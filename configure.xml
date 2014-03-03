@@ -87,7 +87,7 @@ Multiple Allowed: ${multiple}</echo>
 
 	<target name="commitmoving" depends="movingnogit" if="git.avail">
 		<exec executable="git" failifexecutionfails="true" failonerror="true">
-			<arg line="commit -A -m 'customizing files'" />
+			<arg line="commit -a -m 'customizing files'" />
 		</exec>
 	</target>
 
@@ -113,7 +113,7 @@ Multiple Allowed: ${multiple}</echo>
 
 	<target name="commitadapting" depends="adaptingnogit" if="git.avail">
 		<exec executable="git" failifexecutionfails="true" failonerror="true">
-			<arg line="commit -A -m 'adapting files'" />
+			<arg line="commit -a -m 'adapting files'" />
 		</exec>
 	</target>
 
@@ -130,7 +130,7 @@ Multiple Allowed: ${multiple}</echo>
 
 	<target name="commitcleanup" depends="cleanupnogit" if="git.avail">
 		<exec executable="git" failifexecutionfails="true" failonerror="true">
-			<arg line="commit -A -m 'cleanup files'" />
+			<arg line="commit -a -m 'cleanup files'" />
 		</exec>
 	</target>
 
