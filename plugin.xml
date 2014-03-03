@@ -6,10 +6,10 @@
       <view
             allowMultiple="true"
             category="org.caleydo.core.views"
-            class="org.caleydo.view.template.internal.TemplateViewPart"
+            class="org.caleydo.view.dynamicpathway.internal.DynamicPathwayViewPart"
             icon="resources/icons/icon.png"
-            id="org.caleydo.view.template"
-            name="Template">
+            id="org.caleydo.view.dynamicpathway"
+            name="DynamicPathway">
       </view>
    </extension>
    <extension
@@ -17,7 +17,7 @@
       <menuContribution
             locationURI="menu:org.caleydo.menu.view.visualization">
          <command
-               commandId="org.caleydo.view.template.command.open"
+               commandId="org.caleydo.view.dynamicpathway.command.open"
                icon="resources/icons/icon.png"
                style="push">
          </command>
@@ -26,15 +26,15 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            defaultHandler="org.caleydo.view.template.internal.OpenViewHandler"
-            id="org.caleydo.view.template.command.open"
-            name="Template">
+            defaultHandler="org.caleydo.view.dynamicpathway.internal.OpenViewHandler"
+            id="org.caleydo.view.dynamicpathway.command.open"
+            name="DynamicPathway">
       </command>
    </extension>
    <extension
          point="org.caleydo.core.data.datadomain.ViewDataDomainAssociation">
       <association
-            view="org.caleydo.view.template">
+            view="org.caleydo.view.dynamicpathway">
          <dataDomain
                type="org.caleydo.datadomain.genetic">
          </dataDomain>

@@ -3,13 +3,13 @@
      19.07.2013 20:15:48                                                        
 
      configure
-     configure script for initialize a template project
+     configure script for initialize a dynamicpathway project
                    
      Samuel Gratzl                                                                
      ====================================================================== -->
 <project name="configurer" default="configure">
 	<description>
-    	configure script for initialize a template project
+    	configure script for initialize a dynamicpathway project
     </description>
 
 	<property environment="env" />
@@ -36,7 +36,7 @@
 			<equals arg1="${type}" arg2="single" />
 		</condition>
 		<input addproperty="multiple" message="Should multiple instances of the view exist at the same time?" defaultvalue="n" validargs="y,n" />
-		<condition property="multiple.upper" value="MULTIPLE" else="SINGLE">
+		<condition property="multiple.upper" value="MULTIPLE" else="MULTIPLE">
 			<equals arg1="${multiple}" arg2="y" />
 		</condition>
 		<condition property="multiple.true" value="true" else="false">
@@ -63,22 +63,22 @@ Multiple Allowed: ${multiple}</echo>
          - - - - - - - - - - - - - - - - - -->
 	<target name="moving">
 		<move todir="src/main/java/org/caleydo/view/${id}">
-			<fileset dir="src/main/java/org/caleydo/view/template" excludes="**/*Template*" />
+			<fileset dir="src/main/java/org/caleydo/view/dynamicpathway" excludes="**/*DynamicPathway*" />
 		</move>
 		<move todir="src/main/java/org/caleydo/view/${id}">
-			<fileset dir="src/main/java/org/caleydo/view/template" includes="**/*TemplateV*,**/*TemplateE*" />
-			<regexpmapper from="^(.*)Template(.*)$$" to="\1${name}\2" />
+			<fileset dir="src/main/java/org/caleydo/view/dynamicpathway" includes="**/*DynamicPathwayV*,**/*DynamicPathwayE*" />
+			<regexpmapper from="^(.*)DynamicPathway(.*)$$" to="\1${name}\2" />
 		</move>
 		<move todir="src/main/java/org/caleydo/view/${id}">
-			<fileset dir="src/main/java/org/caleydo/view/template" includes="**/*Template${type.camel}*" />
-			<regexpmapper from="^(.*)Template${type.camel}(.*)$$" to="\1${name}\2" />
+			<fileset dir="src/main/java/org/caleydo/view/dynamicpathway" includes="**/*DynamicPathway${type.camel}*" />
+			<regexpmapper from="^(.*)DynamicPathway${type.camel}(.*)$$" to="\1${name}\2" />
 		</move>
-		<delete dir="src/main/java/org/caleydo/view/template" />
+		<delete dir="src/main/java/org/caleydo/view/dynamicpathway" />
 		
 		<move todir="src/main/resources/org/caleydo/view/${id}">
-			<fileset dir="src/main/resources/org/caleydo/view/template" />
+			<fileset dir="src/main/resources/org/caleydo/view/dynamicpathway" />
 		</move>
-		<delete dir="src/main/resources/org/caleydo/view/template" />
+		<delete dir="src/main/resources/org/caleydo/view/dynamicpathway" />
 	</target>
 
 	<target name="movingnogit" unless="git.avail">
@@ -96,11 +96,11 @@ Multiple Allowed: ${multiple}</echo>
      - - - - - - - - - - - - - - - - - -->
 	<target name="adapting">
 		<replace casesensitive="true" dir=".">
-			<replacefilter token="AUTHOR" value="${author}" />
-			<replacefilter token="template" value="${id}" />
-			<replacefilter token="Template" value="${name}" />
+			<replacefilter token="Christiane Schwarzl" value="${author}" />
+			<replacefilter token="dynamicpathway" value="${id}" />
+			<replacefilter token="DynamicPathway" value="${name}" />
 			<replacefilter token="${name}Single" value="${name}" />
-			<replacefilter token="SINGLE" value="${multiple.upper}" />
+			<replacefilter token="MULTIPLE" value="${multiple.upper}" />
 			<replacefilter token="allowMultiple=&quot;true&quot;" value="allowMultiple=&quot;${multiple.true}&quot;" />
 		</replace>
 		<echo append="false" file="README.md">${name} View
