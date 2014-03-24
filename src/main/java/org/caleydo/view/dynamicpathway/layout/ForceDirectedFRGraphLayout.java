@@ -34,52 +34,66 @@ public class ForceDirectedFRGraphLayout {
 		Set<PathwayVertexRep> vertices = graph.vertexSet();
 		Set<DefaultEdge> edges = graph.edgeSet();
 		double space = (area.getWidth()*area.getHeight())/vertices.size();
-		float root_space = (float)java.lang.Math.sqrt(space);
+		float root_space = (float)Math.sqrt(space);
 		
 		
 		for(int i = 1; i <= MAX_ITERATIONS; i++) {
 			
 			// calculate repulsive forces
 			for(PathwayVertexRep vrep : vertices) {
-				graph.setDistance(vrep, new Vec2f());
-				calcDisparity(graph, vertices, vrep, root_space);
+				//System.out.println("Vertice Label: " + vrep.getLabel());
+				//System.out.println("Vertices: " + vrep.toString());
+				if(vrep.getCenterX() != 0 || vrep.getCenterY() != 0) {
+					graph.setDistance(vrep, new Vec2f());
+					calcRepulsiveForces(graph, vertices, vrep, root_space);
+				}				
+			}
+			
+			//calculate attrative forces			
+			for(DefaultEdge edge : edges) {
+				DefaultEdgeWrapper edgeWrapper = new DefaultEdgeWrapper(edge);
+				System.out.println("edgeWrapper: " + edgeWrapper.getSource());
+
+//				
+//				System.out.println("Vertices: " + vertices.iterator().next().toString());
+//				System.out.println("Vertex short name: " + vertices.iterator().next().getShortName());
+//				System.out.println("Vertex name: " + vertices.iterator().next().getName());
+				System.out.println("Edges: " + edge.toString());
+				
 				
 			}
 		}
 		
+		int a = 0;
+		
 	}
 	
-	private void calcDisparity(PathwayGraphWrapper graph, Set<PathwayVertexRep> vertices, PathwayVertexRep currentVertex, float space) {
-		Vec2f difference = new Vec2f();
+	private void calcRepulsiveForces(PathwayGraphWrapper graph, Set<PathwayVertexRep> vertices, PathwayVertexRep currentVertex, float space) {
+		float xVertexDisp = graph.getDistance(currentVertex).x();
+		float yVertexDisp = graph.getDistance(currentVertex).y();
 		for(PathwayVertexRep vrep : vertices) {
 			if(vrep.getID() != currentVertex.getID()) {
-				difference.setX(vrep.getCenterX() - currentVertex.getCenterX());
-				difference.setY(vrep.getCenterY() - currentVertex.getCenterY());
+				float xDistance = vrep.getCenterX() - currentVertex.getCenterX();
+				float yDistance = vrep.getCenterY() - currentVertex.getCenterY();
+				float distance = (float) Math.sqrt(xDistance * xDistance + yDistance * yDistance);
 				
-				Vec2f tmp = new Vec2f();				
-				tmp = difference.times(1/difference.length()).times(attrativeForceFunc(difference.length(), space));
-				//Vec2f tmp = graph.getDistance(vrep) + (difference/difference.length());
-				//graph.setDistance(vrep, graph.getDistance(vrep).add(b));
-				
-				System.out.println("before calc disparity: " + graph.getDistance(currentVertex));
-				graph.getDistance(currentVertex).add(tmp);
-				System.out.println("after calc disparity: " + graph.getDistance(currentVertex));
-				
+				if(distance > 0) {
+					float repulsiveForce = space*space/distance;
+					xVertexDisp += xDistance/distance * repulsiveForce;
+					yVertexDisp += yDistance/distance * repulsiveForce;
+				}
 			}
-				
 		}
+		System.out.println("before calc disparity: " + graph.getDistance(currentVertex));
+		graph.setDistance(currentVertex, new Vec2f(xVertexDisp,yVertexDisp));
+		System.out.println("after calc disparity: " + graph.getDistance(currentVertex));
 	}
 	
-	private float attrativeForceFunc(float position, float space) {
-		return (float)((java.lang.Math.pow(position, 2))/space);
+	private void calcAttractiveForces() {
+		
+		
 	}
 	
-	private float repulsiveForceFunc(float position, float space) {
-		return (float)((java.lang.Math.pow(space, 2))/position);
-	}
-	
-//	private void setNodePosition(NodeElement node, Point2D position) {
-//		
-//	}
+
 
 }

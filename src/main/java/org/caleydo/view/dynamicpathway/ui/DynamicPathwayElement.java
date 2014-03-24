@@ -39,6 +39,7 @@ public class DynamicPathwayElement extends AnimatedGLElementContainer {
 		focusPathway = new PathwayGraphWrapper();
 		focusPathway.addGraph(graph);
 		
+		
 		Rectangle2D drawingArea = new Rectangle();
 		drawingArea.setFrame(10,10,area.x(),area.y());
 		
@@ -48,7 +49,7 @@ public class DynamicPathwayElement extends AnimatedGLElementContainer {
 		setLayout(GLLayouts.LAYERS);
 		for(PathwayVertexRep vrep : focusPathway.vertexSet()) {
 			
-			if(vrep.getType() == EPathwayVertexType.gene || vrep.getType() == EPathwayVertexType.enzyme)
+			if(vrep.getType() == EPathwayVertexType.gene)
 				add(new NodeElement(vrep));
 		}
 		

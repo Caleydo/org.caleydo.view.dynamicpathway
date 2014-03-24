@@ -37,6 +37,7 @@ public class PathwayGraphWrapper  {
 	}
 	
 	public Set<DefaultEdge> edgeSet() {
+		
 		return graph.edgeSet();
 	}
 
