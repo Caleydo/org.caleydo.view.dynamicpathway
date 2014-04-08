@@ -32,7 +32,6 @@ public class DynamicPathwayView extends AGLElementView {
 
 	public DynamicPathwayView(IGLCanvas glCanvas) {
 		super(glCanvas, VIEW_TYPE, VIEW_NAME);	
-		this.getSize();
 	}
 
 	@Override
@@ -42,6 +41,6 @@ public class DynamicPathwayView extends AGLElementView {
 
 	@Override
 	protected GLElement createRoot() {
-		return new DynamicPathwayElement(this.getSize());
+		return new DynamicPathwayElement();
 	}
 }

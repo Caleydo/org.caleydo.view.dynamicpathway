@@ -8,10 +8,12 @@ package org.caleydo.view.dynamicpathway.ui;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Vector;
 
 import gleem.linalg.Vec2f;
 
 import org.caleydo.core.data.perspective.table.TablePerspective;
+import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
 import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
 import org.caleydo.core.view.opengl.layout2.renderer.GLRenderers;
@@ -31,29 +33,49 @@ import org.jgrapht.graph.DefaultEdge;
  */
 public class DynamicPathwayElement extends AnimatedGLElementContainer {
 	
-	private PathwayGraphWrapper focusPathway;
+	private PathwayGraphWrapper pathway;
+	private Rectangle2D area;
 	
-	public DynamicPathwayElement(Vec2f area) {
+	
+	public DynamicPathwayElement() {
 		PathwayGraph graph = PathwayManager.get().getPathwayByTitle("Alzheimer's disease",
 				EPathwayDatabaseType.KEGG);
-		focusPathway = new PathwayGraphWrapper();
-		focusPathway.addGraph(graph);
+		pathway = new PathwayGraphWrapper(graph);
 		
 		
-		Rectangle2D drawingArea = new Rectangle();
-		drawingArea.setFrame(10,10,area.x(),area.y());
+		area = new Rectangle(graph.getWidth(), graph.getHeight());	
+//		area = new Rectangle();
 		
-
-		ForceDirectedFRGraphLayout.getInstance().layout(focusPathway, drawingArea);
-
+//		ForceDirectedFRGraphLayout.getInstance().layout(pathway, area);
+//		
 		setLayout(GLLayouts.LAYERS);
-		for(PathwayVertexRep vrep : focusPathway.vertexSet()) {
-			
-			if(vrep.getType() == EPathwayVertexType.gene)
-				add(new NodeElement(vrep));
+		for(NodeElement node : pathway.nodeElementSet()) {
+
+			add(node);
 		}
 		
 
+	}
+	
+	Boolean firstRun = true;
+	
+	@Override
+	protected void renderImpl(GLGraphics g, float w, float h) {
+//		if(area.getHeight() != h || area.getWidth() != w) {
+			area.setFrame(0, 0, w, h);
+			//System.out.println("width: " + w + " height:" + h);
+			
+		ForceDirectedFRGraphLayout.getInstance().layout(pathway, area);
+		
+
+		
+		
+		
+
+//		repaintAll();
+//		relayout();
+
+		super.renderImpl(g, w, h);
 	}
 
 	@Override
