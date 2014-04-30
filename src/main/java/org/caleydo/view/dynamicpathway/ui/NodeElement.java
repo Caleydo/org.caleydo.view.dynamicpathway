@@ -16,13 +16,16 @@ import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 public class NodeElement extends GLElement {
 	
 	private PathwayVertexRep vertexRep;
-//	private double displacement;
+	private float displacementX;
+	private float displacementY;
 	ArrayList<Pair<Short, Short>> coordinates;
 
 	public NodeElement(PathwayVertexRep vertexRep) {
 		
 		this.vertexRep = vertexRep;
 		this.coordinates = vertexRep.getCoords();
+		this.displacementX = 0.0f;
+		this.displacementY = 0.0f;
 		
 		setVisibility(EVisibility.PICKABLE);
 		
@@ -69,16 +72,37 @@ public class NodeElement extends GLElement {
 		return vertexRep;
 	}
 	
+	public short getCenterX() {
+		return coordinates.get(0).getFirst();
+	}
+	
+	public short getCenterY() {
+		return coordinates.get(0).getSecond();
+	}
+	
 	public ArrayList<Pair<Short, Short>> getCoords() {
 		return coordinates;
 	}
 	
 	public void setCoords(short centerX, short centerY, short width, short height) {
+		coordinates.clear();
 		coordinates.add(new Pair<Short, Short>((short) (centerX - width / 2), (short) (centerY - height / 2)));
 		coordinates.add(new Pair<Short, Short>((short) (centerX + width / 2), (short) (centerY - height / 2)));
 		coordinates.add(new Pair<Short, Short>((short) (centerX + width / 2), (short) (centerY + height / 2)));
 		coordinates.add(new Pair<Short, Short>((short) (centerX - width / 2), (short) (centerY + height / 2)));
-		
+	}
+	
+	public void setDisplacement(float dispX, float dispY) {
+		this.displacementX = dispX;
+		this.displacementY = dispY;
+	}
+	
+	public float getDisplacementX() {
+		return displacementX;
+	}
+	
+	public float getDisplacementY() {
+		return displacementY;
 	}
 
 }
