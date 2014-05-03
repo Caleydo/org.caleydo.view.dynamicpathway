@@ -39,8 +39,8 @@ public class GLDynamicPathwayLayout implements IGLLayout2 {
 		width = w;
 		height = h;
 		
-		temperature = w/10;
-		area = w*h;
+		temperature = width/10;
+		area = width*height;
 		space = (float)Math.sqrt(area/children.size());	
 		cooldown = temperature/MAX_ITERATIONS;
 
@@ -105,11 +105,12 @@ public class GLDynamicPathwayLayout implements IGLLayout2 {
 				if(distance > 0) {					
 					xDisplacement += (xDistance/distance) * repulsiveForce;
 					yDisplacement += (yDistance/distance) * repulsiveForce;	
+					currentNode.setDisplacement(xDisplacement, yDisplacement);
 				}				
 			}			
 		}
 		
-		currentNode.setDisplacement(xDisplacement, yDisplacement);
+		
 	}
 	
 	private void calcAttractiveForces(DynamicPathwayGraph graph, DefaultEdge currentEdge) {
@@ -159,10 +160,10 @@ public class GLDynamicPathwayLayout implements IGLLayout2 {
 		float newYPos = yPosition-vertexHeight/2;
 		
 		
-		if(xPosition+vertexWidth >= this.width)
-			newXPos = width-vertexWidth/2-20;
-		if(yPosition+vertexHeight >= this.height)
-			newYPos = height-vertexHeight/2-20;
+//		if(xPosition+vertexWidth >= this.width)
+//			newXPos = width-vertexWidth/2-20;
+//		if(yPosition+vertexHeight >= this.height)
+//			newYPos = height-vertexHeight/2-20;
 		
 		child.setBounds(newXPos, newYPos, vertexWidth, vertexHeight);
 //		currentNode.setCoords((short)0, (short)0, currentNode.getVertex().getWidth(), currentNode.getVertex().getHeight());
