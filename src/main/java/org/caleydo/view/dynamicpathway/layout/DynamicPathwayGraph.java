@@ -18,25 +18,23 @@ public class DynamicPathwayGraph {
 	PathwayGraph combinedGraph;
 	Map<PathwayVertexRep, NodeElement> vertexNodeMap;
 	
-	public DynamicPathwayGraph(PathwayGraph graph) {
-		focusGraph = graph;
-		kontextGraphs = new Vector<PathwayGraph>();	
-		combinedGraph = new PathwayGraph(graph.getType(), graph.getName(), graph.getTitle(), graph.getImage(),
-				graph.getExternalLink());		
+	public DynamicPathwayGraph() {
+//		focusGraph = graph;
+		kontextGraphs = new Vector<PathwayGraph>();		
 		vertexNodeMap = new HashMap<PathwayVertexRep, NodeElement>();
 		
-		for (PathwayVertexRep vrep : graph.vertexSet()) {
-			if(vrep.getType() == EPathwayVertexType.gene) {
-				combinedGraph.addVertex(vrep);
-			}
-		}
-		for (DefaultEdge edge : graph.edgeSet()) {
-			PathwayVertexRep source = graph.getEdgeSource(edge);
-			PathwayVertexRep target = graph.getEdgeTarget(edge);
-			if(source.getType() == EPathwayVertexType.gene && target.getType() == EPathwayVertexType.gene) {
-				combinedGraph.addEdge(graph.getEdgeSource(edge), graph.getEdgeTarget(edge), edge);
-			}
-		}
+//		for (PathwayVertexRep vrep : graph.vertexSet()) {
+//			if(vrep.getType() == EPathwayVertexType.gene) {
+//				combinedGraph.addVertex(vrep);
+//			}
+//		}
+//		for (DefaultEdge edge : graph.edgeSet()) {
+//			PathwayVertexRep source = graph.getEdgeSource(edge);
+//			PathwayVertexRep target = graph.getEdgeTarget(edge);
+//			if(source.getType() == EPathwayVertexType.gene && target.getType() == EPathwayVertexType.gene) {
+//				combinedGraph.addEdge(graph.getEdgeSource(edge), graph.getEdgeTarget(edge), edge);
+//			}
+//		}
 
 	}
 	
@@ -64,5 +62,72 @@ public class DynamicPathwayGraph {
 		return vertexNodeMap.get(vrep);
 	}
 	
+	public boolean isGraphPresented(PathwayGraph pathway) {
+		if(isFocusGraph(pathway))
+			return true;
+		
+		if(isKontextGraph(pathway))
+			return true;
+		
+		return false;
+	}
+	
+	private boolean isFocusGraph(PathwayGraph pathway) {
+		if(pathway == focusGraph)
+			return true;
+		return false;
+	}
+	
+	private boolean isKontextGraph(PathwayGraph pathway) {
+		for(PathwayGraph kontextPathway : kontextGraphs) {
+			if(pathway == kontextPathway)
+				return true;
+		}
+		return false;
+	}
+	
+	
+
+	// adds a new focus or kontext pathway, so they will be displayed
+	public void addFocusOrKontextPathway(PathwayGraph pathway) {
+
+		if(!isFocusGraphSet()) {
+			assert(kontextGraphs.size() == 0);
+			
+			addFocusPathway(pathway);
+
+		}
+		else {
+			if(!isKontextGraph(pathway)) {
+				kontextGraphs.add(pathway);
+			}
+		}
+	}
+	
+	private boolean isFocusGraphSet() {
+		if(focusGraph != null)
+			return true;
+		return false;
+	}
+	
+	private void addFocusPathway(PathwayGraph graph) {
+		focusGraph = graph;
+		
+		combinedGraph = new PathwayGraph(graph.getType(), graph.getName(), graph.getTitle(), graph.getImage(),
+				graph.getExternalLink());	
+		
+		for (PathwayVertexRep vrep : graph.vertexSet()) {
+			if(vrep.getType() == EPathwayVertexType.gene) {
+				combinedGraph.addVertex(vrep);
+			}
+		}
+		for (DefaultEdge edge : graph.edgeSet()) {
+			PathwayVertexRep source = graph.getEdgeSource(edge);
+			PathwayVertexRep target = graph.getEdgeTarget(edge);
+			if(source.getType() == EPathwayVertexType.gene && target.getType() == EPathwayVertexType.gene) {
+				combinedGraph.addEdge(graph.getEdgeSource(edge), graph.getEdgeTarget(edge), edge);
+			}
+		}
+	}
 
 }

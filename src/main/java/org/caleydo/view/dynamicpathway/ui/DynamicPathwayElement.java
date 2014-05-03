@@ -34,12 +34,12 @@ public class DynamicPathwayElement extends AnimatedGLElementContainer {
 	private GLElementContainer edges;
 	
 	public DynamicPathwayElement() {
-		PathwayGraph focusGraph = PathwayManager.get().getPathwayByTitle("Alzheimer's disease",
-				EPathwayDatabaseType.KEGG);		
+//		PathwayGraph focusGraph = PathwayManager.get().getPathwayByTitle("Alzheimer's disease",
+//				EPathwayDatabaseType.KEGG);		1
 		
 		
 		
-		pathway = new DynamicPathwayGraph(focusGraph);
+		pathway = new DynamicPathwayGraph();
 		
 		pathwayLayout = new GLDynamicPathwayLayout();
 		//TODO: change Layout to GLLayouts.DYNAMICPATHWAY
@@ -47,6 +47,17 @@ public class DynamicPathwayElement extends AnimatedGLElementContainer {
 		
 		//TODO: change Layout to GLLayouts.GRIDEDGES
 		edges = new GLElementContainer(GLLayouts.LAYERS);
+
+		setLayout(GLLayouts.LAYERS);
+		
+//		add(vertices);
+
+
+	}
+	
+	public void addPathwayRep(PathwayGraph graph) {
+		pathway.addFocusOrKontextPathway(graph);
+		
 		
 		for(PathwayVertexRep vrep : pathway.getCombinedVertexSet()) {
 			NodeElement node = new NodeElement(vrep);
@@ -54,14 +65,12 @@ public class DynamicPathwayElement extends AnimatedGLElementContainer {
 			vertices.add(node);
 		}
 		
-		setLayout(GLLayouts.LAYERS);
-		
 		add(vertices);
-
-
+		
+		
 	}
 	
-	Boolean firstRun = true;
+	
 	
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {

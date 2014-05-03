@@ -12,3 +12,4 @@ Bundle-Vendor: www.caleydo.org
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.caleydo.view.dynamicpathway.internal.Activator
 Export-Package: org.caleydo.view.dynamicpathway.ui
+Import-Package: org.caleydo.datadomain.genetic

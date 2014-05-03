@@ -21,6 +21,8 @@ public class GLDynamicPathwayLayout implements IGLLayout2 {
 	private float space;
 	private float cooldown;
 	private float area;
+	private float width;
+	private float height;
 
 
 	public GLDynamicPathwayLayout() {
@@ -33,6 +35,9 @@ public class GLDynamicPathwayLayout implements IGLLayout2 {
 //		Map<DefaultEdge, Pair<PathwayVertexRep, PathwayVertexRep>> edges = graph.getCombinedEdges();
 		
 		parent.setBounds(0, 0, w, h);
+		
+		width = w;
+		height = h;
 		
 		temperature = w/10;
 		area = w*h;
@@ -145,8 +150,21 @@ public class GLDynamicPathwayLayout implements IGLLayout2 {
 			xPosition += (xDisplacement/displacementDistance)*maxDisplacementLimit;
 			yPosition += (yDisplacement/displacementDistance)*maxDisplacementLimit;
 		}
+
+
+		float vertexWidth = currentNode.getVertex().getWidth();
+		float vertexHeight = currentNode.getVertex().getHeight();
 		
-		child.setBounds(xPosition, yPosition, currentNode.getVertex().getWidth(), currentNode.getVertex().getHeight());
+		float newXPos = xPosition-vertexWidth/2;
+		float newYPos = yPosition-vertexHeight/2;
+		
+		
+		if(xPosition+vertexWidth >= this.width)
+			newXPos = width-vertexWidth/2-20;
+		if(yPosition+vertexHeight >= this.height)
+			newYPos = height-vertexHeight/2-20;
+		
+		child.setBounds(newXPos, newYPos, vertexWidth, vertexHeight);
 //		currentNode.setCoords((short)0, (short)0, currentNode.getVertex().getWidth(), currentNode.getVertex().getHeight());
 		
 		

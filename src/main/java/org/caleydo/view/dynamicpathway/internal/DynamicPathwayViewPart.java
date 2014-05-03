@@ -5,24 +5,39 @@
  ******************************************************************************/
 package org.caleydo.view.dynamicpathway.internal;
 
-import org.caleydo.core.view.ARcpGLElementViewPart;
-import org.caleydo.core.view.opengl.canvas.IGLCanvas;
-import org.caleydo.core.view.opengl.layout2.AGLElementView;
+import org.caleydo.core.view.ARcpGLViewPart;
 import org.caleydo.view.dynamicpathway.internal.serial.SerializedDynamicPathwayView;
+import org.caleydo.view.entourage.GLEntourage;
+import org.eclipse.swt.widgets.Composite;
 
 /**
  *
  * @author Christiane Schwarzl
  *
  */
-public class DynamicPathwayViewPart extends ARcpGLElementViewPart {
+public class DynamicPathwayViewPart extends ARcpGLViewPart {
 
 	public DynamicPathwayViewPart() {
 		super(SerializedDynamicPathwayView.class);
 	}
+	
+	@Override
+	public void createPartControl(Composite parent) {
+		super.createPartControl(parent);
+
+		DynamicPathwayView subgraph = new DynamicPathwayView(glCanvas, serializedView.getViewFrustum());
+		view = subgraph;
+		initializeView();
+
+		createPartControlGL();
+
+		// DataMappers.getDataMapper().show();
+	}
 
 	@Override
-	protected AGLElementView createView(IGLCanvas canvas) {
-		return new DynamicPathwayView(glCanvas);
+	public void createDefaultSerializedView() {
+		serializedView = new SerializedDynamicPathwayView();
+		determineDataConfiguration(serializedView);		
 	}
+
 }
