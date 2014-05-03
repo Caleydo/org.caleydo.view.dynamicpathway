@@ -58,6 +58,8 @@ public class DynamicPathwayElement extends AnimatedGLElementContainer {
 	public void addPathwayRep(PathwayGraph graph) {
 		pathway.addFocusOrKontextPathway(graph);
 		
+		vertices.clear();
+		
 		
 		for(PathwayVertexRep vrep : pathway.getCombinedVertexSet()) {
 			NodeElement node = new NodeElement(vrep);

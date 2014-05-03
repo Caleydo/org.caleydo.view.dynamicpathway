@@ -13,10 +13,13 @@ import org.jgrapht.graph.DefaultEdge;
 
 public class DynamicPathwayGraph {
 	
-	PathwayGraph focusGraph;
-	Vector<PathwayGraph> kontextGraphs;
-	PathwayGraph combinedGraph;
-	Map<PathwayVertexRep, NodeElement> vertexNodeMap;
+	private PathwayGraph focusGraph;
+	private Vector<PathwayGraph> kontextGraphs;
+	private PathwayGraph combinedGraph;
+	private Map<PathwayVertexRep, NodeElement> vertexNodeMap;
+	private boolean setKontextGraph;
+	
+	
 	
 	public DynamicPathwayGraph() {
 //		focusGraph = graph;
@@ -90,18 +93,25 @@ public class DynamicPathwayGraph {
 
 	// adds a new focus or kontext pathway, so they will be displayed
 	public void addFocusOrKontextPathway(PathwayGraph pathway) {
-
-		if(!isFocusGraphSet()) {
-			assert(kontextGraphs.size() == 0);
-			
+		
+		if(!setKontextGraph) {
 			addFocusPathway(pathway);
-
 		}
 		else {
-			if(!isKontextGraph(pathway)) {
-				kontextGraphs.add(pathway);
-			}
+			kontextGraphs.add(pathway);
 		}
+
+//		if(!isFocusGraphSet()) {
+//			assert(kontextGraphs.size() == 0);
+//			
+//			addFocusPathway(pathway);
+//
+//		}
+//		else {
+//			if(!isKontextGraph(pathway)) {
+//				kontextGraphs.add(pathway);
+//			}
+//		}
 	}
 	
 	private boolean isFocusGraphSet() {
