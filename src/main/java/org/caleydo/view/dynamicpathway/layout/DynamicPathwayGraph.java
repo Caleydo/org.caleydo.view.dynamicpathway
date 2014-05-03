@@ -63,5 +63,6 @@ public class DynamicPathwayGraph {
 	public NodeElement getNodeOfVertex(PathwayVertexRep vrep) {
 		return vertexNodeMap.get(vrep);
 	}
+	
 
 }

@@ -5,19 +5,31 @@
  ******************************************************************************/
 package org.caleydo.view.dynamicpathway.internal;
 
-import org.caleydo.core.data.datadomain.DataSupportDefinitions;
-import org.caleydo.core.data.datadomain.IDataSupportDefinition;
-import org.caleydo.core.data.perspective.table.TablePerspective;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.caleydo.core.event.EventListenerManager;
 import org.caleydo.core.serialize.ASerializedView;
 import org.caleydo.core.util.logging.Logger;
 import org.caleydo.core.view.opengl.canvas.IGLCanvas;
-import org.caleydo.core.view.opengl.canvas.PixelGLConverter;
 import org.caleydo.core.view.opengl.layout2.AGLElementView;
 import org.caleydo.core.view.opengl.layout2.GLElement;
-import org.caleydo.core.view.opengl.layout2.GLElementDecorator;
-import org.caleydo.core.view.opengl.layout2.view.ASingleTablePerspectiveElementView;
+import org.caleydo.core.view.opengl.layout2.GLElementContainer;
+import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
+import org.caleydo.core.view.opengl.layout2.basic.GLButton;
+import org.caleydo.core.view.opengl.layout2.basic.GLButton.ISelectionCallback;
+import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
+import org.caleydo.core.view.opengl.layout2.layout.GLPadding;
+import org.caleydo.core.view.opengl.layout2.layout.GLSizeRestrictiveFlowLayout;
+import org.caleydo.core.view.opengl.util.draganddrop.DragAndDropController;
+import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.view.dynamicpathway.internal.serial.SerializedDynamicPathwayView;
+import org.caleydo.view.dynamicpathway.ranking.RankingElement;
 import org.caleydo.view.dynamicpathway.ui.DynamicPathwayElement;
+import org.caleydo.view.entourage.SideWindow;
+import org.caleydo.view.entourage.SlideInElement;
+import org.caleydo.view.entourage.SlideInElement.ESlideInElementPosition;
+
 
 /**
  *
@@ -29,9 +41,69 @@ public class DynamicPathwayView extends AGLElementView {
 	public static final String VIEW_NAME = "DynamicPathway";
 
 	private static final Logger log = Logger.create(DynamicPathwayView.class);
+	
+//	private GLElement dynamicPathwayOverview;
+	private DynamicPathwayWindow activeWindow;
+	private DynamicPathwayWindow rankingWindow;
+	
+	private RankingElement rankingElement;
+	
+	private DynamicPathwayElement currentPathwayRep;
+	
+	private GLElementContainer root = new GLElementContainer(GLLayouts.LAYERS);
+	private AnimatedGLElementContainer baseContainer = new AnimatedGLElementContainer(new GLSizeRestrictiveFlowLayout(
+			true, 10, GLPadding.ZERO));
+	
+	//a list that contains all chooseable pathways
+	private List<PathwayGraph> pathwayInfos = new ArrayList<>();
+	
+	
 
 	public DynamicPathwayView(IGLCanvas glCanvas) {
 		super(glCanvas, VIEW_TYPE, VIEW_NAME);	
+		
+		currentPathwayRep = new DynamicPathwayElement();
+		currentPathwayRep.setLocation(200, 0);
+		
+		AnimatedGLElementContainer column = new AnimatedGLElementContainer(new GLSizeRestrictiveFlowLayout(false, 10,
+				GLPadding.ZERO));
+		
+		column.add(baseContainer);
+		
+		rankingWindow = new DynamicPathwaySideWindow("Pathways", this, SideWindow.SLIDE_LEFT_OUT);
+		rankingElement = new RankingElement(this);
+		rankingWindow.setContent(rankingElement);
+		rankingWindow.setLocation(0, 0);
+		rankingWindow.setSize(200, Float.NaN);
+		
+		
+		SlideInElement slideInElement = new SlideInElement(rankingWindow, ESlideInElementPosition.RIGHT);
+		slideInElement.setCallBack(new ISelectionCallback() {
+			@Override
+			public void onSelectionChanged(GLButton button, boolean selected) {
+				AnimatedGLElementContainer anim = (AnimatedGLElementContainer) rankingWindow.getParent();
+				if (selected) {
+					anim.resizeChild(rankingWindow, 200, Float.NaN);
+
+				} else {
+					anim.resizeChild(rankingWindow, 1, Float.NaN);
+				}
+
+			}
+		});
+		
+		rankingWindow.addSlideInElement(slideInElement);
+		rankingWindow.setShowCloseButton(false);
+		rankingElement.setWindow(rankingWindow);
+		
+		baseContainer.add(rankingWindow);
+		
+		root.add(baseContainer);
+		root.add(currentPathwayRep);
+	}
+	
+	public EventListenerManager getEventListenerManager() {
+		return eventListeners;
 	}
 
 	@Override
@@ -40,7 +112,35 @@ public class DynamicPathwayView extends AGLElementView {
 	}
 
 	@Override
-	protected GLElement createRoot() {
-		return new DynamicPathwayElement();
+	protected GLElement createRoot() {		
+//		dynamicPathwayOverview = new DynamicPathwayOverview();		
+////		dynamicPathwayElem = new DynamicPathwayElement();
+////		dynamicPathwayElem.setLocation(200, 0);
+		return root;
 	}
+	
+	public void setActiveWindow(DynamicPathwayWindow activeWindow) {
+		if (activeWindow != null && this.activeWindow != null && activeWindow != this.activeWindow) {
+			this.activeWindow.setActive(false);
+		}
+//		if (activeWindow instanceof GLPathwayWindow) {
+//			portalFocusWindow = (GLPathwayWindow) activeWindow;
+//		}
+
+		this.activeWindow = activeWindow;
+//		isLayoutDirty = true;
+
+	}
+	
+	public boolean isPathwayInPathwayInfos(PathwayGraph pathway) {
+		for(PathwayGraph graph : pathwayInfos) {
+			if(pathway == graph)
+				return true;
+		}
+		return false;
+	}
+	
+//	public DragAndDropController getDndController() {
+//		return dndController;
+//	}
 }

@@ -14,8 +14,14 @@ import org.jgrapht.graph.DefaultEdge;
 public class GLDynamicPathwayLayout implements IGLLayout2 {
 	
 	private static final int MAX_ITERATIONS = 1;
-	private static final int MAX_TEMPERATURE = 400;
+	private static final int MAX_TEMPERATURE = 100;
 	private static final float STEP = 0.1f;
+	
+	private float temperature;
+	private float space;
+	private float cooldown;
+	private float area;
+
 
 	public GLDynamicPathwayLayout() {
 	}
@@ -26,47 +32,55 @@ public class GLDynamicPathwayLayout implements IGLLayout2 {
 		// TODO Auto-generated method stub
 //		Map<DefaultEdge, Pair<PathwayVertexRep, PathwayVertexRep>> edges = graph.getCombinedEdges();
 		
-		float temperature = MAX_TEMPERATURE;
-		double space = (w*h)/children.size();
-		float rootSpace = (float)Math.sqrt(space);	
+		parent.setBounds(0, 0, w, h);
+		
+		temperature = w/10;
+		area = w*h;
+		space = (float)Math.sqrt(area/children.size());	
+		cooldown = temperature/MAX_ITERATIONS;
+
 		
 		GLElementContainer verticeContainer = (GLElementContainer)parent.asElement();
 		DynamicPathwayElement pathwayElement = (DynamicPathwayElement)verticeContainer.getParent();
 		DynamicPathwayGraph graph = pathwayElement.getDynamicPathway();
 		Set<DefaultEdge> edgeSet = pathwayElement.getDynamicPathway().getCombinedEdgeSet();
-		//		
-		for(int i = 1; i <= MAX_ITERATIONS; i++) {
+
+		
+		int i = 1;
+		while(i<=MAX_ITERATIONS && temperature > 0.5) {
 			
 			for(IGLLayoutElement child : children) {
-				child.setBounds(0, 0, w, h);
 				
 				NodeElement node = (NodeElement)child.asElement();
 				
 				if(node.getCenterX() != 0 || node.getCenterY() != 0) {
 					node.setDisplacement(0.0f, 0.0f);
-					calcRepulsiveForces(children, node, rootSpace);
+					calcRepulsiveForces(children, node);
 				}
 				
 			}
 			
 			for(DefaultEdge edge : edgeSet) {
-				calcAttractiveForces(graph, rootSpace, edge);
+				calcAttractiveForces(graph, edge);
 			}
+			
 			
 			for(IGLLayoutElement child : children) {
 				NodeElement node = (NodeElement)child.asElement();
 				
-				calcNewVertexPositions(temperature, node, child);
+				calcNewVertexPositions(node, child);
 			}
 			
+			coolDownTemp();
 			
+			i++;
 			
 		}
 		
 		return false;
 	}
 	
-	private void calcRepulsiveForces(List<? extends IGLLayoutElement> children, NodeElement currentNode, float space) {
+	private void calcRepulsiveForces(List<? extends IGLLayoutElement> children, NodeElement currentNode) {
 		float xDisplacement = currentNode.getDisplacementX();
 		float yDisplacement = currentNode.getDisplacementY();
 		
@@ -74,15 +88,18 @@ public class GLDynamicPathwayLayout implements IGLLayout2 {
 			NodeElement otherNode = (NodeElement)otherChild.asElement();
 			
 			if(otherNode.getVertex().getID() != currentNode.getVertex().getID()) {
-				float xDistance = otherNode.getCenterX() - currentNode.getCenterX();
-				float yDistance = otherNode.getCenterY() - currentNode.getCenterY();
+				float xDistance = currentNode.getCenterX() - otherNode.getCenterX();
+				float yDistance = currentNode.getCenterY() - otherNode.getCenterY();
+				
+				float otherNodeXDisplacement = otherNode.getDisplacementX();
+				float otherNodeYDisplacement = otherNode.getDisplacementY();
 				
 				float distance = calcDistance(xDistance,yDistance);
 				float repulsiveForce = space*space/distance;
 				
 				if(distance > 0) {					
 					xDisplacement += (xDistance/distance) * repulsiveForce;
-					yDisplacement += (yDistance/distance) * repulsiveForce;		
+					yDisplacement += (yDistance/distance) * repulsiveForce;	
 				}				
 			}			
 		}
@@ -90,7 +107,7 @@ public class GLDynamicPathwayLayout implements IGLLayout2 {
 		currentNode.setDisplacement(xDisplacement, yDisplacement);
 	}
 	
-	private void calcAttractiveForces(DynamicPathwayGraph graph, float space, DefaultEdge currentEdge) {
+	private void calcAttractiveForces(DynamicPathwayGraph graph, DefaultEdge currentEdge) {
 		NodeElement sourceNode = graph.getNodeOfVertex(graph.getEdgeSource(currentEdge));
 		NodeElement targetNode = graph.getNodeOfVertex(graph.getEdgeTarget(currentEdge));
 		
@@ -99,8 +116,8 @@ public class GLDynamicPathwayLayout implements IGLLayout2 {
 		float xDisplacementTarget = targetNode.getDisplacementX();
 		float yDisplacementTarget = targetNode.getDisplacementY();
 		
-		float xDistance = sourceNode.getCenterX()-targetNode.getCenterX();
-		float yDistance = sourceNode.getCenterY()-targetNode.getCenterY();
+		float xDistance = sourceNode.getCenterX() - targetNode.getCenterX();
+		float yDistance = sourceNode.getCenterY() - targetNode.getCenterY();
 		
 		float distance = calcDistance(xDistance, yDistance);
 		float attractiveForce = distance*distance/space;
@@ -115,7 +132,7 @@ public class GLDynamicPathwayLayout implements IGLLayout2 {
 		targetNode.setDisplacement(xDisplacementTarget, yDisplacementTarget);		
 	}
 	
-	private void calcNewVertexPositions(float temperature, NodeElement currentNode, IGLLayoutElement child) {
+	private void calcNewVertexPositions(NodeElement currentNode, IGLLayoutElement child) {
 		float xPosition = currentNode.getCenterX();
 		float yPosition = currentNode.getCenterY();
 		float xDisplacement = currentNode.getDisplacementX();
@@ -124,18 +141,26 @@ public class GLDynamicPathwayLayout implements IGLLayout2 {
 		
 		float maxDisplacementLimit = Math.min(displacementDistance, temperature);
 		
-		xPosition += xDisplacement/displacementDistance*maxDisplacementLimit;
-		yPosition += yDisplacement/displacementDistance*maxDisplacementLimit;
+		if(maxDisplacementLimit > 0) {
+			xPosition += (xDisplacement/displacementDistance)*maxDisplacementLimit;
+			yPosition += (yDisplacement/displacementDistance)*maxDisplacementLimit;
+		}
 		
-//		child.setBounds(xPosition, yPosition, currentNode.getVertex().getWidth(), currentNode.getVertex().getHeight());
+		child.setBounds(xPosition, yPosition, currentNode.getVertex().getWidth(), currentNode.getVertex().getHeight());
 //		currentNode.setCoords((short)0, (short)0, currentNode.getVertex().getWidth(), currentNode.getVertex().getHeight());
 		
-		currentNode.setCoords((short)xPosition, (short)yPosition, currentNode.getVertex().getWidth(), currentNode.getVertex().getHeight());
+		
 	}
 	
 	
 	private float calcDistance(float x, float y) {
 		return (float)Math.sqrt(x * x + y * y);
+	}
+	
+	private void coolDownTemp() {
+		temperature /= cooldown;
+		if(temperature < 0)
+			temperature = 0;
 	}
 	
 

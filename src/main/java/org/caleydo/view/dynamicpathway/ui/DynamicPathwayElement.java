@@ -15,6 +15,7 @@ import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 import org.caleydo.datadomain.pathway.manager.EPathwayDatabaseType;
+import org.caleydo.datadomain.pathway.manager.PathwayDatabase;
 import org.caleydo.datadomain.pathway.manager.PathwayManager;
 import org.caleydo.view.dynamicpathway.layout.DynamicPathwayGraph;
 import org.caleydo.view.dynamicpathway.layout.GLDynamicPathwayLayout;
@@ -35,11 +36,15 @@ public class DynamicPathwayElement extends AnimatedGLElementContainer {
 	public DynamicPathwayElement() {
 		PathwayGraph focusGraph = PathwayManager.get().getPathwayByTitle("Alzheimer's disease",
 				EPathwayDatabaseType.KEGG);		
+		
+		
+		
 		pathway = new DynamicPathwayGraph(focusGraph);
 		
 		pathwayLayout = new GLDynamicPathwayLayout();
 		//TODO: change Layout to GLLayouts.DYNAMICPATHWAY
 		vertices = new GLElementContainer(pathwayLayout);
+		
 		//TODO: change Layout to GLLayouts.GRIDEDGES
 		edges = new GLElementContainer(GLLayouts.LAYERS);
 		
@@ -71,6 +76,7 @@ public class DynamicPathwayElement extends AnimatedGLElementContainer {
 	public DynamicPathwayGraph getDynamicPathway() {
 		return pathway;
 	}
+
 	
 
 }

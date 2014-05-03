@@ -58,8 +58,9 @@ public class NodeElement extends GLElement {
 		short width = vertexRep.getWidth();
 		short height = vertexRep.getHeight();
 		
-		g.color("#F3C649").fillRoundedRect(x, y, width, height,2);
-		g.drawText(vertexRep.getName(), x, y, width, 12);
+//		g.color("#F3C649").fillRoundedRect(0, 0, width, height,2);
+		g.color("#F3C649").fillRoundedRect(0, 0, width, height, 2);
+		g.drawText(vertexRep.getName(), 0, 0, width, 12);
 		
 	}
 
