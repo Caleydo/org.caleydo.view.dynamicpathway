@@ -13,7 +13,7 @@ import org.jgrapht.graph.DefaultEdge;
 
 public class GLDynamicPathwayLayout implements IGLLayout2 {
 	
-	private static final int MAX_ITERATIONS = 1;
+	private static final int MAX_ITERATIONS = 5;
 	private static final int MAX_TEMPERATURE = 100;
 	private static final float STEP = 0.1f;
 	
@@ -49,19 +49,25 @@ public class GLDynamicPathwayLayout implements IGLLayout2 {
 		DynamicPathwayElement pathwayElement = (DynamicPathwayElement)verticeContainer.getParent();
 		DynamicPathwayGraph graph = pathwayElement.getDynamicPathway();
 		Set<DefaultEdge> edgeSet = pathwayElement.getDynamicPathway().getCombinedEdgeSet();
-
+		
+//		float scaleX = width/graph.getFocusPathwayWidth();
+//		float scaleY = height/graph.getFocusPathwayHeight();
+//
+//		for(IGLLayoutElement child : children) {
+//			NodeElement node = (NodeElement)child.asElement();
+//			node.setCenter(node.getCenterX()*scaleX, node.getCenterY()*scaleY);
+//		}
+		
 		
 		int i = 1;
-		while(i<=MAX_ITERATIONS && temperature > 0.5) {
+		while(i<=MAX_ITERATIONS) {
 			
 			for(IGLLayoutElement child : children) {
 				
 				NodeElement node = (NodeElement)child.asElement();
 				
-				if(node.getCenterX() != 0 || node.getCenterY() != 0) {
-					node.setDisplacement(0.0f, 0.0f);
-					calcRepulsiveForces(children, node);
-				}
+				node.setDisplacement(0.0f, 0.0f);
+				calcRepulsiveForces(children, node);
 				
 			}
 			
@@ -166,7 +172,8 @@ public class GLDynamicPathwayLayout implements IGLLayout2 {
 //			newYPos = height-vertexHeight/2-20;
 		
 		child.setBounds(newXPos, newYPos, vertexWidth, vertexHeight);
-//		currentNode.setCoords((short)0, (short)0, currentNode.getVertex().getWidth(), currentNode.getVertex().getHeight());
+		currentNode.setCenter(newXPos, newYPos);
+//		currentNode.setCoords((short)newXPos, (short)newYPos, currentNode.getVertex().getWidth(), currentNode.getVertex().getHeight());
 		
 		
 	}
@@ -177,7 +184,7 @@ public class GLDynamicPathwayLayout implements IGLLayout2 {
 	}
 	
 	private void coolDownTemp() {
-		temperature /= cooldown;
+		temperature -= cooldown;
 		if(temperature < 0)
 			temperature = 0;
 	}

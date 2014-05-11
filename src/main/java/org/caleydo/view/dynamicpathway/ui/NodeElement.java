@@ -18,14 +18,18 @@ public class NodeElement extends GLElement {
 	private PathwayVertexRep vertexRep;
 	private float displacementX;
 	private float displacementY;
-	ArrayList<Pair<Short, Short>> coordinates;
+	private float centerX;
+	private float centerY;
+//	ArrayList<Pair<Short, Short>> coordinates;
 
 	public NodeElement(PathwayVertexRep vertexRep) {
 		
 		this.vertexRep = vertexRep;
-		this.coordinates = vertexRep.getCoords();
+//		this.coordinates = vertexRep.getCoords();
 		this.displacementX = 0.0f;
 		this.displacementY = 0.0f;
+		this.centerX = vertexRep.getCenterX();
+		this.centerY = vertexRep.getCenterY();
 		
 		setVisibility(EVisibility.PICKABLE);
 		
@@ -52,9 +56,7 @@ public class NodeElement extends GLElement {
 		
 		//vertexRep.getCoords().get(0).getFirst() is the upper left coordinate
 		
-		
-		short x = coordinates.get(0).getFirst();
-		short y = coordinates.get(0).getSecond();
+
 		short width = vertexRep.getWidth();
 		short height = vertexRep.getHeight();
 		
@@ -73,24 +75,37 @@ public class NodeElement extends GLElement {
 		return vertexRep;
 	}
 	
-	public short getCenterX() {
-		return coordinates.get(0).getFirst();
+//	public short getCenterX() {
+//		return coordinates.get(0).getFirst();
+//	}
+//	
+//	public short getCenterY() {
+//		return coordinates.get(0).getSecond();
+//	}
+//	
+//	public ArrayList<Pair<Short, Short>> getCoords() {
+//		return coordinates;
+//	}
+//	
+//	public void setCoords(short centerX, short centerY, short width, short height) {
+//		coordinates.clear();
+//		coordinates.add(new Pair<Short, Short>((short) (centerX - width / 2), (short) (centerY - height / 2)));
+//		coordinates.add(new Pair<Short, Short>((short) (centerX + width / 2), (short) (centerY - height / 2)));
+//		coordinates.add(new Pair<Short, Short>((short) (centerX + width / 2), (short) (centerY + height / 2)));
+//		coordinates.add(new Pair<Short, Short>((short) (centerX - width / 2), (short) (centerY + height / 2)));
+//	}
+	
+	public float getCenterX() {
+		return this.centerX;
 	}
 	
-	public short getCenterY() {
-		return coordinates.get(0).getSecond();
+	public float getCenterY() {
+		return this.centerY;
 	}
 	
-	public ArrayList<Pair<Short, Short>> getCoords() {
-		return coordinates;
-	}
-	
-	public void setCoords(short centerX, short centerY, short width, short height) {
-		coordinates.clear();
-		coordinates.add(new Pair<Short, Short>((short) (centerX - width / 2), (short) (centerY - height / 2)));
-		coordinates.add(new Pair<Short, Short>((short) (centerX + width / 2), (short) (centerY - height / 2)));
-		coordinates.add(new Pair<Short, Short>((short) (centerX + width / 2), (short) (centerY + height / 2)));
-		coordinates.add(new Pair<Short, Short>((short) (centerX - width / 2), (short) (centerY + height / 2)));
+	public void setCenter(float x, float y) {
+		this.centerX = x;
+		this.centerY = y;
 	}
 	
 	public void setDisplacement(float dispX, float dispY) {

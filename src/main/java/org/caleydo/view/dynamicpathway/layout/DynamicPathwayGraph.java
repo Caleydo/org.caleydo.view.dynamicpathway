@@ -24,7 +24,7 @@ public class DynamicPathwayGraph {
 	public DynamicPathwayGraph() {
 //		focusGraph = graph;
 		kontextGraphs = new Vector<PathwayGraph>();		
-		vertexNodeMap = new HashMap<PathwayVertexRep, NodeElement>();
+		vertexNodeMap = new HashMap<PathwayVertexRep, NodeElement>();		
 		
 //		for (PathwayVertexRep vrep : graph.vertexSet()) {
 //			if(vrep.getType() == EPathwayVertexType.gene) {
@@ -112,6 +112,14 @@ public class DynamicPathwayGraph {
 //				kontextGraphs.add(pathway);
 //			}
 //		}
+	}
+	
+	public float getFocusPathwayWidth() {
+		return focusGraph.getWidth();
+	}
+	
+	public float getFocusPathwayHeight() {
+		return focusGraph.getHeight();
 	}
 	
 	private boolean isFocusGraphSet() {
