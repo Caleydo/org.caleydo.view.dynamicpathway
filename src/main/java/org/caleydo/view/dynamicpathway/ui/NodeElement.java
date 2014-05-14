@@ -2,25 +2,25 @@ package org.caleydo.view.dynamicpathway.ui;
 
 import java.util.ArrayList;
 
-import gleem.linalg.Vec2f;
-
 import org.caleydo.core.util.collection.Pair;
-import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLElement;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.core.view.opengl.picking.PickingMode;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
+import org.caleydo.view.dynamicpathway.layout.DynamicPathwayGraph;
+import org.caleydo.view.dynamicpathway.util.Coordinates;
 
 public class NodeElement extends GLElement {
 	
 	private PathwayVertexRep vertexRep;
-	private float displacementX;
-	private float displacementY;
-	private float centerX;
-	private float centerY;
-//	ArrayList<Pair<Short, Short>> coordinates;
+	private double displacementX;
+	private double displacementY;
+	private double centerX;
+	private double centerY;
+	private DynamicPathwayGraph parentGraph;	
+	private Coordinates coords;
 
 	public NodeElement(PathwayVertexRep vertexRep) {
 		
@@ -30,6 +30,10 @@ public class NodeElement extends GLElement {
 		this.displacementY = 0.0f;
 		this.centerX = vertexRep.getCenterX();
 		this.centerY = vertexRep.getCenterY();
+		this.coords = new Coordinates();
+		
+		coords.setCoords(centerX,centerY, vertexRep.getWidth(), vertexRep.getHeight());
+		
 		
 		setVisibility(EVisibility.PICKABLE);
 		
@@ -64,6 +68,7 @@ public class NodeElement extends GLElement {
 		g.color("#F3C649").fillRoundedRect(0, 0, width, height, 2);
 		g.drawText(vertexRep.getName(), 0, 0, width, 12);
 		
+		
 	}
 
 	@Override
@@ -75,50 +80,37 @@ public class NodeElement extends GLElement {
 		return vertexRep;
 	}
 	
-//	public short getCenterX() {
-//		return coordinates.get(0).getFirst();
-//	}
-//	
-//	public short getCenterY() {
-//		return coordinates.get(0).getSecond();
-//	}
-//	
-//	public ArrayList<Pair<Short, Short>> getCoords() {
-//		return coordinates;
-//	}
-//	
-//	public void setCoords(short centerX, short centerY, short width, short height) {
-//		coordinates.clear();
-//		coordinates.add(new Pair<Short, Short>((short) (centerX - width / 2), (short) (centerY - height / 2)));
-//		coordinates.add(new Pair<Short, Short>((short) (centerX + width / 2), (short) (centerY - height / 2)));
-//		coordinates.add(new Pair<Short, Short>((short) (centerX + width / 2), (short) (centerY + height / 2)));
-//		coordinates.add(new Pair<Short, Short>((short) (centerX - width / 2), (short) (centerY + height / 2)));
-//	}
-	
-	public float getCenterX() {
+
+	public double getCenterX() {
 		return this.centerX;
 	}
 	
-	public float getCenterY() {
+	public double getCenterY() {
 		return this.centerY;
 	}
 	
-	public void setCenter(float x, float y) {
+	public void setCenter(double x, double y) {
 		this.centerX = x;
 		this.centerY = y;
+		
+		coords.setCoords(x,y, vertexRep.getWidth(), vertexRep.getHeight());
 	}
 	
-	public void setDisplacement(float dispX, float dispY) {
+	public void setDisplacement(double dispX, double dispY) {
 		this.displacementX = dispX;
 		this.displacementY = dispY;
 	}
 	
-	public float getDisplacementX() {
+	public double getDisplacementX() {
 		return displacementX;
 	}
 	
-	public float getDisplacementY() {
+	public double getDisplacementY() {
 		return displacementY;
+	}
+	
+	public Coordinates getCoords() {
+		return coords;
 	}
 
 }

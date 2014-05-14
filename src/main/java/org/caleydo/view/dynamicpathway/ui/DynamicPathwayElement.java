@@ -14,11 +14,9 @@ import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer
 import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
-import org.caleydo.datadomain.pathway.manager.EPathwayDatabaseType;
-import org.caleydo.datadomain.pathway.manager.PathwayDatabase;
-import org.caleydo.datadomain.pathway.manager.PathwayManager;
 import org.caleydo.view.dynamicpathway.layout.DynamicPathwayGraph;
 import org.caleydo.view.dynamicpathway.layout.GLDynamicPathwayLayout;
+import org.jgrapht.graph.DefaultEdge;
 /**
  * element of this view holding a {@link TablePerspective}
  * 
@@ -59,6 +57,7 @@ public class DynamicPathwayElement extends AnimatedGLElementContainer {
 		pathway.addFocusOrKontextPathway(graph);
 		
 		vertices.clear();
+		edges.clear();
 		
 		
 		for(PathwayVertexRep vrep : pathway.getCombinedVertexSet()) {
@@ -67,7 +66,20 @@ public class DynamicPathwayElement extends AnimatedGLElementContainer {
 			vertices.add(node);
 		}
 		
+		for(DefaultEdge e : pathway.getCombinedEdgeSet()) {
+			PathwayVertexRep vrepSource = pathway.getEdgeSource(e);
+			PathwayVertexRep vrepTarget = pathway.getEdgeTarget(e);
+			NodeElement nodeSource = pathway.getNodeOfVertex(vrepSource);
+			NodeElement nodeTarget = pathway.getNodeOfVertex(vrepTarget);
+			
+			EdgeElement edgeElement = new EdgeElement(e, nodeSource, nodeTarget);		
+			edges.add(edgeElement);
+		}
+		
 		add(vertices);
+		add(edges);
+		
+		
 		
 		
 	}

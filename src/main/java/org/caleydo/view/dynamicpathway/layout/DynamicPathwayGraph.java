@@ -41,6 +41,10 @@ public class DynamicPathwayGraph {
 
 	}
 	
+	public PathwayGraph getCombinedGraph() {
+		return combinedGraph;
+	}
+	
 	public Set<PathwayVertexRep> getCombinedVertexSet() {
 		return combinedGraph.vertexSet();
 	}
