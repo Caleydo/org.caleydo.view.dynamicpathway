@@ -1,5 +1,7 @@
 package org.caleydo.view.dynamicpathway.util;
 
+import java.awt.geom.Line2D;
+
 import org.caleydo.core.util.collection.Pair;
 
 public class Coordinates {
@@ -38,4 +40,21 @@ public class Coordinates {
 	public Pair<Double, Double> getBottomRight() {
 		return bottomRight;
 	}
+	
+	public Line2D getTopBound() {
+		return (new Line2D.Double(topLeft.getFirst(), topLeft.getSecond(), topRight.getFirst(), topRight.getSecond()));
+	}
+	
+	public Line2D getBottomBound() {
+		return (new Line2D.Double(bottomLeft.getFirst(), bottomLeft.getSecond(), bottomRight.getFirst(), bottomRight.getSecond()));
+	}
+	
+	public Line2D getLeftBound() {
+		return (new Line2D.Double(topLeft.getFirst(), topLeft.getSecond(), bottomLeft.getFirst(), bottomLeft.getSecond()));
+	}
+	
+	public Line2D getRightBound() {
+		return (new Line2D.Double(topRight.getFirst(), topRight.getSecond(), bottomRight.getFirst(), bottomRight.getSecond()));
+	}
+	
 }
