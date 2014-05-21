@@ -1,6 +1,8 @@
 package org.caleydo.view.dynamicpathway.util;
 
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+import java.util.Vector;
 
 import org.caleydo.core.util.collection.Pair;
 
@@ -57,4 +59,14 @@ public class Coordinates {
 		return (new Line2D.Double(topRight.getFirst(), topRight.getSecond(), bottomRight.getFirst(), bottomRight.getSecond()));
 	}
 	
+	public Vector<Line2D> getBounds() {
+		Vector<Line2D> bounds = new Vector<Line2D>();
+		bounds.add(getTopBound());
+		bounds.add(getRightBound());
+		bounds.add(getBottomBound());
+		bounds.add(getLeftBound());
+		return bounds;
+	}
+	
+
 }

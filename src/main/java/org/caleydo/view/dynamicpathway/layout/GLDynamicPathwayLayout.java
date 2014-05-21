@@ -15,17 +15,28 @@ public class GLDynamicPathwayLayout implements IGLLayout2 {
 	
 	private static final int MAX_ITERATIONS = 700;
 	private static final int MAX_TEMPERATURE = 100;
-	private static final float STEP = 0.1f;
 	
 	private double temperature;
+	private int maxIterations;
 	private double globalEdgeLength;
 	private double cooldown;
 	private double area;
 	private double width;
 	private double height;
+	private boolean temperatureAndCooldownSetByUser;
 
 
 	public GLDynamicPathwayLayout() {
+		this.maxIterations = MAX_ITERATIONS;
+		this.temperatureAndCooldownSetByUser = false;
+	}
+	
+	public GLDynamicPathwayLayout(int maxIterations, double temperature, double cooldown) {
+		this.maxIterations = maxIterations;
+		this.temperature = temperature;
+		this.cooldown = cooldown;
+		
+		this.temperatureAndCooldownSetByUser = true;	
 	}
 
 	@Override
@@ -39,28 +50,21 @@ public class GLDynamicPathwayLayout implements IGLLayout2 {
 		width = w;
 		height = h;
 		
-		temperature = width/10;
+		if(!temperatureAndCooldownSetByUser) {
+			temperature = width/10;
+			cooldown = temperature/maxIterations;
+		}
+		
 		area = width*height;
 		globalEdgeLength = (float)Math.sqrt(area/children.size());	
-		cooldown = temperature/MAX_ITERATIONS;
-
+		
 		
 		GLElementContainer verticeContainer = (GLElementContainer)parent.asElement();
 		DynamicPathwayElement pathwayElement = (DynamicPathwayElement)verticeContainer.getParent();
 		DynamicPathwayGraph graph = pathwayElement.getDynamicPathway();
 		Set<DefaultEdge> edgeSet = pathwayElement.getDynamicPathway().getCombinedEdgeSet();
-		
-//		float scaleX = width/graph.getFocusPathwayWidth();
-//		float scaleY = height/graph.getFocusPathwayHeight();
-//
-//		for(IGLLayoutElement child : children) {
-//			NodeElement node = (NodeElement)child.asElement();
-//			node.setCenter(node.getCenterX()*scaleX, node.getCenterY()*scaleY);
-//		}
-		
-		
-		int i = 1;
-		while(i<=MAX_ITERATIONS) {
+
+		for(int i = 1; i <= maxIterations; i++) {
 			
 			
 			/**
@@ -96,8 +100,6 @@ public class GLDynamicPathwayLayout implements IGLLayout2 {
 			}
 			
 			coolDownTemp();
-			
-			i++;
 			
 		}
 		

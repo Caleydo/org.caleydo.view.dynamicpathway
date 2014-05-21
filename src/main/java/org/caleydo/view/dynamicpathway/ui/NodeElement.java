@@ -1,5 +1,7 @@
 package org.caleydo.view.dynamicpathway.ui;
 
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import org.caleydo.core.util.collection.Pair;
@@ -111,6 +113,38 @@ public class NodeElement extends GLElement {
 	
 	public Coordinates getCoords() {
 		return coords;
+	}
+	
+	public Point2D.Double getIntersectionPoint(Line2D intersectingLine) {
+		for(Line2D bound : coords.getBounds()) {
+			if(intersectingLine.intersectsLine(bound)) {
+				return calcIntersectionPoint(intersectingLine, bound);
+			}
+		}	
+		return null;
+	}
+	
+	
+	private Point2D.Double calcIntersectionPoint(Line2D line1, Line2D line2) {
+		double px = line1.getX1();
+		double py = line1.getY1();
+		double rx = line1.getX2()-px;
+		double ry = line1.getY2()-py;
+		
+		double qx = line2.getX1();
+		double qy = line2.getY1();
+		double sx = line2.getX2()-qx;
+		double sy = line2.getY2()-qy;
+		
+		double determinate = sx*ry - sy*rx;		
+        double z = (sx*(qy-py)+sy*(px-qx))/determinate;
+        
+        double xIntersect = px + z * rx;
+        double yIntersect = py + z * ry;
+        
+
+        return new Point2D.Double(xIntersect, yIntersect);
+	      
 	}
 
 }
