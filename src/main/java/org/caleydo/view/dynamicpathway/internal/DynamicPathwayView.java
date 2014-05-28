@@ -29,11 +29,14 @@ import org.caleydo.core.view.opengl.util.draganddrop.DragAndDropController;
 import org.caleydo.datadomain.genetic.EGeneIDTypes;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.view.dynamicpathway.internal.serial.SerializedDynamicPathwayView;
+import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayout2;
 import org.caleydo.view.dynamicpathway.ranking.RankingElement;
 import org.caleydo.view.dynamicpathway.ui.DynamicPathwayElement;
 import org.caleydo.view.entourage.SideWindow;
 import org.caleydo.view.entourage.SlideInElement;
 import org.caleydo.view.entourage.SlideInElement.ESlideInElementPosition;
+
+import com.jogamp.opengl.math.geom.Frustum;
 
 
 /**
@@ -47,13 +50,12 @@ public class DynamicPathwayView extends AGLElementGLView implements IEventBasedS
 
 	private static final Logger log = Logger.create(DynamicPathwayView.class);
 	
-//	private GLElement dynamicPathwayOverview;
 	private DynamicPathwayWindow activeWindow;
 	private DynamicPathwayWindow rankingWindow;
 	
 	private RankingElement rankingElement;
 	
-	private DynamicPathwayElement currentPathwayRep;
+	private DynamicPathwayElement currentPathwayElement;
 	
 	private GLElementContainer root = new GLElementContainer(GLLayouts.LAYERS);
 	private AnimatedGLElementContainer baseContainer = new AnimatedGLElementContainer(new GLSizeRestrictiveFlowLayout(
@@ -72,8 +74,9 @@ public class DynamicPathwayView extends AGLElementGLView implements IEventBasedS
 	public DynamicPathwayView(IGLCanvas glCanvas, ViewFrustum viewFrustum) {
 		super(glCanvas, viewFrustum, VIEW_TYPE, VIEW_NAME);	
 		
-		currentPathwayRep = new DynamicPathwayElement();
-		currentPathwayRep.setLocation(200, 0);
+//		GLFruchtermanReingoldLayout2 pathwayLayout = new GLFruchtermanReingoldLayout2();
+		currentPathwayElement = new DynamicPathwayElement();
+		currentPathwayElement.setLocation(200, 0);
 		
 		
 		AnimatedGLElementContainer column = new AnimatedGLElementContainer(new GLSizeRestrictiveFlowLayout(false, 10,
@@ -110,7 +113,7 @@ public class DynamicPathwayView extends AGLElementGLView implements IEventBasedS
 		baseContainer.add(rankingWindow);
 		
 		root.add(baseContainer);
-		root.add(currentPathwayRep);
+		root.add(currentPathwayElement);
 		
 		vertexSelectionManager = new EventBasedSelectionManager(this, IDType.getIDType(EGeneIDTypes.PATHWAY_VERTEX_REP
 				.name()));
@@ -160,12 +163,12 @@ public class DynamicPathwayView extends AGLElementGLView implements IEventBasedS
 	}
 	
 	public void addPathway(PathwayGraph pathway) {
-		this.currentPathwayRep.addPathwayRep(pathway);	
+		this.currentPathwayElement.addPathwayRep(pathway);	
 		relayout();
 	}
 	
 	public boolean isGraphPresented(PathwayGraph pathway) {
-		if(currentPathwayRep.getDynamicPathway().isGraphPresented(pathway))
+		if(currentPathwayElement.getDynamicPathway().isGraphPresented(pathway))
 			return true;
 		return false;
 	}

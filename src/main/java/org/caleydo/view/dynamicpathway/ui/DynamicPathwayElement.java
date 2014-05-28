@@ -15,7 +15,8 @@ import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 import org.caleydo.view.dynamicpathway.layout.DynamicPathwayGraph;
-import org.caleydo.view.dynamicpathway.layout.GLDynamicPathwayLayout;
+import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayout;
+import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayout2;
 import org.jgrapht.graph.DefaultEdge;
 /**
  * element of this view holding a {@link TablePerspective}
@@ -27,7 +28,7 @@ public class DynamicPathwayElement extends AnimatedGLElementContainer {
 	
 	private DynamicPathwayGraph pathway;
 
-	private GLDynamicPathwayLayout pathwayLayout;
+	private GLFruchtermanReingoldLayout pathwayLayout;
 	private GLElementContainer vertices;
 	private GLElementContainer edges;
 	
@@ -39,11 +40,27 @@ public class DynamicPathwayElement extends AnimatedGLElementContainer {
 		
 		pathway = new DynamicPathwayGraph();
 		
-		pathwayLayout = new GLDynamicPathwayLayout();
-		//TODO: change Layout to GLLayouts.DYNAMICPATHWAY
+		pathwayLayout = new GLFruchtermanReingoldLayout();
 		vertices = new GLElementContainer(pathwayLayout);
 		
-		//TODO: change Layout to GLLayouts.GRIDEDGES
+		edges = new GLElementContainer(GLLayouts.LAYERS);
+
+		setLayout(GLLayouts.LAYERS);
+		
+//		add(vertices);
+
+
+	}
+	
+	public DynamicPathwayElement(GLFruchtermanReingoldLayout2 layout) {
+//		PathwayGraph focusGraph = PathwayManager.get().getPathwayByTitle("Alzheimer's disease",
+//				EPathwayDatabaseType.KEGG);		1
+		
+		pathway = new DynamicPathwayGraph();
+		
+		pathwayLayout = new GLFruchtermanReingoldLayout();
+		vertices = new GLElementContainer(pathwayLayout);
+		
 		edges = new GLElementContainer(GLLayouts.LAYERS);
 
 		setLayout(GLLayouts.LAYERS);

@@ -5,6 +5,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import org.caleydo.core.util.collection.Pair;
+import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLElement;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
@@ -12,9 +13,10 @@ import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.core.view.opengl.picking.PickingMode;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 import org.caleydo.view.dynamicpathway.layout.DynamicPathwayGraph;
+import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
 import org.caleydo.view.dynamicpathway.util.Coordinates;
 
-public class NodeElement extends GLElement {
+public class NodeElement extends GLElement implements IFRLayoutNode{
 	
 	private PathwayVertexRep vertexRep;
 	private double displacementX;
@@ -67,9 +69,11 @@ public class NodeElement extends GLElement {
 		short height = vertexRep.getHeight();
 		
 //		g.color("#F3C649").fillRoundedRect(0, 0, width, height,2);
-		g.color("#F3C649").fillRoundedRect(0, 0, width, height, 2);
-		g.drawText(vertexRep.getName(), 0, 0, width, 12);
+//		g.color("#F3C649").fillRoundedRect(0, 0, width, height, 2);
+		g.color(Color.LIGHT_GRAY).fillRoundedRect(0, 0, width+2, height+2,2);
+		g.color("#F2F2F2").fillRoundedRect(1, 1, width, height,2);
 		
+		g.drawText(vertexRep.getName(), 0, 0, width, 12);
 		
 	}
 
@@ -145,6 +149,16 @@ public class NodeElement extends GLElement {
 
         return new Point2D.Double(xIntersect, yIntersect);
 	      
+	}
+
+	@Override
+	public double getHeight() {
+		return this.getVertex().getHeight();
+	}
+
+	@Override
+	public double getWidth() {
+		return this.getVertex().getWidth();
 	}
 
 }
