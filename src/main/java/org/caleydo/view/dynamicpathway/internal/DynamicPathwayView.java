@@ -74,8 +74,8 @@ public class DynamicPathwayView extends AGLElementGLView implements IEventBasedS
 	public DynamicPathwayView(IGLCanvas glCanvas, ViewFrustum viewFrustum) {
 		super(glCanvas, viewFrustum, VIEW_TYPE, VIEW_NAME);	
 		
-//		GLFruchtermanReingoldLayout2 pathwayLayout = new GLFruchtermanReingoldLayout2();
-		currentPathwayElement = new DynamicPathwayElement();
+		GLFruchtermanReingoldLayout2 pathwayLayout = new GLFruchtermanReingoldLayout2();
+		currentPathwayElement = new DynamicPathwayElement(pathwayLayout);
 		currentPathwayElement.setLocation(200, 0);
 		
 		

@@ -210,7 +210,7 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 				double yDistance = currentNode.getCenterY() - otherNode.getCenterY();
 				
 				double distance = calcDistance(xDistance,yDistance);
-				double repulsiveForce = globalEdgeLength*globalEdgeLength/(distance*distance);
+				double repulsiveForce = globalEdgeLength*globalEdgeLength/(distance*(distance/2.0));
 				
 				if(distance > 0) {					
 					xDisplacement += (xDistance/distance) * repulsiveForce;
