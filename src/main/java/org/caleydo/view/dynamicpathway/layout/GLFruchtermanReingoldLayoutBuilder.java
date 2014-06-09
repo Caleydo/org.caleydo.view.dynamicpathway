@@ -10,7 +10,7 @@ public class GLFruchtermanReingoldLayoutBuilder {
 	private double repulsionMultiplier = 1.0;
 	private double attractionMultiplier = 1.0;
 
-	public GLFruchtermanReingoldLayout2 buildGLFruchtermanReingoldLayout2() {		
+	public GLFruchtermanReingoldLayout2 buildLayout() {		
 		return (new GLFruchtermanReingoldLayout2(maxIterations, temperature, cooldown, repulsionMultiplier, attractionMultiplier));
 	}
 	

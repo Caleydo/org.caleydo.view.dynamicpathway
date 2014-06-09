@@ -11,5 +11,11 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: www.caleydo.org
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.caleydo.view.dynamicpathway.internal.Activator
-Export-Package: org.caleydo.view.dynamicpathway.ui
+Export-Package: org.caleydo.view.dynamicpathway.internal;x-internal:=true,
+ org.caleydo.view.dynamicpathway.internal.icons;x-internal:=true,
+ org.caleydo.view.dynamicpathway.internal.serial;x-internal:=true,
+ org.caleydo.view.dynamicpathway.layout,
+ org.caleydo.view.dynamicpathway.ranking,
+ org.caleydo.view.dynamicpathway.ui,
+ org.caleydo.view.dynamicpathway.util
 Import-Package: org.caleydo.datadomain.genetic

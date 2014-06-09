@@ -7,7 +7,7 @@ import org.caleydo.core.view.opengl.layout2.GLElementContainer;
 import org.caleydo.core.view.opengl.layout2.layout.IGLLayout2;
 import org.caleydo.core.view.opengl.layout2.layout.IGLLayoutElement;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
-import org.caleydo.view.dynamicpathway.ui.DynamicPathwayElement;
+import org.caleydo.view.dynamicpathway.ui.DynamicPathwayGraphRepresentation;
 import org.caleydo.view.dynamicpathway.ui.NodeElement;
 import org.jgrapht.graph.DefaultEdge;
 
@@ -144,7 +144,7 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 		
 		
 		GLElementContainer verticeContainer = (GLElementContainer)parent.asElement();
-		DynamicPathwayElement pathwayElement = (DynamicPathwayElement)verticeContainer.getParent();
+		DynamicPathwayGraphRepresentation pathwayElement = (DynamicPathwayGraphRepresentation)verticeContainer.getParent();
 		DynamicPathwayGraph graph = pathwayElement.getDynamicPathway();
 		Set<DefaultEdge> edgeSet = pathwayElement.getDynamicPathway().getCombinedEdgeSet();
 

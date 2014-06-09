@@ -93,12 +93,12 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 
 	@Override
 	public IFRLayoutNode getSource() {
-		return this.getSource();
+		return this.sourceNode;
 	}
 
 	@Override
 	public IFRLayoutNode getTarget() {
-		return this.getTarget();
+		return this.targetNode;
 	}
 
 	@Override

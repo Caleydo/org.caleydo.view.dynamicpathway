@@ -30,8 +30,9 @@ import org.caleydo.datadomain.genetic.EGeneIDTypes;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.view.dynamicpathway.internal.serial.SerializedDynamicPathwayView;
 import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayout2;
+import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayoutBuilder;
 import org.caleydo.view.dynamicpathway.ranking.RankingElement;
-import org.caleydo.view.dynamicpathway.ui.DynamicPathwayElement;
+import org.caleydo.view.dynamicpathway.ui.DynamicPathwayGraphRepresentation;
 import org.caleydo.view.entourage.SideWindow;
 import org.caleydo.view.entourage.SlideInElement;
 import org.caleydo.view.entourage.SlideInElement.ESlideInElementPosition;
@@ -55,9 +56,13 @@ public class DynamicPathwayView extends AGLElementGLView implements IEventBasedS
 	
 	private RankingElement rankingElement;
 	
-	private DynamicPathwayElement currentPathwayElement;
+	private DynamicPathwayGraphRepresentation currentPathwayElement;
+	private GLFruchtermanReingoldLayout2 pathwayLayout;
 	
 	private GLElementContainer root = new GLElementContainer(GLLayouts.LAYERS);
+	
+//	private GLElementContainer pathwayGraphLayoutContainer;
+	
 	private AnimatedGLElementContainer baseContainer = new AnimatedGLElementContainer(new GLSizeRestrictiveFlowLayout(
 			true, 10, GLPadding.ZERO));
 
@@ -74,10 +79,13 @@ public class DynamicPathwayView extends AGLElementGLView implements IEventBasedS
 	public DynamicPathwayView(IGLCanvas glCanvas, ViewFrustum viewFrustum) {
 		super(glCanvas, viewFrustum, VIEW_TYPE, VIEW_NAME);	
 		
-		GLFruchtermanReingoldLayout2 pathwayLayout = new GLFruchtermanReingoldLayout2();
-		currentPathwayElement = new DynamicPathwayElement(pathwayLayout);
+		pathwayLayout = new GLFruchtermanReingoldLayoutBuilder().buildLayout();
+//		pathwayGraphLayoutContainer = new GLElementContainer(pathwayLayout);
+		
+		currentPathwayElement = new DynamicPathwayGraphRepresentation(pathwayLayout);
 		currentPathwayElement.setLocation(200, 0);
 		
+//		pathwayGraphLayoutContainer.add(currentPathwayElement);
 		
 		AnimatedGLElementContainer column = new AnimatedGLElementContainer(new GLSizeRestrictiveFlowLayout(false, 10,
 				GLPadding.ZERO));
@@ -164,7 +172,7 @@ public class DynamicPathwayView extends AGLElementGLView implements IEventBasedS
 	
 	public void addPathway(PathwayGraph pathway) {
 		this.currentPathwayElement.addPathwayRep(pathway);	
-		relayout();
+//		relayout();
 	}
 	
 	public boolean isGraphPresented(PathwayGraph pathway) {

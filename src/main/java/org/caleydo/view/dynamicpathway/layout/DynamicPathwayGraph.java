@@ -8,37 +8,56 @@ import java.util.Vector;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
+import org.caleydo.view.dynamicpathway.ui.EdgeElement;
 import org.caleydo.view.dynamicpathway.ui.NodeElement;
 import org.jgrapht.graph.DefaultEdge;
 
+/**
+ * contains all informations for the different graphs, such
+ * as the focusGraph & all kontextGraphs
+ * 
+ * @author Christiane Schwarzl
+ *
+ */
 public class DynamicPathwayGraph {
 	
+	/** 
+	 * the actual focus pathway graph,
+	 * which is completely represented
+	 */
 	private PathwayGraph focusGraph;
+	
+	/**
+	 * the kontext graph, which may not be 
+	 * be fully represented
+	 * TODO: change vector to : vector<KontextGraph>
+	 * KontextGraph contains: PathwayGraph, to which it belong, the main vertex, list of represented vertices & edges
+	 */
 	private Vector<PathwayGraph> kontextGraphs;
+	
+	/**
+	 * needed for searching all currently represented vertices
+	 */
 	private PathwayGraph combinedGraph;
+	
+	/**
+	 * get source/target vertex of edge returns a PathwayVertexRep, but
+	 * we need a NodeElement, which is a container for PathwayVertexRep
+	 */
 	private Map<PathwayVertexRep, NodeElement> vertexNodeMap;
+	
+	/**
+	 * so we can extinguish if a focus or kontextGraph should be added, deleted
+	 * or was chosen
+	 */
 	private boolean setKontextGraph;
-	
-	
+
 	
 	public DynamicPathwayGraph() {
-//		focusGraph = graph;
+		
 		kontextGraphs = new Vector<PathwayGraph>();		
 		vertexNodeMap = new HashMap<PathwayVertexRep, NodeElement>();		
 		
-//		for (PathwayVertexRep vrep : graph.vertexSet()) {
-//			if(vrep.getType() == EPathwayVertexType.gene) {
-//				combinedGraph.addVertex(vrep);
-//			}
-//		}
-//		for (DefaultEdge edge : graph.edgeSet()) {
-//			PathwayVertexRep source = graph.getEdgeSource(edge);
-//			PathwayVertexRep target = graph.getEdgeTarget(edge);
-//			if(source.getType() == EPathwayVertexType.gene && target.getType() == EPathwayVertexType.gene) {
-//				combinedGraph.addEdge(graph.getEdgeSource(edge), graph.getEdgeTarget(edge), edge);
-//			}
-//		}
-
 	}
 	
 	public PathwayGraph getCombinedGraph() {

@@ -27,24 +27,34 @@ import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
 import org.jgrapht.graph.DefaultEdge;
 /**
  * Container, which defines the graph layout {@link GLFruchtermanReingoldLayout2}
+ * contains the renderable Elements
  * 
  * @author Christiane Schwarzl
  * 
  */
-public class DynamicPathwayElement extends AnimatedGLElementContainer implements IFRLayoutGraph {
+public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContainer implements IFRLayoutGraph {
 	
-	private DynamicPathwayGraph pathway;
-	
+	private DynamicPathwayGraph pathway;	
 	Set<NodeElement> nodeElementSet;
 	Set<EdgeElement> edgeElementSet;
+	
+	Set<IFRLayoutNode> nodeSet;
+	Set<IFRLayoutEdge> edgeSet;
 	
 //	private GLFruchtermanReingoldLayout pathwayLayout;
 //	private GLElementContainer vertices;
 //	private GLElementContainer edges;
 	
-	public DynamicPathwayElement(GLFruchtermanReingoldLayout2 layout) {
+	
+	public DynamicPathwayGraphRepresentation(GLFruchtermanReingoldLayout2 layout) {
 		
 		pathway = new DynamicPathwayGraph();
+		
+		nodeElementSet = new HashSet<NodeElement>();
+		edgeElementSet = new HashSet<EdgeElement>();
+		
+		nodeSet = new HashSet<IFRLayoutNode>();
+		edgeSet = new HashSet<IFRLayoutEdge>();
 		
 //		pathwayLayout = new GLFruchtermanReingoldLayout();
 //		vertices = new GLElementContainer(pathwayLayout);		
@@ -63,12 +73,19 @@ public class DynamicPathwayElement extends AnimatedGLElementContainer implements
 		nodeElementSet.clear();
 		edgeElementSet.clear();
 		
+		nodeSet.clear();
+		edgeSet.clear();
+		
+		clear();
 		
 		for(PathwayVertexRep vrep : pathway.getCombinedVertexSet()) {
 			NodeElement node = new NodeElement(vrep);
 			pathway.addVertexNodeMapEntry(vrep, node);
 			nodeElementSet.add(node);
+			nodeSet.add((IFRLayoutNode)node);
+			add(node);
 		}
+
 		
 		for(DefaultEdge e : pathway.getCombinedEdgeSet()) {
 			PathwayVertexRep vrepSource = pathway.getEdgeSource(e);
@@ -76,8 +93,13 @@ public class DynamicPathwayElement extends AnimatedGLElementContainer implements
 			NodeElement nodeSource = pathway.getNodeOfVertex(vrepSource);
 			NodeElement nodeTarget = pathway.getNodeOfVertex(vrepTarget);
 			
+			nodeSource.getHeight();
+			nodeTarget.getDisplacementX();
+			
 			EdgeElement edgeElement = new EdgeElement(e, nodeSource, nodeTarget);		
 			edgeElementSet.add(edgeElement);
+			edgeSet.add((IFRLayoutEdge)edgeElement);
+			add(edgeElement);
 		}
 		
 //		add(vertices);
@@ -106,20 +128,12 @@ public class DynamicPathwayElement extends AnimatedGLElementContainer implements
 
 	@Override
 	public Set<IFRLayoutNode> getNodeSet() {
-		Set<IFRLayoutNode> nodeSet = new HashSet<IFRLayoutNode>();
-		for(NodeElement node : this.nodeElementSet) {
-			nodeSet.add((IFRLayoutNode)node);
-		}	
-		return nodeSet;
+		return this.nodeSet;
 	}
 
 	@Override
 	public Set<IFRLayoutEdge> getEdgeSet() {
-		Set<IFRLayoutEdge> edgeSet = new HashSet<IFRLayoutEdge>();
-		for(EdgeElement edge : this.edgeElementSet) {
-			edgeSet.add((IFRLayoutEdge)edge);
-		}	
-		return edgeSet;
+		return this.edgeSet;
 	}
 
 	
