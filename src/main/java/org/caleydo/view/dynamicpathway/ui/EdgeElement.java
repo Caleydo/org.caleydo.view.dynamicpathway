@@ -18,6 +18,7 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 	private NodeElement targetNode;
 	private Line2D centerToCenterLine;
 	private Line2D edgeToRender;
+	private int magic;
 
 	private enum Direction {
 		TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT
@@ -27,6 +28,8 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		this.edge = edge;
 		this.sourceNode = sourceNode;
 		this.targetNode = targetNode;
+		
+		this.magic = 3;
 
 		double xSource = sourceNode.getCenterX();
 		double ySource = sourceNode.getCenterY();
@@ -40,6 +43,8 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {
+		
+		this.magic = 5;
 
 		calcDrawableEdge();
 
@@ -49,31 +54,7 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		
 	}
 
-	/**
-	 * determine which from which source edge to which target edge to draw, i.e.
-	 * direction [source] [target] \ / \ / [target] [source] target node is on
-	 * the bottom right target node is on the top right -> xDirection is
-	 * positive -> xDirection is positive -> yDirection is positive ->
-	 * yDirection is negative
-	 * 
-	 * note: origin (0,0) is on the top left corner
-	 */
-//	private void setDirection() {
-//		double xDirection = targetNode.getCenterX() - sourceNode.getCenterX();
-//		double yDirection = targetNode.getCenterY() - sourceNode.getCenterY();
-//
-//		if (xDirection >= 0.0) {
-//			if (yDirection >= 0.0)
-//				this.direction = Direction.BOTTOM_RIGHT;
-//			else
-//				this.direction = Direction.TOP_RIGHT;
-//		} else {
-//			if (yDirection >= 0.0)
-//				this.direction = Direction.BOTTOM_LEFT;
-//			else
-//				this.direction = Direction.TOP_LEFT;
-//		}
-//	}
+
 
 	private void calcDrawableEdge() {
 
@@ -87,8 +68,12 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		Point2D sourcePoint = sourceNode.getIntersectionPoint(centerToCenterLine);
 		Point2D targetPoint = targetNode.getIntersectionPoint(centerToCenterLine);
 		
-		edgeToRender.setLine(sourcePoint, targetPoint);
-		
+		if(sourcePoint == null || targetPoint == null) {
+			edgeToRender.setLine(this.centerToCenterLine);
+		}
+		else {
+			edgeToRender.setLine(sourcePoint, targetPoint);
+		}
 	}
 
 	@Override
@@ -109,6 +94,11 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 	@Override
 	public void setCenterToCenterLine(Line2D centerToCenterLine) {
 		this.centerToCenterLine.setLine(centerToCenterLine);
+	}
+
+	@Override
+	public void setMagic(int magic) {
+		this.magic = magic;
 	}
 
 

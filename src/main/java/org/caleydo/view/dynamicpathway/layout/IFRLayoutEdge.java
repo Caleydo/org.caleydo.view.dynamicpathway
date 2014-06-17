@@ -14,4 +14,5 @@ public interface IFRLayoutEdge {
 	IFRLayoutNode getTarget();
 	Line2D getCenterToCenterLine();
 	void setCenterToCenterLine(Line2D centerToCenterLine);
+	void setMagic(int magic);
 }

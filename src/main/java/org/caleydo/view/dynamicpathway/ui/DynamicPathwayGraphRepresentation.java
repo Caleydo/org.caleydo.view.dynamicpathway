@@ -42,8 +42,6 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	Set<IFRLayoutEdge> edgeSet;
 	
 //	private GLFruchtermanReingoldLayout pathwayLayout;
-//	private GLElementContainer vertices;
-//	private GLElementContainer edges;
 	
 	
 	public DynamicPathwayGraphRepresentation(GLFruchtermanReingoldLayout2 layout) {
@@ -56,13 +54,9 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		nodeSet = new HashSet<IFRLayoutNode>();
 		edgeSet = new HashSet<IFRLayoutEdge>();
 		
-//		pathwayLayout = new GLFruchtermanReingoldLayout();
-//		vertices = new GLElementContainer(pathwayLayout);		
-//		edges = new GLElementContainer(GLLayouts.LAYERS);
 
 		setLayout(layout);
 		
-//		add(vertices);
 
 
 	}
@@ -80,6 +74,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		
 		for(PathwayVertexRep vrep : pathway.getCombinedVertexSet()) {
 			NodeElement node = new NodeElement(vrep);
+			node.setLayoutData(true);
 			pathway.addVertexNodeMapEntry(vrep, node);
 			nodeElementSet.add(node);
 			nodeSet.add((IFRLayoutNode)node);
@@ -93,17 +88,13 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			NodeElement nodeSource = pathway.getNodeOfVertex(vrepSource);
 			NodeElement nodeTarget = pathway.getNodeOfVertex(vrepTarget);
 			
-			nodeSource.getHeight();
-			nodeTarget.getDisplacementX();
-			
 			EdgeElement edgeElement = new EdgeElement(e, nodeSource, nodeTarget);		
+			edgeElement.setLayoutData(false);
+			
 			edgeElementSet.add(edgeElement);
 			edgeSet.add((IFRLayoutEdge)edgeElement);
 			add(edgeElement);
 		}
-		
-//		add(vertices);
-//		add(edges);
 		
 		
 		

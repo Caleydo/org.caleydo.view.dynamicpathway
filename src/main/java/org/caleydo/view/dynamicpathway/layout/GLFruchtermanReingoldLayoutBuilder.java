@@ -9,9 +9,10 @@ public class GLFruchtermanReingoldLayoutBuilder {
 	private double cooldown = -1.0;
 	private double repulsionMultiplier = 1.0;
 	private double attractionMultiplier = 1.0;
+	private double nodeBoundsExtension = 1.0;
 
 	public GLFruchtermanReingoldLayout2 buildLayout() {		
-		return (new GLFruchtermanReingoldLayout2(maxIterations, temperature, cooldown, repulsionMultiplier, attractionMultiplier));
+		return (new GLFruchtermanReingoldLayout2(maxIterations, temperature, cooldown, repulsionMultiplier, attractionMultiplier, nodeBoundsExtension));
 	}
 	
 	public GLFruchtermanReingoldLayoutBuilder maxIterations(int maxIterations) {
@@ -32,6 +33,11 @@ public class GLFruchtermanReingoldLayoutBuilder {
 	
 	public GLFruchtermanReingoldLayoutBuilder attractionMultiplier(double attractionMultiplier) {
 		this.attractionMultiplier = attractionMultiplier;
+		return this;
+	}
+	
+	public GLFruchtermanReingoldLayoutBuilder nodeBoundsExtension(double nodeBoundsExtension) {
+		this.nodeBoundsExtension = nodeBoundsExtension;
 		return this;
 	}
 

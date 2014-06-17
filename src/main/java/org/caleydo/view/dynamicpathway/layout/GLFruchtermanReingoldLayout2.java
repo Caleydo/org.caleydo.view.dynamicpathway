@@ -2,13 +2,16 @@ package org.caleydo.view.dynamicpathway.layout;
 
 import java.awt.geom.Point2D;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.caleydo.core.view.opengl.layout2.GLElementContainer;
 import org.caleydo.core.view.opengl.layout2.layout.IGLLayout2;
 import org.caleydo.core.view.opengl.layout2.layout.IGLLayoutElement;
 import org.caleydo.view.dynamicpathway.ui.DynamicPathwayGraphRepresentation;
+import org.caleydo.view.dynamicpathway.ui.NodeElement;
 
 /**
  * calculates new vertex position according to the Fruchterman & Reingold algorithm
@@ -34,7 +37,7 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 	/**
 	 * Some member can be set by the user, but cannot be parameterized - they are set when doLayout is called
 	 */
-	private final boolean temperatureAndCooldownSetByUser;
+	private boolean isTemperatureAndCooldownSetByUser;
 
 	// parameterizable members
 
@@ -54,13 +57,40 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 	/**
 	 * Standard calculation may not be applicable for the current graph. (e.g. graph is too sparse) If the
 	 * repulsionMultiplier is set higher, than not connected nodes are farer apart and vice versa.
+	 * 
+	 * If it is set to -1, it is set to the distance between the 2 nodes. Since the repulsionMultiplier is 
+	 * inversely proportional to the repulsion force, this strongly limits the repulsion force
 	 */
-	private final double repulsionMultiplier;
+	private double repulsionMultiplier;
+	
+	private boolean isRepulsionMultiplierSetToDistance;
+	
 	/**
 	 * Standard calculation may not be applicable for the current graph. (e.g. graph is too sparse) If the
 	 * attractionMultiplier is set higher, than connected nodes are closer together and vice versa.
+	 * 
+	 * If it is set to -1, it is set to the GlobalEdgeLength. Since the attractionMultiplier is 
+	 * inversely proportional to the attraction force, this strongly limits the attraction force
 	 */
-	private final double attractionMultiplier;
+	private double attractionMultiplier;
+
+	private IGLLayoutElement parentGraph = null;
+
+	/**
+	 * needed for setting the bounds, so nodes are (re)drawn
+	 */
+	private Set<IGLLayoutElement> iglLayoutElementNodeSet;
+	
+	/**
+	 * needed for setting the bounds, so edged are (re)drawn
+	 */
+	private Set<IGLLayoutElement> iglLayoutElementEdgeSet;
+	
+	/**
+	 * added to the width & higth, when setting the bounds
+	 *  -> sets bounds bigger
+	 */
+	private double nodeBoundsExtension;
 
 	/**
 	 * 
@@ -76,24 +106,39 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 	 *            {@link #attractionMultiplier}
 	 */
 	public GLFruchtermanReingoldLayout2(int maxIterations, double temperature, double cooldown,
-			double repulsionMultiplier, double attractionMultiplier) {
+			double repulsionMultiplier, double attractionMultiplier, double nodeBoundsExtension) {
 
+		this.isTemperatureAndCooldownSetByUser = false;
+		this.isRepulsionMultiplierSetToDistance = false;
+		
 		/**
 		 * Temperature & cooldown are set to -1.0 by default, so if these are not -1.0, the user set them by
 		 * the LayoutBuilder
 		 */
 		if (temperature >= 0.0) {
-			this.temperatureAndCooldownSetByUser = true;
+			this.isTemperatureAndCooldownSetByUser = true;
 			this.temperature = temperature;
 			this.cooldown = cooldown;
-		} else {
-			this.temperatureAndCooldownSetByUser = false;
-		}
+		} 
+		
+		/**
+		 * If it is set to -1, it is set to the distance between the 2 nodes. Since the repulsionMultiplier is 
+		 * inversely proportional to the repulsion force, this strongly limits the repulsion force
+		 */
+		if(repulsionMultiplier < 0.0)
+			this.isRepulsionMultiplierSetToDistance = true;
 
-		this.maxIterations = maxIterations;
+		this.maxIterations = maxIterations;		
 		this.repulsionMultiplier = repulsionMultiplier;
 		this.attractionMultiplier = attractionMultiplier;
+		this.nodeBoundsExtension = nodeBoundsExtension;
+		
 		this.displacementMap = new HashMap<IFRLayoutNode, Point2D>();
+		this.iglLayoutElementNodeSet = new HashSet<IGLLayoutElement>();
+		this.iglLayoutElementEdgeSet = new HashSet<IGLLayoutElement>();
+
+		this.width = 0.0;
+		this.height = 0.0;
 	}
 
 	/**
@@ -104,7 +149,7 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 	 * @param w
 	 *            width of the current frame
 	 * @param h
-	 *            width of the current frame 
+	 *            width of the current frame
 	 * @param parent
 	 *            the graph, needed to get the vertex & edgeSet
 	 * @param deltaTimeMs
@@ -119,32 +164,41 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 			return false;
 
 		displacementMap.clear();
-
-		// DynamicPathwayGraphElement graph2 = (DynamicPathwayGraphElement)children.get(0);
-		//
-		// IFRLayoutGraph graph = (IFRLayoutGraph) graph2;
-		// Set<IFRLayoutNode> nodeSet = graph.getNodeSet();
-		// Set<IFRLayoutEdge> edgeSet = graph.getEdgeSet();
+		iglLayoutElementNodeSet.clear();
+		iglLayoutElementEdgeSet.clear();
 
 		width = w;
 		height = h;
 
-		if (!temperatureAndCooldownSetByUser) {
+		if (!isTemperatureAndCooldownSetByUser) {
 			temperature = width / 10;
 			cooldown = temperature / maxIterations;
 		}
 
 		area = width * height;
 
-		// for(IGLLayoutElement child : children) {
+		for (IGLLayoutElement child : children) {
+			Boolean isNode = child.getLayoutDataAs(Boolean.class, false);
+			if (isNode)
+				iglLayoutElementNodeSet.add(child);
+			else
+				iglLayoutElementEdgeSet.add(child);
+			
+		}
 
-		DynamicPathwayGraphRepresentation graph2 = (DynamicPathwayGraphRepresentation) parent.asElement();
 
-		IFRLayoutGraph graph = (IFRLayoutGraph) graph2;
+		IFRLayoutGraph graph = (IFRLayoutGraph) parent.asElement();
 		Set<IFRLayoutNode> nodeSet = graph.getNodeSet();
 		Set<IFRLayoutEdge> edgeSet = graph.getEdgeSet();
 
+		assert (iglLayoutElementNodeSet.size() == nodeSet.size());
+
 		globalEdgeLength = (float) Math.sqrt(area / nodeSet.size());
+		
+		if(this.attractionMultiplier < 0.0) {
+			this.attractionMultiplier = this.globalEdgeLength;
+		}
+		
 
 		for (int i = 1; i <= maxIterations; i++) {
 
@@ -170,16 +224,23 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 				calcAttractiveForces(edge);
 			}
 
-			for (IFRLayoutNode currentNode : nodeSet) {
-
-				calcNewVertexPositions(currentNode);
+			for (IGLLayoutElement child : this.iglLayoutElementNodeSet) {
+				IFRLayoutNode node = (IFRLayoutNode) child.asElement();
+				calcNewVertexPositions(child, node);
 			}
+			
+			/**
+			 * setting bounds of edges, so they are updated (renderImpl is called)
+			 */
+			for (IGLLayoutElement child : this.iglLayoutElementEdgeSet) {
+				child.setBounds(0.0f, 0.0f, w, h);
+			}
+			
 
 			coolDownTemp();
 
 		}
 
-		// }
 		return false;
 	}
 
@@ -201,7 +262,12 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 			double yDistance = currentNode.getCenterY() - otherNode.getCenterY();
 
 			double distance = calcDistance(xDistance, yDistance);
-			double repulsiveForce = globalEdgeLength * globalEdgeLength / (distance * distance);
+			
+			if(isRepulsionMultiplierSetToDistance) {
+				this.repulsionMultiplier = distance;
+			}
+			
+			double repulsiveForce = globalEdgeLength * globalEdgeLength / (distance * repulsionMultiplier);
 
 			if (distance > 0) {
 				double xDisplacementFactor = (xDistance / distance) * repulsiveForce;
@@ -225,16 +291,12 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 		IFRLayoutNode sourceNode = currentEdge.getSource();
 		IFRLayoutNode targetNode = currentEdge.getTarget();
 
-		// double xDisplacementSource = sourceNode.getDisplacementX();
-		// double yDisplacementSource = sourceNode.getDisplacementY();
-		// double xDisplacementTarget = targetNode.getDisplacementX();
-		// double yDisplacementTarget = targetNode.getDisplacementY();
-
 		double xDistance = sourceNode.getCenterX() - targetNode.getCenterX();
 		double yDistance = sourceNode.getCenterY() - targetNode.getCenterY();
 
 		double distance = calcDistance(xDistance, yDistance);
-		double attractiveForce = distance * distance / (globalEdgeLength * 5.0);
+		
+		double attractiveForce = distance * distance / (globalEdgeLength * attractionMultiplier);
 
 		if (distance > 0) {
 			double xDisplacementSourceFactor = -(xDistance / distance * attractiveForce);
@@ -246,16 +308,15 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 			editDisplacement(targetNode, xDisplacementTargetFactor, yDisplacementTargetFactor);
 
 		}
-		// sourceNode.setDisplacement(xDisplacementSource, yDisplacementSource);
-		// targetNode.setDisplacement(xDisplacementTarget, yDisplacementTarget);
 	}
 
 	/**
-	 * 
+	 * @param child
+	 *            used to set the drawing bounds for the rendered object
 	 * @param currentNode
 	 *            node, which's position should be changed
 	 */
-	private void calcNewVertexPositions(IFRLayoutNode currentNode) {
+	private void calcNewVertexPositions(IGLLayoutElement child, IFRLayoutNode currentNode) {
 		double xPosition = currentNode.getCenterX();
 		double yPosition = currentNode.getCenterY();
 		double xDisplacement = displacementMap.get(currentNode).getX();
@@ -286,11 +347,11 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 			yPosition = height - borderWidth - Math.random() * borderWidth * 2.0;
 		}
 
-		double newXPos = xPosition - vertexWidth / 2;
-		double newYPos = yPosition - vertexHeight / 2;
+		double newXPos = xPosition - vertexWidth / 2.0;
+		double newYPos = yPosition - vertexHeight / 2.0;
 
-		currentNode.setBounds((float) newXPos, (float) newYPos, (float) vertexWidth + 4,
-				(float) vertexHeight + 4);
+
+		child.setBounds((float) newXPos, (float) newYPos, (float) (vertexWidth + nodeBoundsExtension), (float) (vertexHeight + nodeBoundsExtension));
 		currentNode.setCenter(xPosition, yPosition);
 
 	}

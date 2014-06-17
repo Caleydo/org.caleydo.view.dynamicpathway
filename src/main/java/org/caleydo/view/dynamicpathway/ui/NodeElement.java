@@ -23,7 +23,7 @@ public class NodeElement extends GLElement implements IFRLayoutNode{
 	private double displacementY;
 	private double centerX;
 	private double centerY;
-	private DynamicPathwayGraph parentGraph;	
+//	private DynamicPathwayGraph parentGraph;	
 	private Coordinates coords;
 
 	public NodeElement(PathwayVertexRep vertexRep) {
