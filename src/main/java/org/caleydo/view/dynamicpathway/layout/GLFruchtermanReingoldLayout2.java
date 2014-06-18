@@ -7,11 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.caleydo.core.view.opengl.layout2.GLElementContainer;
 import org.caleydo.core.view.opengl.layout2.layout.IGLLayout2;
 import org.caleydo.core.view.opengl.layout2.layout.IGLLayoutElement;
-import org.caleydo.view.dynamicpathway.ui.DynamicPathwayGraphRepresentation;
-import org.caleydo.view.dynamicpathway.ui.NodeElement;
 
 /**
  * calculates new vertex position according to the Fruchterman & Reingold algorithm
@@ -21,8 +18,9 @@ import org.caleydo.view.dynamicpathway.ui.NodeElement;
  */
 public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 
-	private static final int MAX_ITERATIONS = 700;
-
+	/**
+	 * current width*height
+	 */
 	private double area;
 	private double width;
 	private double height;
@@ -35,9 +33,21 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 	private double globalEdgeLength;
 
 	/**
-	 * Some member can be set by the user, but cannot be parameterized - they are set when doLayout is called
+	 * If temperature & cooldown are not set by the user, they are set when doLayout is called
+	 * In order to not override the user's setting, we have to save (in the constructor) if
+	 * it was set or not
 	 */
 	private boolean isTemperatureAndCooldownSetByUser;
+	
+	/**
+	 * needed for setting the bounds, so nodes are (re)drawn
+	 */
+	private Set<IGLLayoutElement> iglLayoutElementNodeSet;
+
+	/**
+	 * needed for setting the bounds, so edged are (re)drawn
+	 */
+	private Set<IGLLayoutElement> iglLayoutElementEdgeSet;
 
 	// parameterizable members
 
@@ -58,37 +68,26 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 	 * Standard calculation may not be applicable for the current graph. (e.g. graph is too sparse) If the
 	 * repulsionMultiplier is set higher, than not connected nodes are farer apart and vice versa.
 	 * 
-	 * If it is set to -1, it is set to the distance between the 2 nodes. Since the repulsionMultiplier is 
+	 * If it is set to -1, it is set to the distance between the 2 nodes. Since the repulsionMultiplier is
 	 * inversely proportional to the repulsion force, this strongly limits the repulsion force
 	 */
 	private double repulsionMultiplier;
-	
+
 	private boolean isRepulsionMultiplierSetToDistance;
-	
+
 	/**
 	 * Standard calculation may not be applicable for the current graph. (e.g. graph is too sparse) If the
 	 * attractionMultiplier is set higher, than connected nodes are closer together and vice versa.
 	 * 
-	 * If it is set to -1, it is set to the GlobalEdgeLength. Since the attractionMultiplier is 
-	 * inversely proportional to the attraction force, this strongly limits the attraction force
+	 * If it is set to -1, it is set to the GlobalEdgeLength. Since the attractionMultiplier is inversely
+	 * proportional to the attraction force, this strongly limits the attraction force
 	 */
 	private double attractionMultiplier;
 
-	private IGLLayoutElement parentGraph = null;
+
 
 	/**
-	 * needed for setting the bounds, so nodes are (re)drawn
-	 */
-	private Set<IGLLayoutElement> iglLayoutElementNodeSet;
-	
-	/**
-	 * needed for setting the bounds, so edged are (re)drawn
-	 */
-	private Set<IGLLayoutElement> iglLayoutElementEdgeSet;
-	
-	/**
-	 * added to the width & higth, when setting the bounds
-	 *  -> sets bounds bigger
+	 * added to the width & higth, when setting the bounds -> sets bounds bigger
 	 */
 	private double nodeBoundsExtension;
 
@@ -110,7 +109,7 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 
 		this.isTemperatureAndCooldownSetByUser = false;
 		this.isRepulsionMultiplierSetToDistance = false;
-		
+
 		/**
 		 * Temperature & cooldown are set to -1.0 by default, so if these are not -1.0, the user set them by
 		 * the LayoutBuilder
@@ -119,20 +118,20 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 			this.isTemperatureAndCooldownSetByUser = true;
 			this.temperature = temperature;
 			this.cooldown = cooldown;
-		} 
-		
+		}
+
 		/**
-		 * If it is set to -1, it is set to the distance between the 2 nodes. Since the repulsionMultiplier is 
+		 * If it is set to -1, it is set to the distance between the 2 nodes. Since the repulsionMultiplier is
 		 * inversely proportional to the repulsion force, this strongly limits the repulsion force
 		 */
-		if(repulsionMultiplier < 0.0)
+		if (repulsionMultiplier < 0.0)
 			this.isRepulsionMultiplierSetToDistance = true;
 
-		this.maxIterations = maxIterations;		
+		this.maxIterations = maxIterations;
 		this.repulsionMultiplier = repulsionMultiplier;
 		this.attractionMultiplier = attractionMultiplier;
 		this.nodeBoundsExtension = nodeBoundsExtension;
-		
+
 		this.displacementMap = new HashMap<IFRLayoutNode, Point2D>();
 		this.iglLayoutElementNodeSet = new HashSet<IGLLayoutElement>();
 		this.iglLayoutElementEdgeSet = new HashSet<IGLLayoutElement>();
@@ -183,9 +182,8 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 				iglLayoutElementNodeSet.add(child);
 			else
 				iglLayoutElementEdgeSet.add(child);
-			
-		}
 
+		}
 
 		IFRLayoutGraph graph = (IFRLayoutGraph) parent.asElement();
 		Set<IFRLayoutNode> nodeSet = graph.getNodeSet();
@@ -194,11 +192,10 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 		assert (iglLayoutElementNodeSet.size() == nodeSet.size());
 
 		globalEdgeLength = (float) Math.sqrt(area / nodeSet.size());
-		
-		if(this.attractionMultiplier < 0.0) {
+
+		if (this.attractionMultiplier < 0.0) {
 			this.attractionMultiplier = this.globalEdgeLength;
 		}
-		
 
 		for (int i = 1; i <= maxIterations; i++) {
 
@@ -228,14 +225,13 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 				IFRLayoutNode node = (IFRLayoutNode) child.asElement();
 				calcNewVertexPositions(child, node);
 			}
-			
+
 			/**
 			 * setting bounds of edges, so they are updated (renderImpl is called)
 			 */
 			for (IGLLayoutElement child : this.iglLayoutElementEdgeSet) {
 				child.setBounds(0.0f, 0.0f, w, h);
 			}
-			
 
 			coolDownTemp();
 
@@ -262,11 +258,11 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 			double yDistance = currentNode.getCenterY() - otherNode.getCenterY();
 
 			double distance = calcDistance(xDistance, yDistance);
-			
-			if(isRepulsionMultiplierSetToDistance) {
+
+			if (isRepulsionMultiplierSetToDistance) {
 				this.repulsionMultiplier = distance;
 			}
-			
+
 			double repulsiveForce = globalEdgeLength * globalEdgeLength / (distance * repulsionMultiplier);
 
 			if (distance > 0) {
@@ -295,7 +291,7 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 		double yDistance = sourceNode.getCenterY() - targetNode.getCenterY();
 
 		double distance = calcDistance(xDistance, yDistance);
-		
+
 		double attractiveForce = distance * distance / (globalEdgeLength * attractionMultiplier);
 
 		if (distance > 0) {
@@ -350,8 +346,8 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 		double newXPos = xPosition - vertexWidth / 2.0;
 		double newYPos = yPosition - vertexHeight / 2.0;
 
-
-		child.setBounds((float) newXPos, (float) newYPos, (float) (vertexWidth + nodeBoundsExtension), (float) (vertexHeight + nodeBoundsExtension));
+		child.setBounds((float) newXPos, (float) newYPos, (float) (vertexWidth + nodeBoundsExtension),
+				(float) (vertexHeight + nodeBoundsExtension));
 		currentNode.setCenter(xPosition, yPosition);
 
 	}
@@ -371,8 +367,8 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 	 * 
 	 * @param node
 	 *            which's displacement has to be edited
-	 * @param x
-	 * @param y
+	 * @param x the addend for the xDisplacement value
+	 * @param y the addend for the yDisplacement value
 	 * 
 	 */
 	private void editDisplacement(IFRLayoutNode node, double x, double y) {

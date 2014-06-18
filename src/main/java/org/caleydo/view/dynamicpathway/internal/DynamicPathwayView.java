@@ -5,9 +5,6 @@
  ******************************************************************************/
 package org.caleydo.view.dynamicpathway.internal;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.caleydo.core.data.selection.EventBasedSelectionManager;
 import org.caleydo.core.data.selection.IEventBasedSelectionManagerUser;
 import org.caleydo.core.event.EventListenerManager;
@@ -37,9 +34,8 @@ import org.caleydo.view.entourage.SideWindow;
 import org.caleydo.view.entourage.SlideInElement;
 import org.caleydo.view.entourage.SlideInElement.ESlideInElementPosition;
 
-import com.jogamp.opengl.math.geom.Frustum;
-
 /**
+ * view, which can represent different pathways combined into one pathway
  * 
  * @author Christiane Schwarzl
  * 
@@ -60,30 +56,93 @@ public class DynamicPathwayView extends AGLElementGLView implements IEventBasedS
 
 	private GLElementContainer root = new GLElementContainer(GLLayouts.LAYERS);
 
-	// private GLElementContainer pathwayGraphLayoutContainer;
-
 	private AnimatedGLElementContainer baseContainer = new AnimatedGLElementContainer(
 			new GLSizeRestrictiveFlowLayout(true, 10, GLPadding.ZERO));
-
-	// a list that contains all chooseable pathways
-	// private List<PathwayGraph> pathwayInfos = new ArrayList<>();
-
+	
 	private final DragAndDropController dndController = new DragAndDropController(this);
+	
 	private EventBasedSelectionManager vertexSelectionManager;
+	
+	
 
 	public DynamicPathwayView(IGLCanvas glCanvas, ViewFrustum viewFrustum) {
 		super(glCanvas, viewFrustum, VIEW_TYPE, VIEW_NAME);
+		
+		createPathwayGraphView();
 
+		createRankingSideBar();
+
+
+		root.add(baseContainer);
+		root.add(currentPathwayElement);
+
+		vertexSelectionManager = new EventBasedSelectionManager(this,
+				IDType.getIDType(EGeneIDTypes.PATHWAY_VERTEX_REP.name()));
+		vertexSelectionManager.registerEventListeners();
+	}
+
+	public EventListenerManager getEventListenerManager() {
+		return eventListeners;
+	}
+
+	@Override
+	public ASerializedView getSerializableRepresentation() {
+		return new SerializedDynamicPathwayView();
+	}
+
+	@Override
+	protected GLElement createRoot() {
+		return root;
+	}
+
+	public void setActiveWindow(DynamicPathwayWindow activeWindow) {
+		if (activeWindow != null && this.activeWindow != null && activeWindow != this.activeWindow) {
+			this.activeWindow.setActive(false);
+		}
+		
+		this.activeWindow = activeWindow;
+
+	}
+	
+
+	public DragAndDropController getDndController() {
+		return dndController;
+	}
+
+	// TODO: inlude Vertex highlighting
+	@Override
+	public void notifyOfSelectionChange(EventBasedSelectionManager selectionManager) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void addPathway(PathwayGraph pathway) {
+		this.currentPathwayElement.addPathwayRep(pathway);
+		// relayout();
+	}
+
+	public boolean isGraphPresented(PathwayGraph pathway) {
+		if (currentPathwayElement.getDynamicPathway().isGraphPresented(pathway))
+			return true;
+		return false;
+	}
+	
+	/** 
+	 * view for representing pathway graphs
+	 */
+	private void createPathwayGraphView() {
 		pathwayLayout = new GLFruchtermanReingoldLayoutBuilder()
 							.repulsionMultiplier(-1.0).attractionMultiplier(5.0).nodeBoundsExtension(4.0)
 							.buildLayout();
-		// pathwayGraphLayoutContainer = new GLElementContainer(pathwayLayout);
 
 		currentPathwayElement = new DynamicPathwayGraphRepresentation(pathwayLayout);
 		currentPathwayElement.setLocation(200, 0);
-
-		// pathwayGraphLayoutContainer.add(currentPathwayElement);
-
+	}
+	
+	/**
+	 * view for side bar, which contains a list of representable pathways
+	 */
+	private void createRankingSideBar() {
 		AnimatedGLElementContainer column = new AnimatedGLElementContainer(new GLSizeRestrictiveFlowLayout(
 				false, 10, GLPadding.ZERO));
 
@@ -115,65 +174,6 @@ public class DynamicPathwayView extends AGLElementGLView implements IEventBasedS
 		rankingElement.setWindow(rankingWindow);
 
 		baseContainer.add(rankingWindow);
-
-		root.add(baseContainer);
-		root.add(currentPathwayElement);
-
-		vertexSelectionManager = new EventBasedSelectionManager(this,
-				IDType.getIDType(EGeneIDTypes.PATHWAY_VERTEX_REP.name()));
-		vertexSelectionManager.registerEventListeners();
-	}
-
-	public EventListenerManager getEventListenerManager() {
-		return eventListeners;
-	}
-
-	@Override
-	public ASerializedView getSerializableRepresentation() {
-		return new SerializedDynamicPathwayView();
-	}
-
-	@Override
-	protected GLElement createRoot() {
-		// dynamicPathwayOverview = new DynamicPathwayOverview();
-		// // dynamicPathwayElem = new DynamicPathwayElement();
-		// // dynamicPathwayElem.setLocation(200, 0);
-		return root;
-	}
-
-	public void setActiveWindow(DynamicPathwayWindow activeWindow) {
-		if (activeWindow != null && this.activeWindow != null && activeWindow != this.activeWindow) {
-			this.activeWindow.setActive(false);
-		}
-		// if (activeWindow instanceof GLPathwayWindow) {
-		// portalFocusWindow = (GLPathwayWindow) activeWindow;
-		// }
-
-		this.activeWindow = activeWindow;
-		// isLayoutDirty = true;
-
-	}
-
-	public DragAndDropController getDndController() {
-		return dndController;
-	}
-
-	// TODO: inlude Vertex highlighting
-	@Override
-	public void notifyOfSelectionChange(EventBasedSelectionManager selectionManager) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void addPathway(PathwayGraph pathway) {
-		this.currentPathwayElement.addPathwayRep(pathway);
-		// relayout();
-	}
-
-	public boolean isGraphPresented(PathwayGraph pathway) {
-		if (currentPathwayElement.getDynamicPathway().isGraphPresented(pathway))
-			return true;
-		return false;
 	}
 
 }

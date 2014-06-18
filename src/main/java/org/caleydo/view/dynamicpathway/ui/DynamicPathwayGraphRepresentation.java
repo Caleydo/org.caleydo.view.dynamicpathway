@@ -25,84 +25,76 @@ import org.caleydo.view.dynamicpathway.layout.IFRLayoutEdge;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutGraph;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
 import org.jgrapht.graph.DefaultEdge;
+
 /**
- * Container, which defines the graph layout {@link GLFruchtermanReingoldLayout2}
- * contains the renderable Elements
+ * Container, which is defined by the graph layout {@link GLFruchtermanReingoldLayout2} contains the
+ * renderable Elements
  * 
  * @author Christiane Schwarzl
  * 
  */
 public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContainer implements IFRLayoutGraph {
-	
-	private DynamicPathwayGraph pathway;	
-	Set<NodeElement> nodeElementSet;
-	Set<EdgeElement> edgeElementSet;
-	
-	Set<IFRLayoutNode> nodeSet;
-	Set<IFRLayoutEdge> edgeSet;
-	
-//	private GLFruchtermanReingoldLayout pathwayLayout;
-	
-	
+
+	/**
+	 * contains focus & kontextpathway informations
+	 */
+	private DynamicPathwayGraph pathway;
+
+	/**
+	 * contains nodes & edges used for defining and rendering the layout
+	 */
+	private Set<IFRLayoutNode> nodeSet;
+	private Set<IFRLayoutEdge> edgeSet;
+
 	public DynamicPathwayGraphRepresentation(GLFruchtermanReingoldLayout2 layout) {
-		
+
 		pathway = new DynamicPathwayGraph();
-		
-		nodeElementSet = new HashSet<NodeElement>();
-		edgeElementSet = new HashSet<EdgeElement>();
-		
+
 		nodeSet = new HashSet<IFRLayoutNode>();
 		edgeSet = new HashSet<IFRLayoutEdge>();
-		
 
 		setLayout(layout);
-		
-
 
 	}
-	
+
+	/**
+	 * 
+	 * @param graph
+	 *            if a new pathway was added, a new combined (focus + parts of kontext pathways) pathway is
+	 *            created
+	 * 
+	 */
 	public void addPathwayRep(PathwayGraph graph) {
 		pathway.addFocusOrKontextPathway(graph);
-		
-		nodeElementSet.clear();
-		edgeElementSet.clear();
-		
+
 		nodeSet.clear();
 		edgeSet.clear();
-		
+
 		clear();
-		
-		for(PathwayVertexRep vrep : pathway.getCombinedVertexSet()) {
+
+		for (PathwayVertexRep vrep : pathway.getCombinedVertexSet()) {
 			NodeElement node = new NodeElement(vrep);
 			node.setLayoutData(true);
 			pathway.addVertexNodeMapEntry(vrep, node);
-			nodeElementSet.add(node);
-			nodeSet.add((IFRLayoutNode)node);
+			nodeSet.add((IFRLayoutNode) node);
 			add(node);
 		}
 
-		
-		for(DefaultEdge e : pathway.getCombinedEdgeSet()) {
+		for (DefaultEdge e : pathway.getCombinedEdgeSet()) {
 			PathwayVertexRep vrepSource = pathway.getEdgeSource(e);
 			PathwayVertexRep vrepTarget = pathway.getEdgeTarget(e);
 			NodeElement nodeSource = pathway.getNodeOfVertex(vrepSource);
 			NodeElement nodeTarget = pathway.getNodeOfVertex(vrepTarget);
-			
-			EdgeElement edgeElement = new EdgeElement(e, nodeSource, nodeTarget);		
+
+			EdgeElement edgeElement = new EdgeElement(e, nodeSource, nodeTarget);
 			edgeElement.setLayoutData(false);
-			
-			edgeElementSet.add(edgeElement);
-			edgeSet.add((IFRLayoutEdge)edgeElement);
+
+			edgeSet.add((IFRLayoutEdge) edgeElement);
 			add(edgeElement);
 		}
-		
-		
-		
-		
+
 	}
-	
-	
-	
+
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {
 		super.renderImpl(g, w, h);
@@ -112,7 +104,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	public Vec2f getMinSize() {
 		return new Vec2f(100, 100);
 	}
-	
+
 	public DynamicPathwayGraph getDynamicPathway() {
 		return pathway;
 	}
@@ -126,7 +118,5 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	public Set<IFRLayoutEdge> getEdgeSet() {
 		return this.edgeSet;
 	}
-
-	
 
 }
