@@ -8,8 +8,8 @@ import java.util.Vector;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
-import org.caleydo.view.dynamicpathway.ui.EdgeElement;
 import org.caleydo.view.dynamicpathway.ui.NodeElement;
+import org.caleydo.view.dynamicpathway.ui.NodeGeneElement;
 import org.jgrapht.graph.DefaultEdge;
 
 /**
@@ -158,16 +158,19 @@ public class DynamicPathwayGraph {
 				graph.getExternalLink());	
 		
 		for (PathwayVertexRep vrep : graph.vertexSet()) {
-			if(vrep.getType() == EPathwayVertexType.gene) {
+			if(vrep.getType() != EPathwayVertexType.map ) {
+//				if(vrep.getType() != EPathwayVertexType.gene )
+//					System.out.println(vrep.getShortName() + ": " + vrep.getType().toString());
+				
 				combinedGraph.addVertex(vrep);
 			}
 		}
 		for (DefaultEdge edge : graph.edgeSet()) {
 			PathwayVertexRep source = graph.getEdgeSource(edge);
 			PathwayVertexRep target = graph.getEdgeTarget(edge);
-			if(source.getType() == EPathwayVertexType.gene && target.getType() == EPathwayVertexType.gene) {
+//			if(source.getType() == EPathwayVertexType.gene && target.getType() == EPathwayVertexType.gene) {
 				combinedGraph.addEdge(graph.getEdgeSource(edge), graph.getEdgeTarget(edge), edge);
-			}
+//			}
 		}
 	}
 

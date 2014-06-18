@@ -77,7 +77,7 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 
 	/**
 	 * Standard calculation may not be applicable for the current graph. (e.g. graph is too sparse) If the
-	 * attractionMultiplier is set higher, than connected nodes are closer together and vice versa.
+	 * attractionMultiplier is set smaller, than connected nodes are closer together and vice versa.
 	 * 
 	 * If it is set to -1, it is set to the GlobalEdgeLength. Since the attractionMultiplier is inversely
 	 * proportional to the attraction force, this strongly limits the attraction force
@@ -220,18 +220,20 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 			for (IFRLayoutEdge edge : edgeSet) {
 				calcAttractiveForces(edge);
 			}
-
-			for (IGLLayoutElement child : this.iglLayoutElementNodeSet) {
-				IFRLayoutNode node = (IFRLayoutNode) child.asElement();
-				calcNewVertexPositions(child, node);
-			}
-
+			
 			/**
 			 * setting bounds of edges, so they are updated (renderImpl is called)
 			 */
 			for (IGLLayoutElement child : this.iglLayoutElementEdgeSet) {
 				child.setBounds(0.0f, 0.0f, w, h);
 			}
+
+			for (IGLLayoutElement child : this.iglLayoutElementNodeSet) {
+				IFRLayoutNode node = (IFRLayoutNode) child.asElement();
+				calcNewVertexPositions(child, node);
+			}
+
+
 
 			coolDownTemp();
 

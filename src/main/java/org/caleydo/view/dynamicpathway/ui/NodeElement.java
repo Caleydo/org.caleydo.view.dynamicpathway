@@ -2,9 +2,7 @@ package org.caleydo.view.dynamicpathway.ui;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
 
-import org.caleydo.core.util.collection.Pair;
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLElement;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
@@ -12,31 +10,25 @@ import org.caleydo.core.view.opengl.picking.IPickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.core.view.opengl.picking.PickingMode;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
-import org.caleydo.view.dynamicpathway.layout.DynamicPathwayGraph;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
 import org.caleydo.view.dynamicpathway.util.Coordinates;
 
-public class NodeElement extends GLElement implements IFRLayoutNode{
+public abstract class NodeElement extends GLElement implements IFRLayoutNode {
 	
-	private PathwayVertexRep vertexRep;
-	private double displacementX;
-	private double displacementY;
-	private double centerX;
-	private double centerY;
-//	private DynamicPathwayGraph parentGraph;	
-	private Coordinates coords;
-
-	public NodeElement(PathwayVertexRep vertexRep) {
-		
+	protected static final int FONT_SIZE = 12;
+	protected static final Color CONTOUR_COLOR  = Color.LIGHT_GRAY;
+	protected static final String FILLING_COLOR = "#F2F2F2";
+	
+	protected PathwayVertexRep vertexRep;
+	protected double centerX;
+	protected double centerY;
+	protected Coordinates coords;
+	
+	public NodeElement(PathwayVertexRep vertexRep) {		
 		this.vertexRep = vertexRep;
-//		this.coordinates = vertexRep.getCoords();
-		this.displacementX = 0.0f;
-		this.displacementY = 0.0f;
 		this.centerX = vertexRep.getCenterX();
 		this.centerY = vertexRep.getCenterY();
 		this.coords = new Coordinates();
-		
-		coords.setCoords(centerX,centerY, vertexRep.getWidth(), vertexRep.getHeight());
 		
 		
 		setVisibility(EVisibility.PICKABLE);
@@ -55,68 +47,39 @@ public class NodeElement extends GLElement implements IFRLayoutNode{
 			}
 		});
 	}
-
-	@Override
-	protected void renderImpl(GLGraphics g, float w, float h) {
-
-//		float x = vertexRep.getCenterX()-(vertexRep.getWidth()/2);
-//		float y = vertexRep.getCenterY()-(vertexRep.getHeight()/2);
-		
-		//vertexRep.getCoords().get(0).getFirst() is the upper left coordinate
-		
-
-		short width = vertexRep.getWidth();
-		short height = vertexRep.getHeight();
-		
-//		g.color("#F3C649").fillRoundedRect(0, 0, width, height,2);
-//		g.color("#F3C649").fillRoundedRect(0, 0, width, height, 2);
-		g.color(Color.LIGHT_GRAY).fillRoundedRect(0, 0, width+2, height+2,2);
-		g.color("#F2F2F2").fillRoundedRect(1, 1, width, height,2);
-		
-		g.drawText(vertexRep.getName(), 0, 0, width, 12);
-		
-	}
-
-	@Override
-	protected void renderPickImpl(GLGraphics g, float w, float h) {
-		renderImpl(g, w, h);
-	}
 	
-	public PathwayVertexRep getVertex() {
-		return vertexRep;
-	}
+	@Override
+	abstract protected void renderImpl(GLGraphics g, float w, float h);
 	
-
+	@Override
+	abstract protected void renderPickImpl(GLGraphics g, float w, float h);
+	
+	@Override
 	public double getCenterX() {
 		return this.centerX;
 	}
-	
+
+	@Override
 	public double getCenterY() {
 		return this.centerY;
 	}
-	
-	public void setCenter(double x, double y) {
-		this.centerX = x;
-		this.centerY = y;
+
+	@Override
+	public void setCenter(double centerX, double centerY) {
+		this.centerX = centerX;
+		this.centerY = centerY;
 		
-		coords.setCoords(x,y, vertexRep.getWidth(), vertexRep.getHeight());
+		coords.setCoords(centerX,centerY, vertexRep.getWidth(), vertexRep.getHeight());
 	}
-	
-	public void setDisplacement(double dispX, double dispY) {
-		this.displacementX = dispX;
-		this.displacementY = dispY;
+
+	@Override
+	public double getHeight() {
+		return this.vertexRep.getHeight();
 	}
-	
-	public double getDisplacementX() {
-		return displacementX;
-	}
-	
-	public double getDisplacementY() {
-		return displacementY;
-	}
-	
-	public Coordinates getCoords() {
-		return coords;
+
+	@Override
+	public double getWidth() {
+		return this.vertexRep.getWidth();
 	}
 	
 	public Point2D.Double getIntersectionPoint(Line2D intersectingLine) {
@@ -128,8 +91,7 @@ public class NodeElement extends GLElement implements IFRLayoutNode{
 		return null;
 	}
 	
-	
-	private Point2D.Double calcIntersectionPoint(Line2D line1, Line2D line2) {
+	private final Point2D.Double calcIntersectionPoint(Line2D line1, Line2D line2) {
 		double px = line1.getX1();
 		double py = line1.getY1();
 		double rx = line1.getX2()-px;
@@ -147,18 +109,9 @@ public class NodeElement extends GLElement implements IFRLayoutNode{
         double yIntersect = py + z * ry;
         
 
-        return new Point2D.Double(xIntersect, yIntersect);
-	      
+        return new Point2D.Double(xIntersect, yIntersect);	      
 	}
+	
 
-	@Override
-	public double getHeight() {
-		return this.getVertex().getHeight();
-	}
-
-	@Override
-	public double getWidth() {
-		return this.getVertex().getWidth();
-	}
 
 }

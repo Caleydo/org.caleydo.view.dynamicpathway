@@ -3,9 +3,6 @@ package org.caleydo.view.dynamicpathway.ui;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-
 import org.caleydo.core.view.opengl.layout2.GLElement;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutEdge;
@@ -18,18 +15,12 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 	private NodeElement targetNode;
 	private Line2D centerToCenterLine;
 	private Line2D edgeToRender;
-	private int magic;
-
-	private enum Direction {
-		TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT
-	}
 
 	public EdgeElement(DefaultEdge edge, NodeElement sourceNode, NodeElement targetNode) {
 		this.edge = edge;
 		this.sourceNode = sourceNode;
 		this.targetNode = targetNode;
-		
-		this.magic = 3;
+
 
 		double xSource = sourceNode.getCenterX();
 		double ySource = sourceNode.getCenterY();
@@ -43,8 +34,7 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {
-		
-		this.magic = 5;
+
 
 		calcDrawableEdge();
 
@@ -95,14 +85,6 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 	public void setCenterToCenterLine(Line2D centerToCenterLine) {
 		this.centerToCenterLine.setLine(centerToCenterLine);
 	}
-
-	@Override
-	public void setMagic(int magic) {
-		this.magic = magic;
-	}
-
-
-	
 
 
 }

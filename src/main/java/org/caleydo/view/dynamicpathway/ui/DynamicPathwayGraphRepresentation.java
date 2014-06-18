@@ -5,21 +5,17 @@
  ******************************************************************************/
 package org.caleydo.view.dynamicpathway.ui;
 
-import java.util.Collections;
+import gleem.linalg.Vec2f;
+
 import java.util.HashSet;
 import java.util.Set;
 
-import gleem.linalg.Vec2f;
-
-import org.caleydo.core.data.perspective.table.TablePerspective;
-import org.caleydo.core.view.opengl.layout2.GLElementContainer;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
-import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
+import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 import org.caleydo.view.dynamicpathway.layout.DynamicPathwayGraph;
-import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayout;
 import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayout2;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutEdge;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutGraph;
@@ -73,11 +69,28 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		clear();
 
 		for (PathwayVertexRep vrep : pathway.getCombinedVertexSet()) {
-			NodeElement node = new NodeElement(vrep);
+			
+			NodeElement node;
+			
+			if(vrep.getType() == EPathwayVertexType.compound) {
+				node = new NodeCompoundElement(vrep);
+			}
+			else if(vrep.getType() == EPathwayVertexType.group){
+				node = new NodeGroupElement(vrep);
+			}
+			else {
+				node = new NodeGeneElement(vrep);
+			}
+			
+//			if(vrep.getType() == EPathwayVertexType.group) {
+//				System.out.println(vrep.toString());
+//			}
+			
 			node.setLayoutData(true);
 			pathway.addVertexNodeMapEntry(vrep, node);
 			nodeSet.add((IFRLayoutNode) node);
 			add(node);
+
 		}
 
 		for (DefaultEdge e : pathway.getCombinedEdgeSet()) {
