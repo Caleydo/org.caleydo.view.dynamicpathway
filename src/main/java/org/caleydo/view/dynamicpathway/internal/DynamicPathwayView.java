@@ -26,7 +26,7 @@ import org.caleydo.core.view.opengl.util.draganddrop.DragAndDropController;
 import org.caleydo.datadomain.genetic.EGeneIDTypes;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.view.dynamicpathway.internal.serial.SerializedDynamicPathwayView;
-import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayout2;
+import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayout;
 import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayoutBuilder;
 import org.caleydo.view.dynamicpathway.ranking.RankingElement;
 import org.caleydo.view.dynamicpathway.ui.DynamicPathwayGraphRepresentation;
@@ -52,7 +52,7 @@ public class DynamicPathwayView extends AGLElementGLView implements IEventBasedS
 	private RankingElement rankingElement;
 
 	private DynamicPathwayGraphRepresentation currentPathwayElement;
-	private GLFruchtermanReingoldLayout2 pathwayLayout;
+	private GLFruchtermanReingoldLayout pathwayLayout;
 
 	private GLElementContainer root = new GLElementContainer(GLLayouts.LAYERS);
 

@@ -3,6 +3,7 @@ package org.caleydo.view.dynamicpathway.ui;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
+import org.caleydo.core.data.selection.SelectionType;
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLElement;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
@@ -18,41 +19,42 @@ public abstract class NodeElement extends GLElement implements IFRLayoutNode {
 	protected static final int FONT_SIZE = 12;
 	protected static final Color CONTOUR_COLOR  = Color.LIGHT_GRAY;
 	protected static final String FILLING_COLOR = "#F2F2F2";
+	protected static final Color SELECTION_CONTOUR_COLOR = SelectionType.SELECTION.getColor();
+	protected static final Color MOUSEROVER_CONTOUR_COLOR = SelectionType.MOUSE_OVER.getColor();
 	
 	protected PathwayVertexRep vertexRep;
+	
 	protected double centerX;
 	protected double centerY;
 	protected Coordinates coords;
 	
-	public NodeElement(PathwayVertexRep vertexRep) {		
+	protected Boolean isThisNodeSelected;
+	protected Boolean isMouseOver;
+//	protected static NodeElement currentSelectedNode = null;
+	
+	protected DynamicPathwayGraphRepresentation parentGraph;
+	
+	public NodeElement(PathwayVertexRep vertexRep, DynamicPathwayGraphRepresentation parentGraph) {		
 		this.vertexRep = vertexRep;
 		this.centerX = vertexRep.getCenterX();
 		this.centerY = vertexRep.getCenterY();
 		this.coords = new Coordinates();
+		this.isThisNodeSelected = false;
+		this.isMouseOver = false;
+		this.parentGraph = parentGraph;
 		
 		
-		setVisibility(EVisibility.PICKABLE);
+//		setVisibility(EVisibility.PICKABLE);
 		
-		onPick(new IPickingListener() {
 
-			@Override
-			public void pick(Pick pick) {
-				if (pick.getPickingMode() == PickingMode.CLICKED)
-					System.out.println("clicked!");
-				if (pick.getPickingMode() == PickingMode.MOUSE_OVER)
-					System.out.println("over!");
-				if (pick.getPickingMode() == PickingMode.MOUSE_OUT)
-					System.out.println("out!");
-
-			}
-		});
 	}
 	
 	@Override
 	abstract protected void renderImpl(GLGraphics g, float w, float h);
 	
-	@Override
-	abstract protected void renderPickImpl(GLGraphics g, float w, float h);
+	protected void renderPickImpl(GLGraphics g, float w, float h) {
+		super.renderPickImpl(g, w, h);
+	}
 	
 	@Override
 	public double getCenterX() {
@@ -89,6 +91,15 @@ public abstract class NodeElement extends GLElement implements IFRLayoutNode {
 			}
 		}	
 		return null;
+	}
+	
+	public void setIsNodeSelected(Boolean selection) {
+		this.isThisNodeSelected = selection;
+		repaint();
+	}
+	
+	public Boolean getIsNodeSelected() {
+		return this.isThisNodeSelected;
 	}
 	
 	private final Point2D.Double calcIntersectionPoint(Line2D line1, Line2D line2) {

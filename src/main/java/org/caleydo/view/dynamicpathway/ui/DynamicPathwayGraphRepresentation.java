@@ -16,14 +16,14 @@ import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 import org.caleydo.view.dynamicpathway.layout.DynamicPathwayGraph;
-import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayout2;
+import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayout;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutEdge;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutGraph;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
 import org.jgrapht.graph.DefaultEdge;
 
 /**
- * Container, which is defined by the graph layout {@link GLFruchtermanReingoldLayout2} contains the
+ * Container, which is defined by the graph layout {@link GLFruchtermanReingoldLayout} contains the
  * renderable Elements
  * 
  * @author Christiane Schwarzl
@@ -41,13 +41,18 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 */
 	private Set<IFRLayoutNode> nodeSet;
 	private Set<IFRLayoutEdge> edgeSet;
+	
+	/**
+	 * the currently selected node
+	 */
+	private NodeElement currentSelectedNode;
 
-	public DynamicPathwayGraphRepresentation(GLFruchtermanReingoldLayout2 layout) {
+	public DynamicPathwayGraphRepresentation(GLFruchtermanReingoldLayout layout) {
 
-		pathway = new DynamicPathwayGraph();
+		this.pathway = new DynamicPathwayGraph();
 
-		nodeSet = new HashSet<IFRLayoutNode>();
-		edgeSet = new HashSet<IFRLayoutEdge>();
+		this.nodeSet = new HashSet<IFRLayoutNode>();
+		this.edgeSet = new HashSet<IFRLayoutEdge>();
 
 		setLayout(layout);
 
@@ -73,18 +78,14 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			NodeElement node;
 			
 			if(vrep.getType() == EPathwayVertexType.compound) {
-				node = new NodeCompoundElement(vrep);
+				node = new NodeCompoundElement(vrep, this);
 			}
 			else if(vrep.getType() == EPathwayVertexType.group){
-				node = new NodeGroupElement(vrep);
+				node = new NodeGroupElement(vrep, this);
 			}
 			else {
-				node = new NodeGeneElement(vrep);
+				node = new NodeGeneElement(vrep, this);
 			}
-			
-//			if(vrep.getType() == EPathwayVertexType.group) {
-//				System.out.println(vrep.toString());
-//			}
 			
 			node.setLayoutData(true);
 			pathway.addVertexNodeMapEntry(vrep, node);
@@ -130,6 +131,14 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	@Override
 	public Set<IFRLayoutEdge> getEdgeSet() {
 		return this.edgeSet;
+	}
+
+	public NodeElement getCurrentSelectedNode() {
+		return currentSelectedNode;
+	}
+
+	public void setCurrentSelectedNode(NodeElement currentSelectedNode) {
+		this.currentSelectedNode = currentSelectedNode;
 	}
 
 }

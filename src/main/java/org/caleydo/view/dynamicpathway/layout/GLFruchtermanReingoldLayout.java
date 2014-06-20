@@ -16,7 +16,7 @@ import org.caleydo.core.view.opengl.layout2.layout.IGLLayoutElement;
  * @author Christiane Schwarzl
  * 
  */
-public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
+public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 
 	/**
 	 * current width*height
@@ -104,7 +104,7 @@ public class GLFruchtermanReingoldLayout2 implements IGLLayout2 {
 	 * @param attractionMultiplier
 	 *            {@link #attractionMultiplier}
 	 */
-	public GLFruchtermanReingoldLayout2(int maxIterations, double temperature, double cooldown,
+	public GLFruchtermanReingoldLayout(int maxIterations, double temperature, double cooldown,
 			double repulsionMultiplier, double attractionMultiplier, double nodeBoundsExtension) {
 
 		this.isTemperatureAndCooldownSetByUser = false;
