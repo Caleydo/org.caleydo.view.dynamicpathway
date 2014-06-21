@@ -39,11 +39,9 @@ import org.caleydo.view.entourage.ranking.PathwayRankings;
  * @author Christiane Schwarzl
  * 
  */
-public class DynamicPathwayView extends AGLElementGLView /*implements IEventBasedSelectionManagerUser*/ {
+public class DynamicPathwayView extends AGLElementGLView /* implements IEventBasedSelectionManagerUser */{
 	public static final String VIEW_TYPE = "org.caleydo.view.dynamicpathway";
 	public static final String VIEW_NAME = "DynamicPathway";
-
-	private static final Logger log = Logger.create(DynamicPathwayView.class);
 
 	private DynamicPathwayWindow activeWindow;
 	private DynamicPathwayWindow rankingWindow;
@@ -57,28 +55,26 @@ public class DynamicPathwayView extends AGLElementGLView /*implements IEventBase
 
 	private AnimatedGLElementContainer baseContainer = new AnimatedGLElementContainer(
 			new GLSizeRestrictiveFlowLayout(true, 10, GLPadding.ZERO));
-	
+
 	private final DragAndDropController dndController = new DragAndDropController(this);
-	
-//	private EventBasedSelectionManager vertexSelectionManager;
-	
+
+	// private EventBasedSelectionManager vertexSelectionManager;
+
 	private PathwayFilters.CommonVertexFilter filter = null;
-	
 
 	public DynamicPathwayView(IGLCanvas glCanvas, ViewFrustum viewFrustum) {
 		super(glCanvas, viewFrustum, VIEW_TYPE, VIEW_NAME);
-		
+
 		createPathwayGraphView();
 
 		createRankingSideBar();
 
-
 		root.add(baseContainer);
 		root.add(currentPathwayElement);
 
-//		vertexSelectionManager = new EventBasedSelectionManager(this,
-//				IDType.getIDType(EGeneIDTypes.PATHWAY_VERTEX_REP.name()));
-//		vertexSelectionManager.registerEventListeners();
+		// vertexSelectionManager = new EventBasedSelectionManager(this,
+		// IDType.getIDType(EGeneIDTypes.PATHWAY_VERTEX_REP.name()));
+		// vertexSelectionManager.registerEventListeners();
 	}
 
 	public EventListenerManager getEventListenerManager() {
@@ -99,46 +95,80 @@ public class DynamicPathwayView extends AGLElementGLView /*implements IEventBase
 		if (activeWindow != null && this.activeWindow != null && activeWindow != this.activeWindow) {
 			this.activeWindow.setActive(false);
 		}
-		
+
 		this.activeWindow = activeWindow;
 
 	}
-	
 
 	public DragAndDropController getDndController() {
 		return dndController;
 	}
 
 	// TODO: inlude Vertex highlighting
-//	@Override
-//	public void notifyOfSelectionChange(EventBasedSelectionManager selectionManager) {
-//		// TODO Auto-generated method stub
-//
-//	}
+	// @Override
+	// public void notifyOfSelectionChange(EventBasedSelectionManager selectionManager) {
+	// // TODO Auto-generated method stub
+	//
+	// }
 
+	/**
+	 * if a pathway in the list was selected, it is added to the representation, so this pathway graph is
+	 * drawn on the right side
+	 * 
+	 * @param pathway
+	 *            the pathway which was selected
+	 */
 	public void addPathway(PathwayGraph pathway) {
 		this.currentPathwayElement.addPathwayRep(pathway);
-		// relayout();
 	}
 
+	/**
+	 * check if this pathway is not already the main drawn pathway
+	 * so it isn't drawn again
+	 * 
+	 * @param pathway
+	 *            the pathway which should be checked
+	 * @return true if it's the same, that is already drawn, false otherwise
+	 */
 	public boolean isGraphPresented(PathwayGraph pathway) {
 		if (currentPathwayElement.getDynamicPathway().isGraphPresented(pathway))
 			return true;
 		return false;
 	}
-	
-	/** 
+
+	/**
+	 * filter the pathway list on the left leaves pathways which contain the given PathwayVertexRep
+	 * 
+	 * called when a vertex is selected @see
+	 * org.caleydo.view.dynamicpathway.ui.DynamicPathwayGraphRepresentation
+	 * #setOrResetSelectedNode(org.caleydo.view.dynamicpathway.ui.NodeElement)
+	 * 
+	 * @param currentContextVertexRep
+	 *            the currently selected node, after which the list is selected
+	 */
+	public void filterPathwayList(PathwayVertexRep currentContextVertexRep) {
+
+		filter = new PathwayFilters.CommonVertexFilter(currentContextVertexRep, false);
+		rankingElement.setFilter(filter);
+		rankingElement.relayout();
+	}
+
+	public void unfilterPathwayList() {
+		rankingElement.removeFilter(filter);
+		rankingElement.relayout();
+	}
+
+	/**
 	 * view for representing pathway graphs
 	 */
 	private void createPathwayGraphView() {
-		pathwayLayout = new GLFruchtermanReingoldLayoutBuilder()
-							.repulsionMultiplier(-1.0).attractionMultiplier(15.0).nodeBoundsExtension(4.0)
-							.buildLayout();
+		pathwayLayout = new GLFruchtermanReingoldLayoutBuilder().repulsionMultiplier(-1.0)
+				.attractionMultiplier(15.0).nodeBoundsExtension(4.0).buildLayout();
 
 		currentPathwayElement = new DynamicPathwayGraphRepresentation(pathwayLayout, this);
 		currentPathwayElement.setLocation(200, 0);
 	}
-	
+
 	/**
 	 * view for side bar, which contains a list of representable pathways
 	 */
@@ -175,20 +205,5 @@ public class DynamicPathwayView extends AGLElementGLView /*implements IEventBase
 
 		baseContainer.add(rankingWindow);
 	}
-	
-	public void filterPathwayList(PathwayVertexRep currentContextVertexRep) {
-		
-		filter = new PathwayFilters.CommonVertexFilter(currentContextVertexRep, false);
-		rankingElement.setFilter(filter);
-//		rankingElement.setRanking(new PathwayRankings.CommonVerticesRanking(currentContextVertexRep.getPathway()));
-		rankingElement.relayout();
-	}
-	
-	public void unfilterPathwayList() {
-		rankingElement.removeFilter(filter);
-//		rankingElement.setRanking(new PathwayRankings.CommonVerticesRanking(currentContextVertexRep.getPathway()));
-		rankingElement.relayout();
-	}
-	
 
 }

@@ -1,9 +1,17 @@
 package org.caleydo.view.dynamicpathway.ui;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.caleydo.core.util.base.ILabelProvider;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.core.view.opengl.picking.PickingMode;
+import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 
 public class NodeGeneElement extends NodeElement {
@@ -15,6 +23,8 @@ public class NodeGeneElement extends NodeElement {
 	public NodeGeneElement(PathwayVertexRep vertexRep, final DynamicPathwayGraphRepresentation parentGraph) {
 		
 		super(vertexRep, parentGraph);
+		
+		init();
 		
 		onPick(new IPickingListener() {
 
@@ -53,6 +63,36 @@ public class NodeGeneElement extends NodeElement {
 			}
 		});
 	}
+	
+	private void init() {
+		parentGraph.getView().addIDPickingTooltipListener(new ILabelProvider() {
+
+			@Override
+			public String getLabel() {
+				StringBuilder builder = new StringBuilder();
+				Set<PathwayVertex> vertices = new LinkedHashSet<>();
+				for (PathwayVertex vRep : vertexRep.getPathwayVertices()) {
+					vertices.add(vRep);
+				}
+				List<String> names = new ArrayList<>(vertices.size());
+				for (PathwayVertex v : vertices) {
+					names.add(v.getHumanReadableName());
+				}
+				Collections.sort(names);
+				for (int i = 0; i < names.size(); i++) {
+					builder.append(names.get(i));
+					if (i < names.size() - 1)
+						builder.append(", ");
+				}
+				return builder.toString();
+			}
+
+			@Override
+			public String getProviderName() {
+				return "Pathway Node";
+			}
+		}, "NodeElement", hashCode());
+	}
 
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {
@@ -71,7 +111,8 @@ public class NodeGeneElement extends NodeElement {
 		}
 		
 		g.color(FILLING_COLOR).fillRoundedRect(OUTER_BOUNDS, OUTER_BOUNDS, width, height,ROUND_EDGE_RADIUS);
-		g.drawText(vertexRep.getName(), 0, 0, width, FONT_SIZE);
+		g.drawText(vertexRep.getPathwayVertices().get(0).getHumanReadableName(), 0, 0, width, FONT_SIZE);
+		
 		
 		
 	}

@@ -2,17 +2,23 @@ package org.caleydo.view.dynamicpathway.ui;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.caleydo.core.data.selection.SelectionType;
+import org.caleydo.core.util.base.ILabelProvider;
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLElement;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
-import org.caleydo.core.view.opengl.picking.IPickingListener;
-import org.caleydo.core.view.opengl.picking.Pick;
-import org.caleydo.core.view.opengl.picking.PickingMode;
+import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
 import org.caleydo.view.dynamicpathway.util.Coordinates;
+import org.caleydo.view.enroute.EPickingType;
+
 
 public abstract class NodeElement extends GLElement implements IFRLayoutNode {
 	
@@ -48,6 +54,7 @@ public abstract class NodeElement extends GLElement implements IFRLayoutNode {
 		
 
 	}
+
 	
 	@Override
 	abstract protected void renderImpl(GLGraphics g, float w, float h);

@@ -247,7 +247,10 @@ public class RankingElement extends GLElementContainer {
 		PathwayRow row = (PathwayRow) table.getMyRanker(null).get(rank);
 	}
 
-	
+	/**
+	 * if a row was selected
+	 * @param newValue the selected pathway
+	 */
 	private void rowSelected(PathwayRow newValue) {
 
 		if (newValue == null)

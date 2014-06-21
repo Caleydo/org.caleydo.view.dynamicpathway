@@ -10,6 +10,8 @@ import gleem.linalg.Vec2f;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.media.opengl.GL2;
+
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
@@ -93,22 +95,27 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			}
 			else {
 				node = new NodeGeneElement(vrep, this);
+				
 			}
 			
 			node.setLayoutData(true);
+			
 			pathway.addVertexNodeMapEntry(vrep, node);
 			nodeSet.add((IFRLayoutNode) node);
 			add(node);
 
 		}
+		
+		GL2 gl = view.getParentGLCanvas().asGLAutoDrawAble().getGL().getGL2();
 
 		for (DefaultEdge e : pathway.getCombinedEdgeSet()) {
 			PathwayVertexRep vrepSource = pathway.getEdgeSource(e);
 			PathwayVertexRep vrepTarget = pathway.getEdgeTarget(e);
 			NodeElement nodeSource = pathway.getNodeOfVertex(vrepSource);
 			NodeElement nodeTarget = pathway.getNodeOfVertex(vrepTarget);
+	
 
-			EdgeElement edgeElement = new EdgeElement(e, nodeSource, nodeTarget);
+			EdgeElement edgeElement = new EdgeElement(e, nodeSource, nodeTarget, gl);
 			edgeElement.setLayoutData(false);
 
 			edgeSet.add((IFRLayoutEdge) edgeElement);
@@ -141,14 +148,14 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		return this.edgeSet;
 	}
 
-//	public NodeElement getCurrentSelectedNode() {
-//		return currentSelectedNode;
-//	}
-//
-//	public void setCurrentSelectedNode(NodeElement currentSelectedNode) {
-//		this.currentSelectedNode = currentSelectedNode;
-//	}
 	
+	/**
+	 * if a node (wrapper for PathwayVertexRep) is selected, it
+	 * is highlighted and the pathway list on the left is filtered by
+	 * pathways, which contain this element 
+	 * 
+	 * @param newSelectedNode
+	 */
 	public void setOrResetSelectedNode(NodeElement newSelectedNode) {
 		/** 
 		 * if nothing was selected, just set the new node
@@ -181,6 +188,10 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			view.filterPathwayList(currentSelectedNode.getVertexRep());
 		}
 		
+	}
+
+	public DynamicPathwayView getView() {
+		return view;
 	}
 
 }
