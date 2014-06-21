@@ -1,7 +1,6 @@
 package org.caleydo.view.dynamicpathway.ui;
 
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
-import org.caleydo.core.view.opengl.layout2.GLElement.EVisibility;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.core.view.opengl.picking.PickingMode;
@@ -17,8 +16,6 @@ public class NodeGeneElement extends NodeElement {
 		
 		super(vertexRep, parentGraph);
 		
-		setVisibility(EVisibility.PICKABLE);
-		
 		onPick(new IPickingListener() {
 
 			@Override
@@ -28,15 +25,10 @@ public class NodeGeneElement extends NodeElement {
 				 */
 				if (pick.getPickingMode() == PickingMode.CLICKED) {
 					
-					/**
-					 * if there was another node selected before, reset it
+					/** 
+					 * select or deselect current node
 					 */
-					if(parentGraph.getCurrentSelectedNode() != null) {
-						parentGraph.getCurrentSelectedNode().setIsNodeSelected(false);				
-					}
-					
-					isThisNodeSelected = true;
-					parentGraph.setCurrentSelectedNode(NodeGeneElement.this);
+					parentGraph.setOrResetSelectedNode(NodeGeneElement.this);
 					
 				}
 				/**
@@ -86,21 +78,10 @@ public class NodeGeneElement extends NodeElement {
 
 	@Override
 	protected void renderPickImpl(GLGraphics g, float w, float h) {
-		
-		short width = vertexRep.getWidth();
-		short height = vertexRep.getHeight();
-		
-		g.color(CONTOUR_COLOR).fillRoundedRect(0, 0, width+INNER_BOUNDS+10, height+INNER_BOUNDS+10,ROUND_EDGE_RADIUS);
-		
+	
 		super.renderPickImpl(g,w,h);
 		
-		
-//		short width = vertexRep.getWidth();
-//		short height = vertexRep.getHeight();
-//		
-//		renderImpl(g, w, h);
-//		
-//		g.color(SELECTION_CONTOUR_COLOR).fillRoundedRect(0, 0, width+INNER_BOUNDS, height+INNER_BOUNDS,ROUND_EDGE_RADIUS);
+
 	}
 	
 

@@ -15,7 +15,6 @@ public class NodeCompoundElement extends NodeElement {
 
 	public NodeCompoundElement(PathwayVertexRep vertexRep, final DynamicPathwayGraphRepresentation parentGraph) {
 		super(vertexRep, parentGraph);
-		setVisibility(EVisibility.PICKABLE);
 		
 		onPick(new IPickingListener() {
 
@@ -26,15 +25,10 @@ public class NodeCompoundElement extends NodeElement {
 				 */
 				if (pick.getPickingMode() == PickingMode.CLICKED) {
 					
-					/**
-					 * if there was another node selected before, reset it
+					/** 
+					 * select or deselect current node
 					 */
-					if(parentGraph.getCurrentSelectedNode() != null) {
-						parentGraph.getCurrentSelectedNode().setIsNodeSelected(false);				
-					}
-					
-					isThisNodeSelected = true;
-					parentGraph.setCurrentSelectedNode(NodeCompoundElement.this);
+					parentGraph.setOrResetSelectedNode(NodeCompoundElement.this);
 					
 				}
 				/**
@@ -67,10 +61,10 @@ public class NodeCompoundElement extends NodeElement {
 
 		
 		if(isThisNodeSelected) {
-			g.color(SELECTION_CONTOUR_COLOR).fillCircle(-1, -1, width+INNER_BOUNDS+1);;
+			g.color(SELECTION_CONTOUR_COLOR).fillCircle(-0.2f, -0.2f, width+INNER_BOUNDS+1+0.5f);;
 		}
 		else if(isMouseOver) {
-			g.color(MOUSEROVER_CONTOUR_COLOR).fillCircle(-1, -1, width+INNER_BOUNDS+1+0.5f);;
+			g.color(MOUSEROVER_CONTOUR_COLOR).fillCircle(-0.2f, -0.2f, width+INNER_BOUNDS+1+0.5f);;
 		}
 		else {
 			g.color(CONTOUR_COLOR).fillCircle(0, 0, width+INNER_BOUNDS);
@@ -85,7 +79,8 @@ public class NodeCompoundElement extends NodeElement {
 
 	@Override
 	protected void renderPickImpl(GLGraphics g, float w, float h) {
-		// TODO Auto-generated method stub
+
+		super.renderPickImpl(g,w,h);
 
 	}
 

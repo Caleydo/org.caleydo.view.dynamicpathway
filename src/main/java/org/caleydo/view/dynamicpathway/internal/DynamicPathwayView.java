@@ -5,10 +5,7 @@
  ******************************************************************************/
 package org.caleydo.view.dynamicpathway.internal;
 
-import org.caleydo.core.data.selection.EventBasedSelectionManager;
-import org.caleydo.core.data.selection.IEventBasedSelectionManagerUser;
 import org.caleydo.core.event.EventListenerManager;
-import org.caleydo.core.id.IDType;
 import org.caleydo.core.serialize.ASerializedView;
 import org.caleydo.core.util.logging.Logger;
 import org.caleydo.core.view.opengl.camera.ViewFrustum;
@@ -23,8 +20,8 @@ import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
 import org.caleydo.core.view.opengl.layout2.layout.GLPadding;
 import org.caleydo.core.view.opengl.layout2.layout.GLSizeRestrictiveFlowLayout;
 import org.caleydo.core.view.opengl.util.draganddrop.DragAndDropController;
-import org.caleydo.datadomain.genetic.EGeneIDTypes;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
+import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 import org.caleydo.view.dynamicpathway.internal.serial.SerializedDynamicPathwayView;
 import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayout;
 import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayoutBuilder;
@@ -33,6 +30,8 @@ import org.caleydo.view.dynamicpathway.ui.DynamicPathwayGraphRepresentation;
 import org.caleydo.view.entourage.SideWindow;
 import org.caleydo.view.entourage.SlideInElement;
 import org.caleydo.view.entourage.SlideInElement.ESlideInElementPosition;
+import org.caleydo.view.entourage.ranking.PathwayFilters;
+import org.caleydo.view.entourage.ranking.PathwayRankings;
 
 /**
  * view, which can represent different pathways combined into one pathway
@@ -40,7 +39,7 @@ import org.caleydo.view.entourage.SlideInElement.ESlideInElementPosition;
  * @author Christiane Schwarzl
  * 
  */
-public class DynamicPathwayView extends AGLElementGLView implements IEventBasedSelectionManagerUser {
+public class DynamicPathwayView extends AGLElementGLView /*implements IEventBasedSelectionManagerUser*/ {
 	public static final String VIEW_TYPE = "org.caleydo.view.dynamicpathway";
 	public static final String VIEW_NAME = "DynamicPathway";
 
@@ -61,8 +60,9 @@ public class DynamicPathwayView extends AGLElementGLView implements IEventBasedS
 	
 	private final DragAndDropController dndController = new DragAndDropController(this);
 	
-	private EventBasedSelectionManager vertexSelectionManager;
+//	private EventBasedSelectionManager vertexSelectionManager;
 	
+	private PathwayFilters.CommonVertexFilter filter = null;
 	
 
 	public DynamicPathwayView(IGLCanvas glCanvas, ViewFrustum viewFrustum) {
@@ -76,9 +76,9 @@ public class DynamicPathwayView extends AGLElementGLView implements IEventBasedS
 		root.add(baseContainer);
 		root.add(currentPathwayElement);
 
-		vertexSelectionManager = new EventBasedSelectionManager(this,
-				IDType.getIDType(EGeneIDTypes.PATHWAY_VERTEX_REP.name()));
-		vertexSelectionManager.registerEventListeners();
+//		vertexSelectionManager = new EventBasedSelectionManager(this,
+//				IDType.getIDType(EGeneIDTypes.PATHWAY_VERTEX_REP.name()));
+//		vertexSelectionManager.registerEventListeners();
 	}
 
 	public EventListenerManager getEventListenerManager() {
@@ -110,11 +110,11 @@ public class DynamicPathwayView extends AGLElementGLView implements IEventBasedS
 	}
 
 	// TODO: inlude Vertex highlighting
-	@Override
-	public void notifyOfSelectionChange(EventBasedSelectionManager selectionManager) {
-		// TODO Auto-generated method stub
-
-	}
+//	@Override
+//	public void notifyOfSelectionChange(EventBasedSelectionManager selectionManager) {
+//		// TODO Auto-generated method stub
+//
+//	}
 
 	public void addPathway(PathwayGraph pathway) {
 		this.currentPathwayElement.addPathwayRep(pathway);
@@ -135,7 +135,7 @@ public class DynamicPathwayView extends AGLElementGLView implements IEventBasedS
 							.repulsionMultiplier(-1.0).attractionMultiplier(15.0).nodeBoundsExtension(4.0)
 							.buildLayout();
 
-		currentPathwayElement = new DynamicPathwayGraphRepresentation(pathwayLayout);
+		currentPathwayElement = new DynamicPathwayGraphRepresentation(pathwayLayout, this);
 		currentPathwayElement.setLocation(200, 0);
 	}
 	
@@ -175,5 +175,20 @@ public class DynamicPathwayView extends AGLElementGLView implements IEventBasedS
 
 		baseContainer.add(rankingWindow);
 	}
+	
+	public void filterPathwayList(PathwayVertexRep currentContextVertexRep) {
+		
+		filter = new PathwayFilters.CommonVertexFilter(currentContextVertexRep, false);
+		rankingElement.setFilter(filter);
+//		rankingElement.setRanking(new PathwayRankings.CommonVerticesRanking(currentContextVertexRep.getPathway()));
+		rankingElement.relayout();
+	}
+	
+	public void unfilterPathwayList() {
+		rankingElement.removeFilter(filter);
+//		rankingElement.setRanking(new PathwayRankings.CommonVerticesRanking(currentContextVertexRep.getPathway()));
+		rankingElement.relayout();
+	}
+	
 
 }

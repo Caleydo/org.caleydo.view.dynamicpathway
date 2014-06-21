@@ -44,7 +44,7 @@ public abstract class NodeElement extends GLElement implements IFRLayoutNode {
 		this.parentGraph = parentGraph;
 		
 		
-//		setVisibility(EVisibility.PICKABLE);
+		setVisibility(EVisibility.PICKABLE);
 		
 
 	}
@@ -102,6 +102,11 @@ public abstract class NodeElement extends GLElement implements IFRLayoutNode {
 		return this.isThisNodeSelected;
 	}
 	
+
+	public PathwayVertexRep getVertexRep() {
+		return vertexRep;
+	}
+	
 	private final Point2D.Double calcIntersectionPoint(Line2D line1, Line2D line2) {
 		double px = line1.getX1();
 		double py = line1.getY1();
@@ -122,6 +127,7 @@ public abstract class NodeElement extends GLElement implements IFRLayoutNode {
 
         return new Point2D.Double(xIntersect, yIntersect);	      
 	}
+
 	
 
 

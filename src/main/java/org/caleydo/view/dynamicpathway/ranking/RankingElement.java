@@ -14,7 +14,6 @@ import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.canvas.GLMouseAdapter;
 import org.caleydo.core.view.opengl.canvas.GLThreadListenerWrapper;
 import org.caleydo.core.view.opengl.canvas.IGLMouseListener;
-import org.caleydo.core.view.opengl.canvas.IGLMouseListener.IMouseEvent;
 import org.caleydo.core.view.opengl.layout.Column.VAlign;
 import org.caleydo.core.view.opengl.layout2.GLElementContainer;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
@@ -23,8 +22,6 @@ import org.caleydo.core.view.opengl.layout2.basic.IScrollBar;
 import org.caleydo.core.view.opengl.layout2.basic.ScrollBarCompatibility;
 import org.caleydo.core.view.opengl.layout2.geom.Rect;
 import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
-import org.caleydo.core.view.opengl.layout2.layout.IGLLayout;
-import org.caleydo.core.view.opengl.layout2.layout.IGLLayout2;
 import org.caleydo.core.view.opengl.layout2.renderer.GLRenderers;
 import org.caleydo.core.view.opengl.layout2.util.GLElementWindow;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
@@ -32,19 +29,18 @@ import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.manager.EPathwayDatabaseType;
 import org.caleydo.datadomain.pathway.manager.PathwayManager;
-import org.caleydo.view.dynamicpathway.internal.DynamicPathwaySideWindow;
 import org.caleydo.view.dynamicpathway.internal.DynamicPathwayView;
-import org.caleydo.view.entourage.EEmbeddingID;
-import org.caleydo.view.entourage.GLEntourage;
 import org.caleydo.view.entourage.ranking.IPathwayFilter;
+import org.caleydo.view.entourage.ranking.IPathwayRanking;
 import org.caleydo.view.entourage.ranking.PathwayFilters;
 import org.caleydo.view.entourage.ranking.PathwayRow;
 import org.caleydo.vis.lineup.config.IRankTableUIConfig;
 import org.caleydo.vis.lineup.config.RankTableConfigBase;
 import org.caleydo.vis.lineup.config.RankTableUIConfigBase;
-import org.caleydo.vis.lineup.config.IRankTableUIConfig.EButtonBarPositionMode;
 import org.caleydo.vis.lineup.layout.RowHeightLayouts;
+import org.caleydo.vis.lineup.model.ARankColumnModel;
 import org.caleydo.vis.lineup.model.CategoricalRankColumnModel;
+import org.caleydo.vis.lineup.model.DoubleRankColumnModel;
 import org.caleydo.vis.lineup.model.IRow;
 import org.caleydo.vis.lineup.model.RankTableModel;
 import org.caleydo.vis.lineup.model.StringRankColumnModel;
@@ -162,9 +158,17 @@ public class RankingElement extends GLElementContainer {
 		applyFilter();
 	}
 	
+	public void removeFilter(IPathwayFilter filter) {
+		this.filter = filter;
+		if (pathwayNameColumn.isFiltered())
+			pathwayNameColumn.setFilter(null, false, false);
+		clearFilter();
+	}
+	
 	public boolean hasScoreColumn() {
 		return table.getColumns().size() > 2;
 	}
+	
 
 	
 	private void initTable(RankTableModel table) {
@@ -264,6 +268,17 @@ public class RankingElement extends GLElementContainer {
 		for (IRow row : data) {
 			// select all rows
 			dataMask.set(i++, filter.showPathway(((PathwayRow) row).getPathway()));
+		}
+		table.setDataMask(dataMask);
+	}
+	
+	private void clearFilter() {
+		List<IRow> data = table.getData();
+		BitSet dataMask = new BitSet(data.size());
+		int i = 0;
+		for (IRow row : data) {
+			// select all rows
+			dataMask.set(i++, true);
 		}
 		table.setDataMask(dataMask);
 	}

@@ -15,6 +15,7 @@ import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
+import org.caleydo.view.dynamicpathway.internal.DynamicPathwayView;
 import org.caleydo.view.dynamicpathway.layout.DynamicPathwayGraph;
 import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayout;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutEdge;
@@ -46,13 +47,20 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 * the currently selected node
 	 */
 	private NodeElement currentSelectedNode;
+	
+	/**
+	 * the view that hold the pathway list & the pathway representation
+	 */
+	private DynamicPathwayView view;
 
-	public DynamicPathwayGraphRepresentation(GLFruchtermanReingoldLayout layout) {
+	public DynamicPathwayGraphRepresentation(GLFruchtermanReingoldLayout layout, DynamicPathwayView view) {
 
 		this.pathway = new DynamicPathwayGraph();
 
 		this.nodeSet = new HashSet<IFRLayoutNode>();
 		this.edgeSet = new HashSet<IFRLayoutEdge>();
+		
+		this.view = view;
 
 		setLayout(layout);
 
@@ -133,12 +141,46 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		return this.edgeSet;
 	}
 
-	public NodeElement getCurrentSelectedNode() {
-		return currentSelectedNode;
-	}
+//	public NodeElement getCurrentSelectedNode() {
+//		return currentSelectedNode;
+//	}
+//
+//	public void setCurrentSelectedNode(NodeElement currentSelectedNode) {
+//		this.currentSelectedNode = currentSelectedNode;
+//	}
+	
+	public void setOrResetSelectedNode(NodeElement newSelectedNode) {
+		/** 
+		 * if nothing was selected, just set the new node
+		 */
+		if(currentSelectedNode == null) {
+			currentSelectedNode = newSelectedNode;
+			currentSelectedNode.setIsNodeSelected(true);
+			
+			view.filterPathwayList(currentSelectedNode.getVertexRep());
+		}
+		/**
+		 * if the node was already selected, deselect it
+		 */
+		else if(currentSelectedNode == newSelectedNode) {
+			currentSelectedNode.setIsNodeSelected(false);
+			currentSelectedNode = null;
+			
+			view.unfilterPathwayList();
 
-	public void setCurrentSelectedNode(NodeElement currentSelectedNode) {
-		this.currentSelectedNode = currentSelectedNode;
+		}
+		/**
+		 * if another node was selected before, deselect it
+		 * and selected the new node
+		 */
+		else {
+			currentSelectedNode.setIsNodeSelected(false);
+			currentSelectedNode = newSelectedNode;
+			currentSelectedNode.setIsNodeSelected(true);
+			
+			view.filterPathwayList(currentSelectedNode.getVertexRep());
+		}
+		
 	}
 
 }
