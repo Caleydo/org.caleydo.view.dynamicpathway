@@ -163,7 +163,7 @@ public class DynamicPathwayView extends AGLElementGLView /* implements IEventBas
 	 */
 	private void createPathwayGraphView() {
 		pathwayLayout = new GLFruchtermanReingoldLayoutBuilder().repulsionMultiplier(-1.0)
-				.attractionMultiplier(15.0).nodeBoundsExtension(4.0).buildLayout();
+				.attractionMultiplier(18.0).nodeBoundsExtension(4.0).buildLayout();
 
 		currentPathwayElement = new DynamicPathwayGraphRepresentation(pathwayLayout, this);
 		currentPathwayElement.setLocation(200, 0);

@@ -9,6 +9,7 @@ import gleem.linalg.Vec2f;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Vector;
 
 import javax.media.opengl.GL2;
 
@@ -26,8 +27,8 @@ import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
 import org.jgrapht.graph.DefaultEdge;
 
 /**
- * Container, which is defined by the graph layout {@link GLFruchtermanReingoldLayout} contains the
- * renderable Elements
+ * Container, which is defined by the graph layout {@link GLFruchtermanReingoldLayout} contains the renderable
+ * Elements
  * 
  * @author Christiane Schwarzl
  * 
@@ -44,12 +45,12 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 */
 	private Set<IFRLayoutNode> nodeSet;
 	private Set<IFRLayoutEdge> edgeSet;
-	
+
 	/**
 	 * the currently selected node
 	 */
 	private NodeElement currentSelectedNode;
-	
+
 	/**
 	 * the view that hold the pathway list & the pathway representation
 	 */
@@ -61,7 +62,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		this.nodeSet = new HashSet<IFRLayoutNode>();
 		this.edgeSet = new HashSet<IFRLayoutEdge>();
-		
+
 		this.view = view;
 
 		setLayout(layout);
@@ -76,7 +77,18 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 * 
 	 */
 	public void addPathwayRep(PathwayGraph graph) {
-		pathway.addFocusOrKontextPathway(graph);
+
+		/**
+		 * if a node is selected & another pathway was selected, this has to be a kontextpathway
+		 */
+		Boolean addKontextPathway = (pathway.isFocusGraphSet() && (currentSelectedNode != null)) ? true
+				: false;
+
+		pathway.addFocusOrKontextPathway(graph, addKontextPathway, currentSelectedNode);
+		if (addKontextPathway) {
+			currentSelectedNode = null;
+			view.unfilterPathwayList();
+		}
 
 		nodeSet.clear();
 		edgeSet.clear();
@@ -84,28 +96,37 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		clear();
 
 		for (PathwayVertexRep vrep : pathway.getCombinedVertexSet()) {
-			
+
 			NodeElement node;
-			
-			if(vrep.getType() == EPathwayVertexType.compound) {
+
+			if (vrep.getType() == EPathwayVertexType.compound) {
 				node = new NodeCompoundElement(vrep, this);
-			}
-			else if(vrep.getType() == EPathwayVertexType.group){
+			} else if (vrep.getType() == EPathwayVertexType.group) {
 				node = new NodeGroupElement(vrep, this);
-			}
-			else {
+			} else {
 				node = new NodeGeneElement(vrep, this);
-				
+
 			}
-			
+
+			/**
+			 * so the layouting algorithm can extinguish, if it's a node or an edge
+			 */
 			node.setLayoutData(true);
-			
+
+			/**
+			 * needed for the edge, because edges just get you the vertexRep of the source & target vertices,
+			 * but not the element, which contain the new position
+			 */
 			pathway.addVertexNodeMapEntry(vrep, node);
+			
+			/**
+			 * needed for the layouting algorithm
+			 */
 			nodeSet.add((IFRLayoutNode) node);
 			add(node);
 
 		}
-		
+
 		GL2 gl = view.getParentGLCanvas().asGLAutoDrawAble().getGL().getGL2();
 
 		for (DefaultEdge e : pathway.getCombinedEdgeSet()) {
@@ -113,12 +134,19 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			PathwayVertexRep vrepTarget = pathway.getEdgeTarget(e);
 			NodeElement nodeSource = pathway.getNodeOfVertex(vrepSource);
 			NodeElement nodeTarget = pathway.getNodeOfVertex(vrepTarget);
-	
 
 			EdgeElement edgeElement = new EdgeElement(e, nodeSource, nodeTarget, gl);
+			
+			/**
+			 * so the layouting algorithm can extinguish, if it's a node or an edge
+			 */
 			edgeElement.setLayoutData(false);
 
+			/**
+			 * needed for the layouting algorithm
+			 */
 			edgeSet.add((IFRLayoutEdge) edgeElement);
+			
 			add(edgeElement);
 		}
 
@@ -148,46 +176,43 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		return this.edgeSet;
 	}
 
-	
 	/**
-	 * if a node (wrapper for PathwayVertexRep) is selected, it
-	 * is highlighted and the pathway list on the left is filtered by
-	 * pathways, which contain this element 
+	 * if a node (wrapper for PathwayVertexRep) is selected, it is highlighted and the pathway list on the
+	 * left is filtered by pathways, which contain this element
 	 * 
 	 * @param newSelectedNode
 	 */
 	public void setOrResetSelectedNode(NodeElement newSelectedNode) {
-		/** 
+		/**
 		 * if nothing was selected, just set the new node
 		 */
-		if(currentSelectedNode == null) {
+		if (currentSelectedNode == null) {
 			currentSelectedNode = newSelectedNode;
 			currentSelectedNode.setIsNodeSelected(true);
-			
+
 			view.filterPathwayList(currentSelectedNode.getVertexRep());
 		}
 		/**
 		 * if the node was already selected, deselect it
 		 */
-		else if(currentSelectedNode == newSelectedNode) {
+		else if (currentSelectedNode == newSelectedNode) {
 			currentSelectedNode.setIsNodeSelected(false);
 			currentSelectedNode = null;
-			
+
 			view.unfilterPathwayList();
 
 		}
 		/**
-		 * if another node was selected before, deselect it
-		 * and selected the new node
+		 * if another node was selected before, deselect it and selected the new node
 		 */
 		else {
 			currentSelectedNode.setIsNodeSelected(false);
 			currentSelectedNode = newSelectedNode;
 			currentSelectedNode.setIsNodeSelected(true);
-			
+
 			view.filterPathwayList(currentSelectedNode.getVertexRep());
 		}
-		
+
 	}
 
 	public DynamicPathwayView getView() {
