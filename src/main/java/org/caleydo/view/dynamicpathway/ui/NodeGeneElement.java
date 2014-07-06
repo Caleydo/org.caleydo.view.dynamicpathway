@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.caleydo.core.util.base.ILabelProvider;
+import org.caleydo.core.util.base.ILabeled;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
+import org.caleydo.core.view.opengl.layout2.IGLElementContext;
+import org.caleydo.core.view.opengl.picking.AdvancedPick;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.core.view.opengl.picking.PickingMode;
@@ -23,8 +26,7 @@ public class NodeGeneElement extends NodeElement {
 	public NodeGeneElement(PathwayVertexRep vertexRep, final DynamicPathwayGraphRepresentation parentGraph) {
 		
 		super(vertexRep, parentGraph);
-		
-		init();
+	
 		
 		onPick(new IPickingListener() {
 
@@ -33,7 +35,14 @@ public class NodeGeneElement extends NodeElement {
 				/**
 				 * if the user clicked on the node
 				 */
+				AdvancedPick p = (AdvancedPick)pick;
+				
 				if (pick.getPickingMode() == PickingMode.CLICKED) {
+					
+					if(p.isCtrlDown()) {
+						//TODO: filter
+						System.out.println("jasdlkdsjlsakdjsak");
+					}
 					
 					/** 
 					 * select or deselect current node
@@ -55,6 +64,8 @@ public class NodeGeneElement extends NodeElement {
 					isMouseOver = false;
 				}
 				
+				
+				
 				/** 
 				 * renderImpl is called
 				 */
@@ -63,10 +74,13 @@ public class NodeGeneElement extends NodeElement {
 			}
 		});
 	}
-	
-	private void init() {
-		parentGraph.getView().addIDPickingTooltipListener(new ILabelProvider() {
-
+	@Override
+	protected void init(IGLElementContext context) {
+		// TODO Auto-generated method stub
+		super.init(context);
+		
+		// create a tooltip listener to render the tooltip of this element
+		this.onPick(context.getSWTLayer().createTooltip(new ILabeled() {
 			@Override
 			public String getLabel() {
 				StringBuilder builder = new StringBuilder();
@@ -85,13 +99,9 @@ public class NodeGeneElement extends NodeElement {
 						builder.append(", ");
 				}
 				return builder.toString();
+//				return NodeGeneElement.this.vertexRep.getName();
 			}
-
-			@Override
-			public String getProviderName() {
-				return "Pathway Node";
-			}
-		}, "NodeElement", hashCode());
+		}));
 	}
 
 	@Override
@@ -112,7 +122,6 @@ public class NodeGeneElement extends NodeElement {
 		
 		g.color(FILLING_COLOR).fillRoundedRect(OUTER_BOUNDS, OUTER_BOUNDS, width, height,ROUND_EDGE_RADIUS);
 		g.drawText(vertexRep.getPathwayVertices().get(0).getHumanReadableName(), 0, 0, width, FONT_SIZE);
-		
 		
 		
 	}

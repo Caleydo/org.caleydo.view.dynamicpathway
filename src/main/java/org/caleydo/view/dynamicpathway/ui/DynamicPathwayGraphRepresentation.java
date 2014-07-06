@@ -9,7 +9,6 @@ import gleem.linalg.Vec2f;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Vector;
 
 import javax.media.opengl.GL2;
 

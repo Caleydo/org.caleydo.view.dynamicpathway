@@ -12,6 +12,7 @@ import org.caleydo.core.data.selection.SelectionType;
 import org.caleydo.core.util.base.ILabelProvider;
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLElement;
+import org.caleydo.core.view.opengl.layout2.GLElementContainer;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
@@ -20,7 +21,7 @@ import org.caleydo.view.dynamicpathway.util.Coordinates;
 import org.caleydo.view.enroute.EPickingType;
 
 
-public abstract class NodeElement extends GLElement implements IFRLayoutNode {
+public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	
 	protected static final int FONT_SIZE = 12;
 	protected static final Color CONTOUR_COLOR  = Color.LIGHT_GRAY;
@@ -56,9 +57,7 @@ public abstract class NodeElement extends GLElement implements IFRLayoutNode {
 	}
 
 	
-	@Override
-	abstract protected void renderImpl(GLGraphics g, float w, float h);
-	
+
 	protected void renderPickImpl(GLGraphics g, float w, float h) {
 		super.renderPickImpl(g, w, h);
 	}

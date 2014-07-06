@@ -18,19 +18,14 @@ import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
 import org.jgrapht.graph.DefaultEdge;
 
 public class EdgeElement extends GLElement implements IFRLayoutEdge {
-	private static final double ARROW_WIDTH = 10.0;
-	private static final double ARROW_HEIGHT = 15.0;
-	
-	private static final float[] ARROW_FILL_COLOR = { 0, 0, 0, 1 };
-	private static final float[] ARROW_CONTOUR_COLOR = { 0, 0, 0, 1 };
-	private static final float ARROW_CONTOUR_WIDTH = 1.0f; 
-	
+	private static final float ARROW_SIZE = 5.0f;
+
 	private DefaultEdge edge;
 	private NodeElement sourceNode;
 	private NodeElement targetNode;
 	private Line2D centerToCenterLine;
 	private Line2D edgeToRender;
-	
+
 	private GL2 gl;
 
 	public EdgeElement(DefaultEdge edge, NodeElement sourceNode, NodeElement targetNode, GL2 gl) {
@@ -57,47 +52,8 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		g.drawLine((float) edgeToRender.getX1(), (float) edgeToRender.getY1(), (float) edgeToRender.getX2(),
 				(float) edgeToRender.getY2());
 
-		Point2D peakPoint = new Point2D.Double(edgeToRender.getX2(), edgeToRender.getY2());
-		Point2D leftPoint = new Point2D.Double(peakPoint.getX() - ARROW_WIDTH, peakPoint.getY()
-				- ARROW_HEIGHT);
-		Point2D rightPoint = new Point2D.Double(peakPoint.getX() + ARROW_WIDTH, peakPoint.getY()
-				+ ARROW_HEIGHT);
-		
-//		Vec3f rightLeft = new Vec3f((float) (leftPoint.getX() - rightPoint.getX()),
-//				(float) (leftPoint.getY() - rightPoint.getY()), 1.0f);
-//		Vec3f leftPeak = new Vec3f((float) (peakPoint.getX() - leftPoint.getX()),
-//				(float) (peakPoint.getY() - leftPoint.getY()), 1.0f);
-//		Vec3f peakRight = new Vec3f((float) (rightPoint.getX() - peakPoint.getX()),
-//				(float) (rightPoint.getY() - peakPoint.getY()), 1.0f);
-		
-//		gl.glPushAttrib(GL.GL_COLOR_BUFFER_BIT | GL2.GL_LINE_BIT);
-//
-//		gl.glColor4fv(ARROW_FILL_COLOR, 0);
-//		gl.glBegin(GL.GL_TRIANGLES);
-//		gl.glVertex3f(rightLeft.x(), rightLeft.y(), rightLeft.z());
-//		gl.glVertex3f(leftPeak.x(), leftPeak.y(), leftPeak.z());
-//		gl.glVertex3f(peakRight.x(), peakRight.y(), peakRight.z());
-//		gl.glEnd();
-//		
-//		gl.glColor4fv(ARROW_CONTOUR_COLOR, 0);
-//		gl.glLineWidth(ARROW_CONTOUR_WIDTH);
-//		gl.glBegin(GL.GL_LINE_LOOP);
-//		gl.glVertex3f(rightLeft.x(), rightLeft.y(), rightLeft.z());
-//		gl.glVertex3f(leftPeak.x(), leftPeak.y(), leftPeak.z());
-//		gl.glVertex3f(peakRight.x(), peakRight.y(), peakRight.z());
-//		gl.glEnd();
-//		gl.glPopAttrib();
 
-//		ColoredVec2f rightLeft = new ColoredVec2f(new Vec2f((float) (leftPoint.getX() - rightPoint.getX()),
-//				(float) (leftPoint.getY() - rightPoint.getY())), Color.BLACK);
-//		
-//		ColoredVec2f leftPeak = new ColoredVec2f(new Vec2f((float) (peakPoint.getX() - leftPoint.getX()),
-//				(float) (peakPoint.getY() - leftPoint.getY())), Color.BLACK);
-//		
-//		ColoredVec2f peakRight = new ColoredVec2f(new Vec2f((float) (rightPoint.getX() - peakPoint.getX()),
-//				(float) (rightPoint.getY() - peakPoint.getY())), Color.BLACK);
-//
-//		g.fillPolygon(rightLeft, leftPeak, peakRight);
+		drawArrowHead(g);
 
 	}
 
@@ -118,6 +74,23 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		} else {
 			edgeToRender.setLine(sourcePoint, targetPoint);
 		}
+	}
+	
+	private void drawArrowHead(GLGraphics g) {
+		Vec2f source = new Vec2f((float) edgeToRender.getX1(), (float) edgeToRender.getY1());
+		Vec2f target = new Vec2f((float) edgeToRender.getX2(), (float) edgeToRender.getY2());
+		
+		float dx = target.x() - source.x();
+		float dy = target.y() - source.y();
+		
+		float length = (float)Math.sqrt(dx*dx + dy*dy);
+		float unitDx = dx/length;
+		float unitDy = dy/length;
+		
+		Vec2f arrowPoint1 = new Vec2f(target.x() - unitDx * ARROW_SIZE - unitDy * ARROW_SIZE, target.y() - unitDy * ARROW_SIZE + unitDx * ARROW_SIZE);
+		Vec2f arrowPoint2 = new Vec2f(target.x() - unitDx * ARROW_SIZE + unitDy * ARROW_SIZE, target.y() - unitDy * ARROW_SIZE - unitDx * ARROW_SIZE);
+		
+		g.color(Color.BLACK).fillPolygon(target, arrowPoint1, arrowPoint2);
 	}
 
 	@Override

@@ -11,6 +11,7 @@ import org.caleydo.core.util.logging.Logger;
 import org.caleydo.core.view.opengl.camera.ViewFrustum;
 import org.caleydo.core.view.opengl.canvas.IGLCanvas;
 import org.caleydo.core.view.opengl.layout2.AGLElementGLView;
+import org.caleydo.core.view.opengl.layout2.AGLElementView;
 import org.caleydo.core.view.opengl.layout2.GLElement;
 import org.caleydo.core.view.opengl.layout2.GLElementContainer;
 import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
@@ -39,7 +40,7 @@ import org.caleydo.view.entourage.ranking.PathwayRankings;
  * @author Christiane Schwarzl
  * 
  */
-public class DynamicPathwayView extends AGLElementGLView /* implements IEventBasedSelectionManagerUser */{
+public class DynamicPathwayView extends AGLElementView /* implements IEventBasedSelectionManagerUser */{
 	public static final String VIEW_TYPE = "org.caleydo.view.dynamicpathway";
 	public static final String VIEW_NAME = "DynamicPathway";
 
@@ -56,14 +57,14 @@ public class DynamicPathwayView extends AGLElementGLView /* implements IEventBas
 	private AnimatedGLElementContainer baseContainer = new AnimatedGLElementContainer(
 			new GLSizeRestrictiveFlowLayout(true, 10, GLPadding.ZERO));
 
-	private final DragAndDropController dndController = new DragAndDropController(this);
+//	private final DragAndDropController dndController = new DragAndDropController(this);
 
 	// private EventBasedSelectionManager vertexSelectionManager;
 
 	private PathwayFilters.CommonVertexFilter filter = null;
 
 	public DynamicPathwayView(IGLCanvas glCanvas, ViewFrustum viewFrustum) {
-		super(glCanvas, viewFrustum, VIEW_TYPE, VIEW_NAME);
+		super(glCanvas, VIEW_TYPE, VIEW_NAME);
 
 		createPathwayGraphView();
 
@@ -99,10 +100,10 @@ public class DynamicPathwayView extends AGLElementGLView /* implements IEventBas
 		this.activeWindow = activeWindow;
 
 	}
-
-	public DragAndDropController getDndController() {
-		return dndController;
-	}
+//
+//	public DragAndDropController getDndController() {
+//		return dndController;
+//	}
 
 	// TODO: inlude Vertex highlighting
 	// @Override
