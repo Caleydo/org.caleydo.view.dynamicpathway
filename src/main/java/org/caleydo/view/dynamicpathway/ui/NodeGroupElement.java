@@ -1,5 +1,8 @@
 package org.caleydo.view.dynamicpathway.ui;
 
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+
 import org.caleydo.core.view.opengl.layout2.GLElementContainer;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
@@ -24,7 +27,7 @@ public class NodeGroupElement extends NodeElement {
 		groupRep = (PathwayVertexGroupRep) vrep;
 		groupSize = groupRep.getGroupedVertexReps().size();
 
-		System.out.println(groupSize);
+//		System.out.println(groupSize);
 		
 		short width = vertexRep.getWidth();
 		short height = vertexRep.getHeight();		
@@ -71,6 +74,7 @@ public class NodeGroupElement extends NodeElement {
 
 	}
 	
+
 
 	@Override
 	protected void renderPickImpl(GLGraphics g, float w, float h) {

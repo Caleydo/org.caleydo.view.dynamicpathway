@@ -198,7 +198,7 @@ public class RankingElement extends GLElementContainer {
 		for (PathwayGraph g : PathwayManager.get().getAllItems()) {
 			//TODO: just kegg??
 			String name = g.getType().getName();
-			System.out.println(name);
+			
 			
 			if(name.equalsIgnoreCase("KEGG"))
 				data.add(new PathwayRow(g));

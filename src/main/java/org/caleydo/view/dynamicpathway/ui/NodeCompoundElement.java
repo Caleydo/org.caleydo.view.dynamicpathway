@@ -7,8 +7,7 @@ import org.caleydo.core.view.opengl.picking.PickingMode;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 
 public class NodeCompoundElement extends NodeElement {
-	
-	private static final int INNER_BOUNDS = 1;
+	protected static final int INNER_BOUNDS = 1;
 	private static final int FONT_SIZE_MULTIPLIER = 8;
 	private static final int TEXT_X_POS = -20;
 	private static final int TEXT_Y_POS = 8;
@@ -83,5 +82,7 @@ public class NodeCompoundElement extends NodeElement {
 		super.renderPickImpl(g,w,h);
 
 	}
+	
+	
 
 }

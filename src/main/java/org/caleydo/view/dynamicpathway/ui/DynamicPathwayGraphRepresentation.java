@@ -12,9 +12,11 @@ import java.util.Set;
 
 import org.caleydo.core.data.selection.EventBasedSelectionManager;
 import org.caleydo.core.data.selection.IEventBasedSelectionManagerUser;
+import org.caleydo.core.data.selection.SelectionType;
 import org.caleydo.core.id.IDType;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
+import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.datadomain.genetic.EGeneIDTypes;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
@@ -60,7 +62,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	private DynamicPathwayView view;
 	
 	
-	private EventBasedSelectionManager geneSelectionManager;
+	private EventBasedSelectionManager vertexSelectionManager;
 
 	public DynamicPathwayGraphRepresentation(GLFruchtermanReingoldLayout layout, DynamicPathwayView view) {
 
@@ -71,8 +73,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		this.view = view;
 		
-		this.geneSelectionManager = new EventBasedSelectionManager(this, IDType.getIDType(EGeneIDTypes.PATHWAY_VERTEX.name()));
-
+		this.vertexSelectionManager = new EventBasedSelectionManager(this, IDType.getIDType(EGeneIDTypes.PATHWAY_VERTEX_REP.name()));
+		this.vertexSelectionManager.registerEventListeners();
 
 		setLayout(layout);
 
@@ -226,13 +228,46 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	public DynamicPathwayView getView() {
 		return view;
 	}
+	
+	public void onSelect(PathwayVertexRep vertexRep, NodeElement node, Pick pick) {
+		switch (pick.getPickingMode()) {
+
+		case MOUSE_OVER:
+			vertexSelectionManager.clearSelection(SelectionType.MOUSE_OVER);
+			vertexSelectionManager.addToType(SelectionType.MOUSE_OVER, vertexRep.getID());
+			break;
+
+		case MOUSE_OUT:
+			vertexSelectionManager.removeFromType(SelectionType.MOUSE_OVER, vertexRep.getID());
+			break;
+
+		case CLICKED:
+			vertexSelectionManager.clearSelection(SelectionType.SELECTION);
+			vertexSelectionManager.addToType(SelectionType.SELECTION, vertexRep.getID());
+			break;
+
+		default:
+			// Do not trigger a selection update for other picking modes
+			return;
+		}
+		
+		vertexSelectionManager.triggerSelectionUpdateEvent();
+		repaint();
+	}
 
 	@Override
 	public void notifyOfSelectionChange(EventBasedSelectionManager selectionManager) {
 		// TODO Auto-generated method stub
 		
-		System.out.println("wahhhhhh");
+		repaint();
 		
+	}
+
+	@Override
+	protected void takeDown() {
+		vertexSelectionManager.unregisterEventListeners();
+		vertexSelectionManager = null;
+		super.takeDown();
 	}
 
 }

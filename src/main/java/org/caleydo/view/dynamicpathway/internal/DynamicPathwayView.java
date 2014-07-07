@@ -177,7 +177,7 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 		rankingWindow = new DynamicPathwaySideWindow("Pathways", this, SideWindow.SLIDE_LEFT_OUT);
 		rankingElement = new RankingElement(this);
 		rankingWindow.setContent(rankingElement);
-		rankingWindow.setLocation(0, 0);
+		rankingWindow.setLocation(0, Float.NaN);
 		rankingWindow.setSize(200, Float.NaN);
 
 		SlideInElement slideInElement = new SlideInElement(rankingWindow, ESlideInElementPosition.RIGHT);

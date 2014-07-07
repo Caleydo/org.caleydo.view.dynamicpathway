@@ -23,7 +23,7 @@ public class NodeGeneElement extends NodeElement {
 	private static final int OUTER_BOUNDS = 1;
 	private static final int ROUND_EDGE_RADIUS = 2;	
 
-	public NodeGeneElement(PathwayVertexRep vertexRep, final DynamicPathwayGraphRepresentation parentGraph) {
+	public NodeGeneElement(final PathwayVertexRep vertexRep, final DynamicPathwayGraphRepresentation parentGraph) {
 		
 		super(vertexRep, parentGraph);
 	
@@ -32,10 +32,13 @@ public class NodeGeneElement extends NodeElement {
 
 			@Override
 			public void pick(Pick pick) {
+//				parentGraph.onSelect(displayedVertex, NodeGeneElement.this, pick);
+				
 				/**
 				 * if the user clicked on the node
 				 */
 				AdvancedPick p = (AdvancedPick)pick;
+				
 				
 				if (pick.getPickingMode() == PickingMode.CLICKED) {
 					
@@ -46,7 +49,8 @@ public class NodeGeneElement extends NodeElement {
 					
 					/** 
 					 * select or deselect current node
-					 */
+					 */					
+					parentGraph.onSelect(vertexRep, NodeGeneElement.this, pick);
 					parentGraph.setOrResetSelectedNode(NodeGeneElement.this);
 					
 				}

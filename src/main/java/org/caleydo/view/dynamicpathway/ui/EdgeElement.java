@@ -8,6 +8,7 @@ import java.awt.geom.Point2D;
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLElement;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
+import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutEdge;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
 import org.jgrapht.graph.DefaultEdge;
@@ -20,7 +21,6 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 	private NodeElement targetNode;
 	private Line2D centerToCenterLine;
 	private Line2D edgeToRender;
-
 
 	public EdgeElement(DefaultEdge edge, NodeElement sourceNode, NodeElement targetNode) {
 		this.edge = edge;
@@ -45,7 +45,6 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		g.drawLine((float) edgeToRender.getX1(), (float) edgeToRender.getY1(), (float) edgeToRender.getX2(),
 				(float) edgeToRender.getY2());
 
-
 		drawArrowHead(g);
 
 	}
@@ -58,9 +57,19 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		double yTarget = targetNode.getCenterY();
 
 		centerToCenterLine.setLine(xSource, ySource, xTarget, yTarget);
-
-		Point2D sourcePoint = sourceNode.getIntersectionPoint(centerToCenterLine);
-		Point2D targetPoint = targetNode.getIntersectionPoint(centerToCenterLine);
+		
+		Point2D sourcePoint;
+		Point2D targetPoint;
+		
+		if (sourceNode.getVertexRep().getType() == EPathwayVertexType.compound)
+			sourcePoint = sourceNode.getIntersectionPointWithNodeBound(sourceNode.getCenter(), sourceNode.getWidth()+2.5);
+		else 
+			sourcePoint = sourceNode.getIntersectionPointWithNodeBound(centerToCenterLine);
+		
+		if (targetNode.getVertexRep().getType() == EPathwayVertexType.compound)
+			targetPoint = targetNode.getIntersectionPointWithNodeBound(targetNode.getCenter(), targetNode.getWidth()+2.5);
+		else	
+			targetPoint = targetNode.getIntersectionPointWithNodeBound(centerToCenterLine);
 
 		if (sourcePoint == null || targetPoint == null) {
 			edgeToRender.setLine(this.centerToCenterLine);
@@ -68,21 +77,23 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 			edgeToRender.setLine(sourcePoint, targetPoint);
 		}
 	}
-	
+
 	private void drawArrowHead(GLGraphics g) {
 		Vec2f source = new Vec2f((float) edgeToRender.getX1(), (float) edgeToRender.getY1());
 		Vec2f target = new Vec2f((float) edgeToRender.getX2(), (float) edgeToRender.getY2());
-		
+
 		float dx = target.x() - source.x();
 		float dy = target.y() - source.y();
-		
-		float length = (float)Math.sqrt(dx*dx + dy*dy);
-		float unitDx = dx/length;
-		float unitDy = dy/length;
-		
-		Vec2f arrowPoint1 = new Vec2f(target.x() - unitDx * ARROW_SIZE - unitDy * ARROW_SIZE, target.y() - unitDy * ARROW_SIZE + unitDx * ARROW_SIZE);
-		Vec2f arrowPoint2 = new Vec2f(target.x() - unitDx * ARROW_SIZE + unitDy * ARROW_SIZE, target.y() - unitDy * ARROW_SIZE - unitDx * ARROW_SIZE);
-		
+
+		float length = (float) Math.sqrt(dx * dx + dy * dy);
+		float unitDx = dx / length;
+		float unitDy = dy / length;
+
+		Vec2f arrowPoint1 = new Vec2f(target.x() - unitDx * ARROW_SIZE - unitDy * ARROW_SIZE, target.y()
+				- unitDy * ARROW_SIZE + unitDx * ARROW_SIZE);
+		Vec2f arrowPoint2 = new Vec2f(target.x() - unitDx * ARROW_SIZE + unitDy * ARROW_SIZE, target.y()
+				- unitDy * ARROW_SIZE - unitDx * ARROW_SIZE);
+
 		g.color(Color.BLACK).fillPolygon(target, arrowPoint1, arrowPoint2);
 	}
 
