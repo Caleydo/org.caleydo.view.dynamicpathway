@@ -1,6 +1,7 @@
 package org.caleydo.view.dynamicpathway.layout;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +34,7 @@ public class DynamicPathwayGraph {
 	 * KontextGraph contains: PathwayGraph, to which it belong, the main vertex, list of represented vertices
 	 * & edges
 	 */
-	private Vector<PathwayGraph> kontextGraphs;
+	private List<PathwayGraph> kontextGraphs;
 
 	/**
 	 * needed for searching all currently represented vertices
@@ -48,7 +49,7 @@ public class DynamicPathwayGraph {
 
 	public DynamicPathwayGraph() {
 
-		kontextGraphs = new Vector<PathwayGraph>();
+		kontextGraphs = new LinkedList<PathwayGraph>();
 		vertexNodeMap = new HashMap<PathwayVertexRep, NodeElement>();
 
 	}
@@ -90,20 +91,8 @@ public class DynamicPathwayGraph {
 
 		return false;
 	}
+	
 
-	private boolean isFocusGraph(PathwayGraph pathway) {
-		if (pathway == focusGraph)
-			return true;
-		return false;
-	}
-
-	private boolean isKontextGraph(PathwayGraph pathway) {
-		for (PathwayGraph kontextPathway : kontextGraphs) {
-			if (pathway == kontextPathway)
-				return true;
-		}
-		return false;
-	}
 
 	// adds a new focus or kontext pathway, so they will be displayed
 	public void addFocusOrKontextPathway(PathwayGraph pathway, Boolean addKontextPathway,
@@ -128,6 +117,30 @@ public class DynamicPathwayGraph {
 	public boolean isFocusGraphSet() {
 		if (focusGraph != null)
 			return true;
+		return false;
+	}
+	
+	public PathwayGraph getFocusGraph() {
+		return focusGraph;
+	}
+
+	public List<PathwayGraph> getKontextGraphs() {
+		return kontextGraphs;
+	}
+	
+	// ----------------------------------------------------
+
+	private boolean isFocusGraph(PathwayGraph pathway) {
+		if (pathway == focusGraph)
+			return true;
+		return false;
+	}
+
+	private boolean isKontextGraph(PathwayGraph pathway) {
+		for (PathwayGraph kontextPathway : kontextGraphs) {
+			if (pathway == kontextPathway)
+				return true;
+		}
 		return false;
 	}
 

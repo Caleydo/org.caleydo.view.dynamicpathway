@@ -25,7 +25,7 @@ public class DynamicPathwayViewPart extends ARcpGLViewPart {
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 
-		DynamicPathwayView subgraph = new DynamicPathwayView(glCanvas, serializedView.getViewFrustum());
+		DynamicPathwayView subgraph = new DynamicPathwayView(glCanvas);
 		view = subgraph;
 		initializeView();
 

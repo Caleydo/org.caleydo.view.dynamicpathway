@@ -131,7 +131,6 @@ public class RankingElement extends GLElementContainer {
 				onRowPick(pick);
 			}
 		});
-
 		
 		
 	}
@@ -198,7 +197,10 @@ public class RankingElement extends GLElementContainer {
 		List<PathwayRow> data = new ArrayList<>();
 		for (PathwayGraph g : PathwayManager.get().getAllItems()) {
 			//TODO: just kegg??
-			if(g.getType() == EPathwayDatabaseType.KEGG)
+			String name = g.getType().getName();
+			System.out.println(name);
+			
+			if(name.equalsIgnoreCase("KEGG"))
 				data.add(new PathwayRow(g));
 		}
 		Collections.sort(data);
@@ -215,7 +217,6 @@ public class RankingElement extends GLElementContainer {
 			// window.setSize(getRequiredWidth(), Float.NaN);
 		}
 	};
-	
 
 	
 	private final PropertyChangeListener onSelectRow = new PropertyChangeListener() {

@@ -7,10 +7,7 @@ package org.caleydo.view.dynamicpathway.internal;
 
 import org.caleydo.core.event.EventListenerManager;
 import org.caleydo.core.serialize.ASerializedView;
-import org.caleydo.core.util.logging.Logger;
-import org.caleydo.core.view.opengl.camera.ViewFrustum;
 import org.caleydo.core.view.opengl.canvas.IGLCanvas;
-import org.caleydo.core.view.opengl.layout2.AGLElementGLView;
 import org.caleydo.core.view.opengl.layout2.AGLElementView;
 import org.caleydo.core.view.opengl.layout2.GLElement;
 import org.caleydo.core.view.opengl.layout2.GLElementContainer;
@@ -20,7 +17,6 @@ import org.caleydo.core.view.opengl.layout2.basic.GLButton.ISelectionCallback;
 import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
 import org.caleydo.core.view.opengl.layout2.layout.GLPadding;
 import org.caleydo.core.view.opengl.layout2.layout.GLSizeRestrictiveFlowLayout;
-import org.caleydo.core.view.opengl.util.draganddrop.DragAndDropController;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 import org.caleydo.view.dynamicpathway.internal.serial.SerializedDynamicPathwayView;
@@ -32,7 +28,6 @@ import org.caleydo.view.entourage.SideWindow;
 import org.caleydo.view.entourage.SlideInElement;
 import org.caleydo.view.entourage.SlideInElement.ESlideInElementPosition;
 import org.caleydo.view.entourage.ranking.PathwayFilters;
-import org.caleydo.view.entourage.ranking.PathwayRankings;
 
 /**
  * view, which can represent different pathways combined into one pathway
@@ -63,7 +58,7 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 
 	private PathwayFilters.CommonVertexFilter filter = null;
 
-	public DynamicPathwayView(IGLCanvas glCanvas, ViewFrustum viewFrustum) {
+	public DynamicPathwayView(IGLCanvas glCanvas) {
 		super(glCanvas, VIEW_TYPE, VIEW_NAME);
 
 		createPathwayGraphView();

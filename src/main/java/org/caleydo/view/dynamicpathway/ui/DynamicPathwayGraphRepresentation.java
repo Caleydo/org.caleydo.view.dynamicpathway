@@ -10,12 +10,15 @@ import gleem.linalg.Vec2f;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.media.opengl.GL2;
-
+import org.caleydo.core.data.selection.EventBasedSelectionManager;
+import org.caleydo.core.data.selection.IEventBasedSelectionManagerUser;
+import org.caleydo.core.id.IDType;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
+import org.caleydo.datadomain.genetic.EGeneIDTypes;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
+import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 import org.caleydo.view.dynamicpathway.internal.DynamicPathwayView;
 import org.caleydo.view.dynamicpathway.layout.DynamicPathwayGraph;
@@ -32,7 +35,7 @@ import org.jgrapht.graph.DefaultEdge;
  * @author Christiane Schwarzl
  * 
  */
-public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContainer implements IFRLayoutGraph {
+public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContainer implements IFRLayoutGraph, IEventBasedSelectionManagerUser {
 
 	/**
 	 * contains focus & kontextpathway informations
@@ -45,6 +48,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	private Set<IFRLayoutNode> nodeSet;
 	private Set<IFRLayoutEdge> edgeSet;
 
+
 	/**
 	 * the currently selected node
 	 */
@@ -54,6 +58,9 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 * the view that hold the pathway list & the pathway representation
 	 */
 	private DynamicPathwayView view;
+	
+	
+	private EventBasedSelectionManager geneSelectionManager;
 
 	public DynamicPathwayGraphRepresentation(GLFruchtermanReingoldLayout layout, DynamicPathwayView view) {
 
@@ -63,6 +70,9 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		this.edgeSet = new HashSet<IFRLayoutEdge>();
 
 		this.view = view;
+		
+		this.geneSelectionManager = new EventBasedSelectionManager(this, IDType.getIDType(EGeneIDTypes.PATHWAY_VERTEX.name()));
+
 
 		setLayout(layout);
 
@@ -117,7 +127,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			 * but not the element, which contain the new position
 			 */
 			pathway.addVertexNodeMapEntry(vrep, node);
-			
+
 			/**
 			 * needed for the layouting algorithm
 			 */
@@ -126,7 +136,6 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		}
 
-		GL2 gl = view.getParentGLCanvas().asGLAutoDrawAble().getGL().getGL2();
 
 		for (DefaultEdge e : pathway.getCombinedEdgeSet()) {
 			PathwayVertexRep vrepSource = pathway.getEdgeSource(e);
@@ -134,8 +143,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			NodeElement nodeSource = pathway.getNodeOfVertex(vrepSource);
 			NodeElement nodeTarget = pathway.getNodeOfVertex(vrepTarget);
 
-			EdgeElement edgeElement = new EdgeElement(e, nodeSource, nodeTarget, gl);
-			
+			EdgeElement edgeElement = new EdgeElement(e, nodeSource, nodeTarget);
+
 			/**
 			 * so the layouting algorithm can extinguish, if it's a node or an edge
 			 */
@@ -145,7 +154,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			 * needed for the layouting algorithm
 			 */
 			edgeSet.add((IFRLayoutEdge) edgeElement);
-			
+
 			add(edgeElement);
 		}
 
@@ -216,6 +225,14 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 	public DynamicPathwayView getView() {
 		return view;
+	}
+
+	@Override
+	public void notifyOfSelectionChange(EventBasedSelectionManager selectionManager) {
+		// TODO Auto-generated method stub
+		
+		System.out.println("wahhhhhh");
+		
 	}
 
 }

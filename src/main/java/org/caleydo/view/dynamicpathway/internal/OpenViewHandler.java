@@ -5,7 +5,9 @@
  ******************************************************************************/
 package org.caleydo.view.dynamicpathway.internal;
 
-import org.caleydo.core.gui.command.AOpenViewHandler;
+import org.caleydo.core.internal.cmd.AOpenViewHandler;
+
+
 
 /**
  * simple command handler for opening this view

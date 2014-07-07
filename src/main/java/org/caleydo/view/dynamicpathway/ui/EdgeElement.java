@@ -1,18 +1,13 @@
 package org.caleydo.view.dynamicpathway.ui;
 
 import gleem.linalg.Vec2f;
-import gleem.linalg.Vec3f;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLElement;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
-import org.caleydo.core.view.opengl.util.gleem.ColoredVec2f;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutEdge;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
 import org.jgrapht.graph.DefaultEdge;
@@ -26,13 +21,11 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 	private Line2D centerToCenterLine;
 	private Line2D edgeToRender;
 
-	private GL2 gl;
 
-	public EdgeElement(DefaultEdge edge, NodeElement sourceNode, NodeElement targetNode, GL2 gl) {
+	public EdgeElement(DefaultEdge edge, NodeElement sourceNode, NodeElement targetNode) {
 		this.edge = edge;
 		this.sourceNode = sourceNode;
 		this.targetNode = targetNode;
-		this.gl = gl;
 
 		double xSource = sourceNode.getCenterX();
 		double ySource = sourceNode.getCenterY();
