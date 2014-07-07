@@ -73,7 +73,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		this.view = view;
 		
-		this.vertexSelectionManager = new EventBasedSelectionManager(this, IDType.getIDType(EGeneIDTypes.PATHWAY_VERTEX_REP.name()));
+		this.vertexSelectionManager = new EventBasedSelectionManager(this, IDType.getIDType(EGeneIDTypes.PATHWAY_VERTEX.name()));
 		this.vertexSelectionManager.registerEventListeners();
 
 		setLayout(layout);
@@ -229,21 +229,21 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		return view;
 	}
 	
-	public void onSelect(PathwayVertexRep vertexRep, NodeElement node, Pick pick) {
+	public void onSelect(PathwayVertex vertex, NodeElement node, Pick pick) {
 		switch (pick.getPickingMode()) {
 
 		case MOUSE_OVER:
 			vertexSelectionManager.clearSelection(SelectionType.MOUSE_OVER);
-			vertexSelectionManager.addToType(SelectionType.MOUSE_OVER, vertexRep.getID());
+			vertexSelectionManager.addToType(SelectionType.MOUSE_OVER, vertex.getID());
 			break;
 
 		case MOUSE_OUT:
-			vertexSelectionManager.removeFromType(SelectionType.MOUSE_OVER, vertexRep.getID());
+			vertexSelectionManager.removeFromType(SelectionType.MOUSE_OVER, vertex.getID());
 			break;
 
 		case CLICKED:
 			vertexSelectionManager.clearSelection(SelectionType.SELECTION);
-			vertexSelectionManager.addToType(SelectionType.SELECTION, vertexRep.getID());
+			vertexSelectionManager.addToType(SelectionType.SELECTION, vertex.getID());
 			break;
 
 		default:
@@ -256,9 +256,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	}
 
 	@Override
-	public void notifyOfSelectionChange(EventBasedSelectionManager selectionManager) {
-		// TODO Auto-generated method stub
-		
+	public void notifyOfSelectionChange(EventBasedSelectionManager selectionManager) {		
 		repaint();
 		
 	}

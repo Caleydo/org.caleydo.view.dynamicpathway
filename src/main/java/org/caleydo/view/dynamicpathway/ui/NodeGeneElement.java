@@ -32,7 +32,7 @@ public class NodeGeneElement extends NodeElement {
 
 			@Override
 			public void pick(Pick pick) {
-//				parentGraph.onSelect(displayedVertex, NodeGeneElement.this, pick);
+				parentGraph.onSelect(displayedVertex, NodeGeneElement.this, pick);
 				
 				/**
 				 * if the user clicked on the node
@@ -50,7 +50,7 @@ public class NodeGeneElement extends NodeElement {
 					/** 
 					 * select or deselect current node
 					 */					
-					parentGraph.onSelect(vertexRep, NodeGeneElement.this, pick);
+					
 					parentGraph.setOrResetSelectedNode(NodeGeneElement.this);
 					
 				}
