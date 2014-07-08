@@ -29,29 +29,39 @@ public class NodeGeneElement extends NodeElement {
 	
 		
 		onPick(new IPickingListener() {
+			
 
 			@Override
 			public void pick(Pick pick) {
+				AdvancedPick p = (AdvancedPick)pick;
+				
 				parentGraph.onSelect(displayedVertex, NodeGeneElement.this, pick);
 				
 				/**
-				 * if the user clicked on the node
+				 * if the user right clicked - show context menu
 				 */
-				AdvancedPick p = (AdvancedPick)pick;
+				if(pick.getPickingMode() == PickingMode.RIGHT_CLICKED) {
+					parentGraph.setOrResetSelectedNode(NodeGeneElement.this);
+					//TODO: show context menu
+					parentGraph.filterOrUnfilterPathwayList();
+				}
 				
-				
+				/**
+				 * if the user clicked on the node
+				 */							
 				if (pick.getPickingMode() == PickingMode.CLICKED) {
 					
+					parentGraph.setOrResetSelectedNode(NodeGeneElement.this);
+					
 					if(p.isCtrlDown()) {
-						//TODO: filter
-						System.out.println("jasdlkdsjlsakdjsak");
+						parentGraph.filterOrUnfilterPathwayList();
 					}
 					
 					/** 
 					 * select or deselect current node
 					 */					
 					
-					parentGraph.setOrResetSelectedNode(NodeGeneElement.this);
+//					parentGraph.setOrResetSelectedNode(NodeGeneElement.this);
 					
 				}
 				/**
@@ -125,7 +135,11 @@ public class NodeGeneElement extends NodeElement {
 		}
 		
 		g.color(FILLING_COLOR).fillRoundedRect(OUTER_BOUNDS, OUTER_BOUNDS, width, height,ROUND_EDGE_RADIUS);
-		g.drawText(vertexRep.getPathwayVertices().get(0).getHumanReadableName(), 0, 0, width, FONT_SIZE);
+		
+		if(displayedVertex == null)
+			displayedVertex = vertexRep.getPathwayVertices().get(0);
+		
+		g.drawText(displayedVertex.getHumanReadableName(), 0, 0, width, FONT_SIZE);
 		
 		
 	}

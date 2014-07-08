@@ -55,6 +55,13 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 * the currently selected node
 	 */
 	private NodeElement currentSelectedNode;
+	
+	/**
+	 * node after which the pathway list is filtered,
+	 * so we now if the list is filtered or not
+	 * is null if the list is unfiltered
+	 */
+	private NodeElement currentFilteringNode;
 
 	/**
 	 * the view that hold the pathway list & the pathway representation
@@ -200,7 +207,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			currentSelectedNode = newSelectedNode;
 			currentSelectedNode.setIsNodeSelected(true);
 
-			view.filterPathwayList(currentSelectedNode.getVertexRep());
+//			view.filterPathwayList(currentSelectedNode.getVertexRep());
 		}
 		/**
 		 * if the node was already selected, deselect it
@@ -220,10 +227,26 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			currentSelectedNode = newSelectedNode;
 			currentSelectedNode.setIsNodeSelected(true);
 
-			view.filterPathwayList(currentSelectedNode.getVertexRep());
+//			view.filterPathwayList(currentSelectedNode.getVertexRep());
 		}
 
 	}
+	
+	public void filterOrUnfilterPathwayList() {
+		/** 
+		 * a new filter was added
+		 */
+		if(currentFilteringNode == null && currentSelectedNode != null) {
+			view.filterPathwayList(currentSelectedNode.getVertexRep());
+			currentFilteringNode = currentSelectedNode;
+		} 
+		else {
+			view.unfilterPathwayList();
+			currentFilteringNode = null;
+		}
+		
+	}
+
 
 	public DynamicPathwayView getView() {
 		return view;
