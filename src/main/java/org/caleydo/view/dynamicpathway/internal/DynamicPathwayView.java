@@ -103,17 +103,6 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 		this.activeWindow = activeWindow;
 
 	}
-//
-//	public DragAndDropController getDndController() {
-//		return dndController;
-//	}
-
-	// TODO: inlude Vertex highlighting
-	// @Override
-	// public void notifyOfSelectionChange(EventBasedSelectionManager selectionManager) {
-	// // TODO Auto-generated method stub
-	//
-	// }
 
 	/**
 	 * if a pathway in the list was selected, it is added to the representation, so this pathway graph is

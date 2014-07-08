@@ -22,13 +22,8 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 	private DefaultEdge edge;
 	private NodeElement sourceNode;
 	private NodeElement targetNode;
-	private EDirection direction;
 	private Line2D centerToCenterLine;
 	private Line2D edgeToRender;
-	
-	private enum EDirection {
-		TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT
-	}
 
 	public EdgeElement(DefaultEdge edge, NodeElement sourceNode, NodeElement targetNode) {
 		this.edge = edge;
@@ -43,13 +38,10 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		this.centerToCenterLine = new Line2D.Double(xSource, ySource, xTarget, yTarget);
 		this.edgeToRender = new Line2D.Double();
 		
-		setDirection();
-
 	}
 
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {
-		setDirection();
 
 		calcDrawableEdge();
 
@@ -60,36 +52,6 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 
 	}
 	
-	/**
-	 * determine which from which source edge to which target edge to draw, i.e.
-	 * direction 
-	 *			[source] 							  		  [target] 
-	 * 					\							 		 /
-	 *					 \									/
-	 *                    [target] 					[source] 
-	 *      target node is on the bottom right  	target node is on the top right 
-	 *      -> xDirection is positive 				-> xDirection is positive 
-	 *		-> yDirection is positive 				-> yDirection is negative
-	 * 
-	 * note: origin (0,0) is on the top left corner
-	 */
-	private void setDirection() {
-		double xDirection = targetNode.getCenterX() - sourceNode.getCenterX();
-		double yDirection = targetNode.getCenterY() - sourceNode.getCenterY();
-
-		if (xDirection >= 0.0) {
-			if (yDirection >= 0.0)
-				this.direction = EDirection.BOTTOM_RIGHT;
-			else
-				this.direction = EDirection.TOP_RIGHT;
-		} else {
-			if (yDirection >= 0.0)
-				this.direction = EDirection.BOTTOM_LEFT;
-			else
-				this.direction = EDirection.TOP_LEFT;
-		}
-	}
-
 
 	private void calcDrawableEdge() {
 
@@ -104,6 +66,9 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		Point2D sourcePoint;
 		Point2D targetPoint;
 		
+		/**
+		 * if the node shape is circle, the intersection points need to be calculated differently
+		 */
 		if (sourceNode.getVertexRep().getType() == EPathwayVertexType.compound) {
 			double radius = sourceNode.getWidth()-1.0;
 			
