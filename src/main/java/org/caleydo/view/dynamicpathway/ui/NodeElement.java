@@ -42,6 +42,9 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	protected String label;
 
 	protected DynamicPathwayGraphRepresentation parentGraph;
+	
+	protected double height;
+	protected double width;
 
 	public NodeElement(PathwayVertexRep vertexRep, DynamicPathwayGraphRepresentation parentGraph) {
 		this.vertexRep = vertexRep;
@@ -55,6 +58,8 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		if (vertexRep.getType() != EPathwayVertexType.group) {
 			this.displayedVertex = vertexRep.getPathwayVertices().get(0);
 			this.label = displayedVertex.getHumanReadableName();
+			this.height = this.vertexRep.getHeight();
+			this.width = this.vertexRep.getWidth();
 		}
 
 		setVisibility(EVisibility.PICKABLE);
@@ -89,12 +94,12 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	@Override
 	public double getHeight() {
-		return this.vertexRep.getHeight();
+		return this.height;
 	}
 
 	@Override
 	public double getWidth() {
-		return this.vertexRep.getWidth();
+		return this.width;
 	}
 
 	public Coordinates getCoords() {

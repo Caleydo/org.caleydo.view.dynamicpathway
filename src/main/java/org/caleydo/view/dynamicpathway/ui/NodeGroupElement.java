@@ -1,74 +1,73 @@
 package org.caleydo.view.dynamicpathway.ui;
 
-import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
+import gleem.linalg.Vec2f;
 
-import org.caleydo.core.view.opengl.layout2.GLElementContainer;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexGroupRep;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 
 public class NodeGroupElement extends NodeElement {
+	
+	private static final int GAP_BETWEEN_NODES = 2;
 
 	private PathwayVertexGroupRep groupRep;
 	private int groupSize;
-
-//	GLElementContainer subNodes;
+	private LinkedList<NodeGeneElement> elementsOfThisGroup;
 
 	public NodeGroupElement(PathwayVertexRep vrep, DynamicPathwayGraphRepresentation parentGraph) {
 		super(vrep, parentGraph);
 		
-		setLayout(GLLayouts.LAYERS);
+		setLayout(GLLayouts.flowVertical(GAP_BETWEEN_NODES));
 
-//		subNodes = new GLElementContainer(GLLayouts.LAYERS);
-//		add(subNodes);
 
-		groupRep = (PathwayVertexGroupRep) vrep;
-		groupSize = groupRep.getGroupedVertexReps().size();
+		this.groupRep = (PathwayVertexGroupRep) vrep;
+		this.groupSize = groupRep.getGroupedVertexReps().size();
+		this.elementsOfThisGroup = new LinkedList<NodeGeneElement>();
 
-//		System.out.println(groupSize);
 		
-		short width = vertexRep.getWidth();
-		short height = vertexRep.getHeight();		
-
-		int oldHeight = 0;
-		int oldWidth = 0;
-		int i = 1;
-		
-		if(groupSize == 2) {
-			oldWidth = (width/2);
-			oldHeight = (height/2)-(groupRep.getGroupedVertexReps().get(0).getHeight()/2);
-		}
-		
+		double height = 0;
+		double width = 0;
 
 		for (PathwayVertexRep subVrep : groupRep.getGroupedVertexReps()) {
 			
-		
-			NodeGroupSubElement node = new NodeGroupSubElement(subVrep, parentGraph, oldWidth, oldHeight,
-					subVrep.getWidth(), subVrep.getHeight());
+			NodeGeneElement node = new NodeGeneElement(subVrep, parentGraph);
+			
+			height += node.getHeight() + GAP_BETWEEN_NODES;
+			width = node.getWidth();
+			
+			elementsOfThisGroup.add(node);
 			add(node);
-			
-			/**
-			 * draw one part of group below the first
-			 */
-			
-			if (groupSize == 2) {
-				oldHeight = subVrep.getHeight() + 10;
-			}
-			else {
-				if (Math.ceil(Math.sqrt(groupSize)) == i) {
-					oldHeight = 0;
-					oldWidth = subVrep.getWidth() + 3;
-				} else {
-					oldHeight = subVrep.getHeight() + 3;
-				}
-			}
-		
-
-			i++;
-			
 		}
+		
+		
+		this.height = height;
+		this.width = width;
+		
+		relayout();
+		
+		this.centerX = 0.0;
+		this.centerY = 0.0;
+		
+		
+//		/**
+//		 * calculating the center getting the vector from the first
+//		 */
+//		Vec2f lastElem = elementsOfThisGroup.getLast().getLocation();
+//		Vec2f firstElem = elementsOfThisGroup.getFirst().getLocation();
+//		
+//		Vec2f a = lastElem.minus(firstElem);
+//		float b = a.length()/2.0f;
+//		a.normalize();
+//		a.scale(b);
+//		Vec2f center = firstElem.plus(a);
+//		this.centerX = center.x();
+//		this.centerY = center.y();
+//		
+//		System.out.println("x: " + centerX + " y: " + centerY);
 		
 		repaint();
 
