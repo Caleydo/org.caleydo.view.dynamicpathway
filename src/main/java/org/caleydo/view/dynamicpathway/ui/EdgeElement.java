@@ -13,6 +13,7 @@ import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutEdge;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
+import org.caleydo.view.dynamicpathway.util.CalculateIntersectionUtil;
 import org.jgrapht.graph.DefaultEdge;
 
 public class EdgeElement extends GLElement implements IFRLayoutEdge {
@@ -97,29 +98,28 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		double xTarget = targetNode.getCenterX();
 		double yTarget = targetNode.getCenterY();
 
+
 		centerToCenterLine.setLine(xSource, ySource, xTarget, yTarget);
 		
 		Point2D sourcePoint;
 		Point2D targetPoint;
 		
 		if (sourceNode.getVertexRep().getType() == EPathwayVertexType.compound) {
-			Boolean getFirstIntersectionPoint = false;
-			if(direction == EDirection.TOP_LEFT || direction == EDirection.BOTTOM_LEFT)
-				getFirstIntersectionPoint = true;
+			double radius = sourceNode.getWidth()-1.0;
 			
-			sourcePoint = sourceNode.getIntersectionPointWithNodeBound(sourceNode.getCenter(), sourceNode.getWidth()-2.5,getFirstIntersectionPoint);
-
+			sourcePoint = CalculateIntersectionUtil.calcIntersectionPoint(centerToCenterLine, radius);
+			
 		}
 		else 
 			sourcePoint = sourceNode.getIntersectionPointWithNodeBound(centerToCenterLine);
 		
 		if (targetNode.getVertexRep().getType() == EPathwayVertexType.compound) {
-			Boolean getFirstIntersectionPoint = false;
 			
-			if(direction == EDirection.TOP_LEFT || direction == EDirection.BOTTOM_LEFT)
-				getFirstIntersectionPoint = true;
+			Line2D reversedCenterToCenterLine = new Line2D.Double(xTarget, yTarget, xSource, ySource);
 			
-			targetPoint = targetNode.getIntersectionPointWithNodeBound(targetNode.getCenter(), targetNode.getWidth()-2.5, getFirstIntersectionPoint);
+			double radius = targetNode.getWidth();
+			
+			targetPoint = CalculateIntersectionUtil.calcIntersectionPoint(reversedCenterToCenterLine, radius);
 			
 		}
 		else	
@@ -158,26 +158,6 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 				- unitDy * ARROW_SIZE - unitDx * ARROW_SIZE);
 
 		g.color(Color.BLACK).fillPolygon(target, arrowPoint1, arrowPoint2);
-	}
-	
-	private Point2D.Double getPointWithMinDistance(Point2D.Double referencePoint, List<Point2D.Double> pointsToCheck) {
-		
-		if(pointsToCheck == null)
-			return null;
-		
-		Point2D.Double pointWithMinDistance = null;
-		double minDistance = Double.POSITIVE_INFINITY;
-		
-		for(Point2D.Double pointToCheck : pointsToCheck) {
-			double distance = referencePoint.distance(pointToCheck);
-			
-			if(distance < minDistance) {
-				minDistance = distance;
-				pointWithMinDistance = pointToCheck;
-			}
-		}
-		
-		return pointWithMinDistance;
 	}
 
 	@Override

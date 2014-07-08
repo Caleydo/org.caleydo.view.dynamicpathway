@@ -7,10 +7,12 @@ import org.caleydo.core.view.opengl.picking.PickingMode;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 
 public class NodeCompoundElement extends NodeElement {
-	protected static final int INNER_BOUNDS = 1;
+	protected static final int INNER_PADDING = 1;
 	private static final int FONT_SIZE_MULTIPLIER = 8;
 	private static final int TEXT_X_POS = -20;
-	private static final int TEXT_Y_POS = 8;
+	private static final int TEXT_Y_POS = 8;	
+	private static final float HIGHLIGHT_LEFT_PADDING = -0.2f;
+	private static final float HIGHLIGHT_RIGHT_PADDING = INNER_PADDING+1+0.5f;
 
 	public NodeCompoundElement(PathwayVertexRep vertexRep, final DynamicPathwayGraphRepresentation parentGraph) {
 		super(vertexRep, parentGraph);
@@ -60,13 +62,13 @@ public class NodeCompoundElement extends NodeElement {
 
 		
 		if(isThisNodeSelected) {
-			g.color(SELECTION_CONTOUR_COLOR).fillCircle(-0.2f, -0.2f, width+INNER_BOUNDS+1+0.5f);;
+			g.color(SELECTION_CONTOUR_COLOR).fillCircle(-HIGHLIGHT_LEFT_PADDING,HIGHLIGHT_LEFT_PADDING, width+HIGHLIGHT_RIGHT_PADDING);;
 		}
 		else if(isMouseOver) {
-			g.color(MOUSEROVER_CONTOUR_COLOR).fillCircle(-0.2f, -0.2f, width+INNER_BOUNDS+1+0.5f);;
+			g.color(MOUSEROVER_CONTOUR_COLOR).fillCircle(HIGHLIGHT_LEFT_PADDING, HIGHLIGHT_LEFT_PADDING, width+HIGHLIGHT_RIGHT_PADDING);;
 		}
 		else {
-			g.color(CONTOUR_COLOR).fillCircle(0, 0, width+INNER_BOUNDS);
+			g.color(CONTOUR_COLOR).fillCircle(0, 0, width+INNER_PADDING);
 		}
 		
 		g.color(FILLING_COLOR).fillCircle(0, 0, width);

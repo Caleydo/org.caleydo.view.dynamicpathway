@@ -30,6 +30,7 @@ public class NodeGroupSubElement extends NodeElement {
 		this.width = width;
 		this.height = height;
 		this.displayedVertex = vertexRep.getPathwayVertices().get(0);
+		this.label = displayedVertex.getHumanReadableName();
 		
 		onPick(new IPickingListener() {
 

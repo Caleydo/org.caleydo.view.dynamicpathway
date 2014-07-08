@@ -13,6 +13,7 @@ import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
+import org.caleydo.view.dynamicpathway.util.CalculateIntersectionUtil;
 import org.caleydo.view.dynamicpathway.util.Coordinates;
 
 public class NodeElement extends GLElementContainer implements IFRLayoutNode {
@@ -37,7 +38,8 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	protected Boolean isThisNodeSelected;
 	protected Boolean isMouseOver;
-	
+
+	protected String label;
 
 	protected DynamicPathwayGraphRepresentation parentGraph;
 
@@ -52,6 +54,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 		if (vertexRep.getType() != EPathwayVertexType.group) {
 			this.displayedVertex = vertexRep.getPathwayVertices().get(0);
+			this.label = displayedVertex.getHumanReadableName();
 		}
 
 		setVisibility(EVisibility.PICKABLE);
@@ -94,50 +97,28 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		return this.vertexRep.getWidth();
 	}
 
+	public Coordinates getCoords() {
+		return coords;
+	}
+
 	/**
+	 * 
 	 * calculate intersection if the node shape is rectangular used in
 	 * {@link org.caleydo.view.dynamicpathway.ui.EdgeElement#renderImpl(GLGraphics, float, float)} for drawing
 	 * the edges between 2 nodes
 	 * 
-	 * general idea of implementation  
-	 * See <a
-	 * href="https://community.oracle.com/thread/1264395?start=0&tstart=0">oracle.com</a>
-	 * 
 	 * @param intersectingLine
-	 *            the line from the center of the source node to the target node
-	 * @return either point at which the line intersects with one of the bounds or null, if none exists
-	 * 
+	 * @return
 	 */
 	public Point2D.Double getIntersectionPointWithNodeBound(Line2D intersectingLine) {
 		for (Line2D bound : coords.getBounds()) {
 			if (intersectingLine.intersectsLine(bound)) {
-				return calcIntersectionPoint(intersectingLine, bound);
+				return CalculateIntersectionUtil.calcIntersectionPoint(intersectingLine, bound);
 			}
 		}
 		return null;
 	}
 
-	/**
-	 * calculate intersection if the node shape is rectangular used in
-	 * {@link org.caleydo.view.dynamicpathway.ui.EdgeElement#renderImpl(GLGraphics, float, float)} for drawing
-	 * the edges between 2 nodes
-	 * 
-	 * general idea of implementation  
-	 * See <a
-	 * href="http://stackoverflow.com/questions/13053061/circle-line-intersection-points">stackoverflow.
-	 * com/circle-line-intersection-point</a>
-	 * 
-	 * @param intersectingLine
-	 *            the line from the center of the source node to the target node
-	 * @return either point at which the line intersects with one of the bounds or null, if none exists
-	 * 
-	 */
-	public Point2D.Double getIntersectionPointWithNodeBound(Point2D.Double center, double radius, Boolean getFirstIntersectionPoint) {
-		for (Line2D bound : coords.getBounds()) {
-			return calcIntersectionPoint(bound, center, radius, getFirstIntersectionPoint);
-		}
-		return null;
-	}
 
 	public void setIsNodeSelected(Boolean selection) {
 		this.isThisNodeSelected = selection;
@@ -152,27 +133,28 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		return vertexRep;
 	}
 
-	private final Point2D.Double calcIntersectionPoint(Line2D line1, Line2D line2) {
-		double px = line1.getX1();
-		double py = line1.getY1();
-		double rx = line1.getX2() - px;
-		double ry = line1.getY2() - py;
+	// private final Point2D.Double calcIntersectionPoint(Line2D line1, Line2D line2) {
+	// double px = line1.getX1();
+	// double py = line1.getY1();
+	// double rx = line1.getX2() - px;
+	// double ry = line1.getY2() - py;
+	//
+	// double qx = line2.getX1();
+	// double qy = line2.getY1();
+	// double sx = line2.getX2() - qx;
+	// double sy = line2.getY2() - qy;
+	//
+	// double determinate = sx * ry - sy * rx;
+	// double z = (sx * (qy - py) + sy * (px - qx)) / determinate;
+	//
+	// double xIntersect = px + z * rx;
+	// double yIntersect = py + z * ry;
+	//
+	// return new Point2D.Double(xIntersect, yIntersect);
+	// }
 
-		double qx = line2.getX1();
-		double qy = line2.getY1();
-		double sx = line2.getX2() - qx;
-		double sy = line2.getY2() - qy;
-
-		double determinate = sx * ry - sy * rx;
-		double z = (sx * (qy - py) + sy * (px - qx)) / determinate;
-
-		double xIntersect = px + z * rx;
-		double yIntersect = py + z * ry;
-
-		return new Point2D.Double(xIntersect, yIntersect);
-	}
-	
-	private final Point2D.Double calcIntersectionPoint(Line2D line, Point2D.Double center, double radius, Boolean getFirstIntersectionPoint) {
+	private final Point2D.Double calcIntersectionPoint(Line2D line, Point2D.Double center, double radius,
+			Boolean getFirstIntersectionPoint) {
 		double baX = line.getX2() - line.getX1();
 		double baY = line.getY2() - line.getY1();
 		double caX = center.getX() - line.getX1();
@@ -186,8 +168,8 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		double q = c / a;
 
 		double disc = pBy2 * pBy2 - q;
-		
-		if(disc < 0)
+
+		if (disc < 0)
 			return null;
 
 		double tmpSqrt = Math.sqrt(disc);
@@ -198,47 +180,47 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 				* abScalingFactor2);
 		Point2D.Double p2 = new Point2D.Double(line.getX1() - baX * abScalingFactor2, line.getY1() - baY
 				* abScalingFactor2);
-		
-		if(getFirstIntersectionPoint)
+
+		if (getFirstIntersectionPoint)
 			return p1;
-		
-		
+
 		return p2;
 	}
 
-//	private final List<Point2D.Double> calcIntersectionPoint(Line2D line, Point2D.Double center, double radius, Boolean getFirstIntersectionPoint) {
-//		double baX = line.getX2() - line.getX1();
-//		double baY = line.getY2() - line.getY1();
-//		double caX = center.getX() - line.getX1();
-//		double caY = center.getY() - line.getY1();
-//
-//		double a = baX * baX + baY * baY;
-//		double bBy2 = baX * caX + baY * caY;
-//		double c = caX * caX + caY * caY - radius * radius;
-//
-//		double pBy2 = bBy2 / a;
-//		double q = c / a;
-//
-//		double disc = pBy2 * pBy2 - q;
-//		
-//		if(disc < 0)
-//			return null;
-//
-//		double tmpSqrt = Math.sqrt(disc);
-//		double abScalingFactor1 = -pBy2 + tmpSqrt;
-//		double abScalingFactor2 = -pBy2 - tmpSqrt;
-//
-//		Point2D.Double p1 = new Point2D.Double(line.getX1() - baX * abScalingFactor1, line.getY1() - baY
-//				* abScalingFactor2);
-//		Point2D.Double p2 = new Point2D.Double(line.getX1() - baX * abScalingFactor2, line.getY1() - baY
-//				* abScalingFactor2);
-//		
-//		List<Point2D.Double> pointsList = new LinkedList<Point2D.Double>();
-//		pointsList.add(p1);
-//		pointsList.add(p2);
-//		
-//		return pointsList;
-//	}
+	// private final List<Point2D.Double> calcIntersectionPoint(Line2D line, Point2D.Double center, double
+	// radius, Boolean getFirstIntersectionPoint) {
+	// double baX = line.getX2() - line.getX1();
+	// double baY = line.getY2() - line.getY1();
+	// double caX = center.getX() - line.getX1();
+	// double caY = center.getY() - line.getY1();
+	//
+	// double a = baX * baX + baY * baY;
+	// double bBy2 = baX * caX + baY * caY;
+	// double c = caX * caX + caY * caY - radius * radius;
+	//
+	// double pBy2 = bBy2 / a;
+	// double q = c / a;
+	//
+	// double disc = pBy2 * pBy2 - q;
+	//
+	// if(disc < 0)
+	// return null;
+	//
+	// double tmpSqrt = Math.sqrt(disc);
+	// double abScalingFactor1 = -pBy2 + tmpSqrt;
+	// double abScalingFactor2 = -pBy2 - tmpSqrt;
+	//
+	// Point2D.Double p1 = new Point2D.Double(line.getX1() - baX * abScalingFactor1, line.getY1() - baY
+	// * abScalingFactor2);
+	// Point2D.Double p2 = new Point2D.Double(line.getX1() - baX * abScalingFactor2, line.getY1() - baY
+	// * abScalingFactor2);
+	//
+	// List<Point2D.Double> pointsList = new LinkedList<Point2D.Double>();
+	// pointsList.add(p1);
+	// pointsList.add(p2);
+	//
+	// return pointsList;
+	// }
 
 	public PathwayVertex getDisplayedVertex() {
 		return displayedVertex;

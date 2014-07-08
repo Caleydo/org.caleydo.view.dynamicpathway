@@ -144,7 +144,7 @@ public class NodeGeneElement extends NodeElement {
 		if (displayedVertex == null)
 			displayedVertex = vertexRep.getPathwayVertices().get(0);
 
-		g.drawText(displayedVertex.getHumanReadableName(), 0, 0, width, FONT_SIZE);
+		g.drawText(label, 0, 0, width, FONT_SIZE);
 
 	}
 
