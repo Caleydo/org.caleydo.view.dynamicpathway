@@ -13,6 +13,7 @@ import java.util.Set;
 import org.caleydo.core.data.selection.EventBasedSelectionManager;
 import org.caleydo.core.data.selection.IEventBasedSelectionManagerUser;
 import org.caleydo.core.data.selection.SelectionType;
+import org.caleydo.core.event.EventListenerManager.ListenTo;
 import org.caleydo.core.id.IDType;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
@@ -245,6 +246,11 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			currentFilteringNode = null;
 		}
 		
+	}
+	
+	@ListenTo
+	public void onFilterPathwayListByNodeElement(FilterPathwayListByVertexEvent event) {
+		filterOrUnfilterPathwayList();
 	}
 
 

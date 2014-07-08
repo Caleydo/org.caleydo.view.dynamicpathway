@@ -7,6 +7,7 @@ package org.caleydo.view.dynamicpathway.internal;
 
 import org.caleydo.core.event.EventListenerManager;
 import org.caleydo.core.serialize.ASerializedView;
+import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.canvas.IGLCanvas;
 import org.caleydo.core.view.opengl.layout2.AGLElementView;
 import org.caleydo.core.view.opengl.layout2.GLElement;
@@ -14,9 +15,9 @@ import org.caleydo.core.view.opengl.layout2.GLElementContainer;
 import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
 import org.caleydo.core.view.opengl.layout2.basic.GLButton;
 import org.caleydo.core.view.opengl.layout2.basic.GLButton.ISelectionCallback;
-import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
 import org.caleydo.core.view.opengl.layout2.layout.GLPadding;
 import org.caleydo.core.view.opengl.layout2.layout.GLSizeRestrictiveFlowLayout;
+import org.caleydo.core.view.opengl.layout2.renderer.GLRenderers;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 import org.caleydo.view.dynamicpathway.internal.serial.SerializedDynamicPathwayView;
@@ -47,7 +48,7 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 	private DynamicPathwayGraphRepresentation currentPathwayElement;
 	private GLFruchtermanReingoldLayout pathwayLayout;
 
-	private GLElementContainer root = new GLElementContainer(GLLayouts.LAYERS);
+	private GLElementContainer root = new GLElementContainer(new GLSizeRestrictiveFlowLayout(true, 1, GLPadding.ZERO));
 
 	private AnimatedGLElementContainer baseContainer = new AnimatedGLElementContainer(
 			new GLSizeRestrictiveFlowLayout(true, 10, GLPadding.ZERO));
@@ -64,9 +65,16 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 		createPathwayGraphView();
 
 		createRankingSideBar();
+		baseContainer.setSize(200, Float.NaN);
+//		baseContainer.setRenderer(GLRenderers.fillRect(Color.RED));
+//		currentPathwayElement.setLayoutData(1.0f);
+//		currentPathwayElement.setRenderer(GLRenderers.fillRect(Color.GREEN));
 
 		root.add(baseContainer);
 		root.add(currentPathwayElement);
+		GLElementContainer cont = new GLElementContainer(new GLSizeRestrictiveFlowLayout(false, 3, GLPadding.ZERO));
+		cont.setSize(200, Float.NaN);
+		root.add(cont);
 
 		// vertexSelectionManager = new EventBasedSelectionManager(this,
 		// IDType.getIDType(EGeneIDTypes.PATHWAY_VERTEX_REP.name()));
@@ -162,7 +170,7 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 				.attractionMultiplier(18.0).nodeBoundsExtension(4.0).buildLayout();
 
 		currentPathwayElement = new DynamicPathwayGraphRepresentation(pathwayLayout, this);
-		currentPathwayElement.setLocation(200, 0);
+//		currentPathwayElement.setLocation(200, 0);
 	}
 
 	/**
@@ -177,8 +185,8 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 		rankingWindow = new DynamicPathwaySideWindow("Pathways", this, SideWindow.SLIDE_LEFT_OUT);
 		rankingElement = new RankingElement(this);
 		rankingWindow.setContent(rankingElement);
-		rankingWindow.setLocation(0, Float.NaN);
-		rankingWindow.setSize(200, Float.NaN);
+//		rankingWindow.setLocation(0, Float.NaN);
+//		rankingWindow.setSize(200, Float.NaN);
 
 		SlideInElement slideInElement = new SlideInElement(rankingWindow, ESlideInElementPosition.RIGHT);
 		slideInElement.setCallBack(new ISelectionCallback() {

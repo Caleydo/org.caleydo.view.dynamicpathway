@@ -37,7 +37,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	protected Boolean isThisNodeSelected;
 	protected Boolean isMouseOver;
-	// protected static NodeElement currentSelectedNode = null;
+	
 
 	protected DynamicPathwayGraphRepresentation parentGraph;
 
