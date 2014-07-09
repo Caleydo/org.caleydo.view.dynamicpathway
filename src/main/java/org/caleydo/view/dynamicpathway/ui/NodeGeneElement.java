@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.caleydo.core.util.base.ILabelProvider;
 import org.caleydo.core.util.base.ILabeled;
+import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.contextmenu.GenericContextMenuItem;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.IGLElementContext;
@@ -111,13 +112,24 @@ public class NodeGeneElement extends NodeElement {
 			g.color(CONTOUR_COLOR).fillRoundedRect(0, 0, width + INNER_BOUNDS, height + INNER_BOUNDS,
 					ROUND_EDGE_RADIUS);
 		}
-
-		g.color(FILLING_COLOR).fillRoundedRect(OUTER_BOUNDS, OUTER_BOUNDS, width, height, ROUND_EDGE_RADIUS);
-
+		
 		if (displayedVertex == null)
 			displayedVertex = vertexRep.getPathwayVertices().get(0);
 
+		if(parentGraph.getDynamicPathway().getFocusGraph() == vertexRep.getPathway()) {
+			g.color(FOCUS_FILLING_COLOR).fillRoundedRect(OUTER_BOUNDS, OUTER_BOUNDS, width, height, ROUND_EDGE_RADIUS);
+			
+		}
+		else if(parentGraph.getDynamicPathway().getCombinedGraph() == vertexRep.getPathway()) {
+			g.color(COMBINED_FILLING_COLOR).fillRoundedRect(OUTER_BOUNDS, OUTER_BOUNDS, width, height, ROUND_EDGE_RADIUS);
+		}
+		else {
+			g.color(KONTEXT_FILLING_COLOR).fillRoundedRect(OUTER_BOUNDS, OUTER_BOUNDS, width, height, ROUND_EDGE_RADIUS);
+			
+		}
+
 		g.drawText(label, 0, 0, width, FONT_SIZE);
+		
 
 	}
 

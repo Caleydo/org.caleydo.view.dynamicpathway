@@ -1,5 +1,6 @@
 package org.caleydo.view.dynamicpathway.ui;
 
+import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.picking.AdvancedPick;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
@@ -98,10 +99,18 @@ public class NodeCompoundElement extends NodeElement {
 			g.color(CONTOUR_COLOR).fillCircle(0, 0, width+INNER_PADDING);
 		}
 		
-		g.color(FILLING_COLOR).fillCircle(0, 0, width);
-
+		if(parentGraph.getDynamicPathway().getFocusGraph() == vertexRep.getPathway()) {
+			g.color(FOCUS_FILLING_COLOR).fillCircle(0, 0, width);
+		}
+		else if(parentGraph.getDynamicPathway().getCombinedGraph() == vertexRep.getPathway()) {
+			g.color(COMBINED_FILLING_COLOR).fillCircle(0, 0, width);
+		}
+		else {
+			g.color(KONTEXT_FILLING_COLOR).fillCircle(0, 0, width);
+		}
 		
-		g.drawText(vertexRep.getName(), TEXT_X_POS, TEXT_Y_POS, width*FONT_SIZE_MULTIPLIER, FONT_SIZE);
+		g.drawText(vertexRep.getName(), TEXT_X_POS, TEXT_Y_POS, width*FONT_SIZE_MULTIPLIER, FONT_SIZE);		
+		
 
 	}
 

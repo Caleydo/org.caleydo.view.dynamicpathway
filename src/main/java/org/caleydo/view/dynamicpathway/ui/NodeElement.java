@@ -34,7 +34,10 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	protected static final int FONT_SIZE = 12;
 	protected static final Color CONTOUR_COLOR = Color.LIGHT_GRAY;
-	protected static final String FILLING_COLOR = "#F2F2F2";
+	protected static final String KONTEXT_FILLING_COLOR = "#F2F2F2";
+	protected static final String COMBINED_FILLING_COLOR = "#3067C6";
+	protected static final Color FOCUS_FILLING_COLOR = Color.LIGHT_BLUE;
+//	protected static final Color COMBINED_FILLING_COLOR = Color.BLUE;
 	protected static final Color SELECTION_CONTOUR_COLOR = SelectionType.SELECTION.getColor();
 	protected static final Color MOUSEROVER_CONTOUR_COLOR = SelectionType.MOUSE_OVER.getColor();
 

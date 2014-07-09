@@ -31,5 +31,16 @@ public class PathwayManagementUtil {
 		return equivalentVertices;
 		
 	}
+	
+	public static Boolean pathwayVertexRepListContainsVertex(List<PathwayVertexRep> pathwayVertexList, PathwayVertex vertex) {
+		
+		for(PathwayVertexRep vrep : pathwayVertexList) {
+			if(vrep.getPathwayVertices().contains(vertex))
+				return true;
+		}
+		
+		return false;
+		
+	}
 
 }

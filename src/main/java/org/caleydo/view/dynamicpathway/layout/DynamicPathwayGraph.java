@@ -5,17 +5,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexShape;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
-import org.caleydo.datadomain.pathway.manager.PathwayManager;
 import org.caleydo.view.dynamicpathway.ui.NodeElement;
 import org.caleydo.view.dynamicpathway.util.PathwayManagementUtil;
-import org.jgrapht.alg.EulerianCircuit;
 import org.jgrapht.graph.DefaultEdge;
 
 /**
@@ -125,6 +122,10 @@ public class DynamicPathwayGraph {
 	public PathwayGraph getFocusGraph() {
 		return focusGraph;
 	}
+	
+	public String getFocusGraphTitle() {
+		return focusGraph.getTitle();
+	}
 
 	public List<PathwayGraph> getKontextGraphs() {
 		return kontextGraphs;
@@ -150,7 +151,7 @@ public class DynamicPathwayGraph {
 		focusGraph = graph;
 		kontextGraphs.clear();
 
-		combinedGraph = new PathwayGraph(graph.getType(), graph.getName(), graph.getTitle(),
+		combinedGraph = new PathwayGraph(graph.getType(), "Combined Graph", "Combined Graph",
 				graph.getImage(), graph.getExternalLink());
 
 		for (PathwayVertexRep vrep : graph.vertexSet()) {
@@ -162,8 +163,8 @@ public class DynamicPathwayGraph {
 			 * so cluttered TODO: implement user interaction
 			 */
 			if (vrep.getType() != EPathwayVertexType.map) {
-				if (DISPLAY_ONLY_VERTICES_WITH_EDGES
-						&& !(graph.inDegreeOf(vrep) == 0 && graph.outDegreeOf(vrep) == 0))
+				if (!(DISPLAY_ONLY_VERTICES_WITH_EDGES && graph.inDegreeOf(vrep) == 0 && graph
+						.outDegreeOf(vrep) == 0))
 					combinedGraph.addVertex(vrep);
 			}
 		}
@@ -190,6 +191,7 @@ public class DynamicPathwayGraph {
 		 * duplicates
 		 */
 		for (PathwayVertexRep vrepToAdd : pathway.vertexSet()) {
+			List<PathwayVertexRep> splittedUpVertexList = new LinkedList<PathwayVertexRep>();
 			for (PathwayVertexRep alreadyDisplayedVrep : combinedGraph.vertexSet()) {
 				List<PathwayVertex> equivalentVertices = PathwayManagementUtil.getEquivalentVertices(
 						alreadyDisplayedVrep, vrepToAdd);
@@ -204,16 +206,22 @@ public class DynamicPathwayGraph {
 					// if(equivalVertexMap.get(vrepToAdd) != null)
 					equivalVertexMap.put(vrepToAdd, alreadyDisplayedVrep);
 				} else if (equivalentVertices.size() > 0) {
-					List<PathwayVertexRep> splittedUpVertexList = new LinkedList<PathwayVertexRep>();
+
 					for (PathwayVertex vertex : equivalentVertices) {
-						PathwayVertexRep splittedOfVertex = new PathwayVertexRep(vertex.getName(),
-								EPathwayVertexShape.rectangle.name(), vrepToAdd.getCenterX(),
-								vrepToAdd.getCenterY(), vrepToAdd.getWidth(), vrepToAdd.getHeight());
-						splittedUpVertexList.add(splittedOfVertex);
-//						combinedGraph.addVertex(splittedOfVertex);
+
+						if (!PathwayManagementUtil.pathwayVertexRepListContainsVertex(splittedUpVertexList,
+								vertex)) {
+
+							PathwayVertexRep splittedOfVertex = new PathwayVertexRep(vertex.getName(),
+									EPathwayVertexShape.rectangle.name(), vrepToAdd.getCenterX(),
+									vrepToAdd.getCenterY(), vrepToAdd.getWidth(), vrepToAdd.getHeight());
+							splittedOfVertex.addPathwayVertex(vertex);
+							splittedUpVertexList.add(splittedOfVertex);
+						}
 					}
 				}
 			}
+			splittedUpVertexMap.put(vrepToAdd, splittedUpVertexList);
 		}
 
 		for (PathwayVertexRep vrep : pathway.vertexSet()) {
@@ -224,14 +232,22 @@ public class DynamicPathwayGraph {
 			 */
 			if (vrep.getType() != EPathwayVertexType.map) {
 
-				if (DISPLAY_ONLY_VERTICES_WITH_EDGES
-						&& !(pathway.inDegreeOf(vrep) == 0 && pathway.outDegreeOf(vrep) == 0)) {
+				if (!(DISPLAY_ONLY_VERTICES_WITH_EDGES && pathway.inDegreeOf(vrep) == 0 && pathway
+						.outDegreeOf(vrep) == 0)) {
 					/**
 					 * if the vertex to add is not already displayed
 					 */
 					if (equivalVertexMap.get(vrep) == null) {
 						combinedGraph.addVertex(vrep);
 					}
+
+					if (splittedUpVertexMap.get(vrep).size() > 0) {
+						for (PathwayVertexRep splitUpVertex : splittedUpVertexMap.get(vrep)) {
+							splitUpVertex.setPathway(combinedGraph);
+							combinedGraph.addVertex(splitUpVertex);
+						}
+					}
+
 				}
 
 			}
@@ -249,6 +265,18 @@ public class DynamicPathwayGraph {
 			}
 			if (equivalVertexMap.containsKey(target)) {
 				target = equivalVertexMap.get(target);
+			}
+
+			if (splittedUpVertexMap.get(source) != null) {
+				for (PathwayVertexRep splitUpVRepSource : splittedUpVertexMap.get(source)) {
+					combinedGraph.addEdge(splitUpVRepSource, target);
+				}
+			}
+
+			if (splittedUpVertexMap.get(target) != null) {
+				for (PathwayVertexRep splitUpVRepTarget : splittedUpVertexMap.get(target)) {
+					combinedGraph.addEdge(source, splitUpVRepTarget);
+				}
 			}
 
 			/**
