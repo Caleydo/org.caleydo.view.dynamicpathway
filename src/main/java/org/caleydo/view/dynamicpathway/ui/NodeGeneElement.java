@@ -93,35 +93,7 @@ public class NodeGeneElement extends NodeElement {
 		
 	}
 
-	@Override
-	protected void init(IGLElementContext context) {
-		
-		super.init(context);
 
-		// create a tooltip listener to render the tooltip of this element
-		this.onPick(context.getSWTLayer().createTooltip(new ILabeled() {
-			@Override
-			public String getLabel() {
-				StringBuilder builder = new StringBuilder();
-				Set<PathwayVertex> vertices = new LinkedHashSet<>();
-				for (PathwayVertex vRep : vertexRep.getPathwayVertices()) {
-					vertices.add(vRep);
-				}
-				List<String> names = new ArrayList<>(vertices.size());
-				for (PathwayVertex v : vertices) {
-					names.add(v.getHumanReadableName());
-				}
-				Collections.sort(names);
-				for (int i = 0; i < names.size(); i++) {
-					builder.append(names.get(i));
-					if (i < names.size() - 1)
-						builder.append(", ");
-				}
-				return builder.toString();
-				// return NodeGeneElement.this.vertexRep.getName();
-			}
-		}));
-	}
 
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {

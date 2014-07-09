@@ -48,6 +48,7 @@ public class DynamicPathwayGraph {
 	 * container for PathwayVertexRep
 	 */
 	private Map<PathwayVertexRep, NodeElement> vertexNodeMap;
+	
 
 	public DynamicPathwayGraph() {
 
