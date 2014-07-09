@@ -26,29 +26,29 @@ public class NodeGeneElement extends NodeElement {
 	private static final int OUTER_BOUNDS = 1;
 	private static final int ROUND_EDGE_RADIUS = 2;
 
+
 	public NodeGeneElement(final PathwayVertexRep vertexRep,
 			final DynamicPathwayGraphRepresentation parentGraph) {
-
 		super(vertexRep, parentGraph);
-
+		
 		onPick(new IPickingListener() {
 
 			@Override
 			public void pick(Pick pick) {
 				AdvancedPick p = (AdvancedPick) pick;
-
-				parentGraph.onSelect(displayedVertex, NodeGeneElement.this, pick);
+				
+				/**
+				 * inform other views about picking event
+				 */
+				parentGraph.onSelect(vertices, NodeGeneElement.this, pick);
 
 				/**
 				 * if the user right clicked - show context menu
 				 */
 				if (pick.getPickingMode() == PickingMode.RIGHT_CLICKED) {
 					parentGraph.setOrResetSelectedNode(NodeGeneElement.this);
-					// TODO: show context menu
-					// parentGraph.filterOrUnfilterPathwayList();
-					GenericContextMenuItem e = new GenericContextMenuItem("filter pathways",
-							new FilterPathwayListByVertexEvent(NodeGeneElement.this));
-					context.getSWTLayer().showContextMenu(Lists.newArrayList(e));
+
+					context.getSWTLayer().showContextMenu(Lists.newArrayList(filterPathwayMenu));
 				}
 
 				/**
@@ -59,7 +59,7 @@ public class NodeGeneElement extends NodeElement {
 					parentGraph.setOrResetSelectedNode(NodeGeneElement.this);
 
 					if (p.isCtrlDown()) {
-						parentGraph.filterOrUnfilterPathwayList();
+						parentGraph.filterPathwayList();
 					}
 
 					/**
@@ -90,11 +90,12 @@ public class NodeGeneElement extends NodeElement {
 
 			}
 		});
+		
 	}
 
 	@Override
 	protected void init(IGLElementContext context) {
-		// TODO Auto-generated method stub
+		
 		super.init(context);
 
 		// create a tooltip listener to render the tooltip of this element

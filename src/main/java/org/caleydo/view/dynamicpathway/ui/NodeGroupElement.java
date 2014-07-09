@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
+import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexGroupRep;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 
@@ -30,14 +31,13 @@ public class NodeGroupElement extends NodeElement {
 
 		
 		double height = 0;
-		double width = 0;
+		
 
 		for (PathwayVertexRep subVrep : groupRep.getGroupedVertexReps()) {
 			
 			NodeGeneElement node = new NodeGeneElement(subVrep, parentGraph);
 			
-			height += node.getHeight() + GAP_BETWEEN_NODES;
-			width = node.getWidth();
+			height += node.getHeight() + GAP_BETWEEN_NODES;		
 			
 			elementsOfThisGroup.add(node);
 			add(node);
@@ -45,7 +45,14 @@ public class NodeGroupElement extends NodeElement {
 		
 		
 		this.height = height;
-		this.width = width;
+		
+		for(NodeGeneElement node : elementsOfThisGroup) {
+			if(node.getType() == EPathwayVertexType.gene) {
+				this.width = node.getWidth();
+				break;
+			}
+			
+		}
 		
 		relayout();
 		

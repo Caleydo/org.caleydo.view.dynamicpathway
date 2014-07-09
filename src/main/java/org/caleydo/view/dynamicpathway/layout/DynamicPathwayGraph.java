@@ -24,6 +24,8 @@ import org.jgrapht.graph.DefaultEdge;
  */
 public class DynamicPathwayGraph {
 
+	private static final Boolean DISPLAY_ONLY_VERTICES_WITH_EDGES = true;
+
 	/**
 	 * the actual focus pathway graph, which is completely represented
 	 */
@@ -91,8 +93,6 @@ public class DynamicPathwayGraph {
 
 		return false;
 	}
-	
-
 
 	// adds a new focus or kontext pathway, so they will be displayed
 	public void addFocusOrKontextPathway(PathwayGraph pathway, Boolean addKontextPathway,
@@ -119,7 +119,7 @@ public class DynamicPathwayGraph {
 			return true;
 		return false;
 	}
-	
+
 	public PathwayGraph getFocusGraph() {
 		return focusGraph;
 	}
@@ -127,7 +127,7 @@ public class DynamicPathwayGraph {
 	public List<PathwayGraph> getKontextGraphs() {
 		return kontextGraphs;
 	}
-	
+
 	// ----------------------------------------------------
 
 	private boolean isFocusGraph(PathwayGraph pathway) {
@@ -152,13 +152,18 @@ public class DynamicPathwayGraph {
 				graph.getImage(), graph.getExternalLink());
 
 		for (PathwayVertexRep vrep : graph.vertexSet()) {
+			
 			/**
-			 * map is the type, which display the current pathway's name this should be layoutet - TODO:
-			 * display map
+			 * map is the type, which display the current pathway's name this should be layoutet
+			 * 
+			 * user can choose if only vertices with edges should be displayed, so that the workspace is not
+			 * so cluttered
+			 * TODO: implement user interaction
 			 */
 			if (vrep.getType() != EPathwayVertexType.map) {
-
-				combinedGraph.addVertex(vrep);
+				if (DISPLAY_ONLY_VERTICES_WITH_EDGES
+						&& !(graph.inDegreeOf(vrep) == 0 && graph.outDegreeOf(vrep) == 0))
+					combinedGraph.addVertex(vrep);
 			}
 		}
 		for (DefaultEdge edge : graph.edgeSet()) {
@@ -196,11 +201,14 @@ public class DynamicPathwayGraph {
 			 */
 			if (vrep.getType() != EPathwayVertexType.map) {
 
-				/**
-				 * if the vertex to add is not already displayed
-				 */
-				if (equivalVertexMap.get(vrep) == null) {
-					combinedGraph.addVertex(vrep);
+				if (DISPLAY_ONLY_VERTICES_WITH_EDGES
+						&& !(pathway.inDegreeOf(vrep) == 0 && pathway.outDegreeOf(vrep) == 0)) {
+					/**
+					 * if the vertex to add is not already displayed
+					 */
+					if (equivalVertexMap.get(vrep) == null) {
+						combinedGraph.addVertex(vrep);
+					}
 				}
 
 			}
@@ -223,10 +231,10 @@ public class DynamicPathwayGraph {
 			/**
 			 * if the edged is already displayed, don't add it
 			 */
-//			 Set<DefaultEdge> equivalentEdges = combinedGraph.getAllEdges(source, target);
-//
-//			 if(equivalentEdges == null || equivalentEdges.size() == 0)
-//				 continue;
+			// Set<DefaultEdge> equivalentEdges = combinedGraph.getAllEdges(source, target);
+			//
+			// if(equivalentEdges == null || equivalentEdges.size() == 0)
+			// continue;
 
 			if (source.getType() != EPathwayVertexType.map && target.getType() != EPathwayVertexType.map)
 				combinedGraph.addEdge(source, target, edge);

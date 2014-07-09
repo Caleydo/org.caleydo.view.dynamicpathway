@@ -8,6 +8,7 @@ package org.caleydo.view.dynamicpathway.ui;
 import gleem.linalg.Vec2f;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.caleydo.core.data.selection.EventBasedSelectionManager;
@@ -38,8 +39,7 @@ import org.jgrapht.graph.DefaultEdge;
  * @author Christiane Schwarzl
  * 
  */
-public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContainer implements IFRLayoutGraph, IEventBasedSelectionManagerUser {
-
+public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContainer implements IFRLayoutGraph, IEventBasedSelectionManagerUser {	
 	/**
 	 * contains focus & kontextpathway informations
 	 */
@@ -69,7 +69,9 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 */
 	private DynamicPathwayView view;
 	
-	
+	/**
+	 * informs other that (and which) vertex (nodeElement) was selected
+	 */
 	private EventBasedSelectionManager vertexSelectionManager;
 
 	public DynamicPathwayGraphRepresentation(GLFruchtermanReingoldLayout layout, DynamicPathwayView view) {
@@ -210,16 +212,16 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 //			view.filterPathwayList(currentSelectedNode.getVertexRep());
 		}
-		/**
+/*		*//**
 		 * if the node was already selected, deselect it
-		 */
+		 *//*
 		else if (currentSelectedNode == newSelectedNode) {
 			currentSelectedNode.setIsNodeSelected(false);
 			currentSelectedNode = null;
 
 			view.unfilterPathwayList();
 
-		}
+		}*/
 		/**
 		 * if another node was selected before, deselect it and selected the new node
 		 */
@@ -233,24 +235,30 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 	}
 	
-	public void filterOrUnfilterPathwayList() {
+	public void filterPathwayList() {
 		/** 
 		 * a new filter was added
 		 */
-		if(currentFilteringNode == null && currentSelectedNode != null) {
+		if(currentSelectedNode != null) {
 			view.filterPathwayList(currentSelectedNode.getVertexRep());
 			currentFilteringNode = currentSelectedNode;
 		} 
-		else {
-			view.unfilterPathwayList();
-			currentFilteringNode = null;
-		}
+//		else {
+//			view.unfilterPathwayList();
+//			currentFilteringNode = null;
+//		}
 		
 	}
 	
+	/**
+	 * listens if the path should be filtered or not 
+	 * used for selecting a kontext pathway, which contains the requested vertex
+	 *  
+	 * @param event 
+	 */
 	@ListenTo
 	public void onFilterPathwayListByNodeElement(FilterPathwayListByVertexEvent event) {
-		filterOrUnfilterPathwayList();
+		filterPathwayList();
 	}
 
 
@@ -258,21 +266,39 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		return view;
 	}
 	
-	public void onSelect(PathwayVertex vertex, NodeElement node, Pick pick) {
+	/**
+	 * if a vertex was called, other views are informed
+	 * 
+	 * called by NodeElement
+	 * 
+	 * @param vertex which was selected
+	 * @param node to the which the vertex belongs
+	 * @param pick
+	 */
+	public void onSelect(List<PathwayVertex> vertices, NodeElement node, Pick pick) {
 		switch (pick.getPickingMode()) {
 
 		case MOUSE_OVER:
 			vertexSelectionManager.clearSelection(SelectionType.MOUSE_OVER);
-			vertexSelectionManager.addToType(SelectionType.MOUSE_OVER, vertex.getID());
+			for(PathwayVertex vertex : vertices)
+				vertexSelectionManager.addToType(SelectionType.MOUSE_OVER, vertex.getID());
 			break;
 
 		case MOUSE_OUT:
-			vertexSelectionManager.removeFromType(SelectionType.MOUSE_OVER, vertex.getID());
+			for(PathwayVertex vertex : vertices)
+				vertexSelectionManager.removeFromType(SelectionType.MOUSE_OVER, vertex.getID());
 			break;
 
 		case CLICKED:
 			vertexSelectionManager.clearSelection(SelectionType.SELECTION);
-			vertexSelectionManager.addToType(SelectionType.SELECTION, vertex.getID());
+			for(PathwayVertex vertex : vertices)
+				vertexSelectionManager.addToType(SelectionType.SELECTION, vertex.getID());
+			break;
+			
+		case RIGHT_CLICKED:
+			vertexSelectionManager.clearSelection(SelectionType.SELECTION);
+			for(PathwayVertex vertex : vertices)
+				vertexSelectionManager.addToType(SelectionType.SELECTION, vertex.getID());
 			break;
 
 		default:

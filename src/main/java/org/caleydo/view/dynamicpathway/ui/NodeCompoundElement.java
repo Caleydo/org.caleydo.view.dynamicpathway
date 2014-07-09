@@ -1,10 +1,14 @@
 package org.caleydo.view.dynamicpathway.ui;
 
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
+import org.caleydo.core.view.opengl.picking.AdvancedPick;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.core.view.opengl.picking.PickingMode;
+import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
+
+import com.google.common.collect.Lists;
 
 public class NodeCompoundElement extends NodeElement {
 	protected static final int INNER_PADDING = 1;
@@ -21,16 +25,39 @@ public class NodeCompoundElement extends NodeElement {
 
 			@Override
 			public void pick(Pick pick) {
+				AdvancedPick p = (AdvancedPick) pick;
+				
+				/**
+				 * inform other views about picking event
+				 */
+				parentGraph.onSelect(vertices, NodeCompoundElement.this, pick);
+
+				/**
+				 * if the user right clicked - show context menu
+				 */
+				if (pick.getPickingMode() == PickingMode.RIGHT_CLICKED) {
+					parentGraph.setOrResetSelectedNode(NodeCompoundElement.this);
+
+					context.getSWTLayer().showContextMenu(Lists.newArrayList(filterPathwayMenu));
+				}
+
 				/**
 				 * if the user clicked on the node
 				 */
 				if (pick.getPickingMode() == PickingMode.CLICKED) {
-					
-					/** 
-					 * select or deselect current node
-					 */
+
 					parentGraph.setOrResetSelectedNode(NodeCompoundElement.this);
-					
+
+					if (p.isCtrlDown()) {
+						parentGraph.filterPathwayList();
+					}
+
+					/**
+					 * select current node
+					 */
+
+					// parentGraph.setOrResetSelectedNode(NodeGeneElement.this);
+
 				}
 				/**
 				 * if the user moved the curser over this node
@@ -38,18 +65,18 @@ public class NodeCompoundElement extends NodeElement {
 				if (pick.getPickingMode() == PickingMode.MOUSE_OVER) {
 					isMouseOver = true;
 				}
-				
+
 				/**
 				 * if the user's curser left the node
 				 */
 				if (pick.getPickingMode() == PickingMode.MOUSE_OUT) {
 					isMouseOver = false;
 				}
-				
-				/** 
+
+				/**
 				 * renderImpl is called
 				 */
-				repaint();	
+				repaint();
 
 			}
 		});
