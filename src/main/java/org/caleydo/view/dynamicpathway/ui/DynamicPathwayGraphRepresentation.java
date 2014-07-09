@@ -9,6 +9,7 @@ import gleem.linalg.Vec2f;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.caleydo.core.data.selection.EventBasedSelectionManager;
@@ -105,7 +106,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		Boolean addKontextPathway = (pathway.isFocusGraphSet() && (currentSelectedNode != null)) ? true
 				: false;
 
-		pathway.addFocusOrKontextPathway(graph, addKontextPathway, currentSelectedNode);
+		Map<PathwayVertexRep, List<PathwayVertexRep>> verticesToIgnore = pathway.addFocusOrKontextPathway(graph, addKontextPathway, currentSelectedNode);
 		if (addKontextPathway) {
 			currentSelectedNode = null;
 			view.unfilterPathwayList();

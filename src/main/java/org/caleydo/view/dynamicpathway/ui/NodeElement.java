@@ -31,6 +31,7 @@ import com.google.common.collect.Lists;
 
 public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
+
 	protected static final int FONT_SIZE = 12;
 	protected static final Color CONTOUR_COLOR = Color.LIGHT_GRAY;
 	protected static final String FILLING_COLOR = "#F2F2F2";
@@ -216,6 +217,11 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	public void setDisplayedVertex(PathwayVertex displayedVertex) {
 		this.displayedVertex = displayedVertex;
+	}
+	
+
+	public String getLabel() {
+		return label;
 	}
 
 }

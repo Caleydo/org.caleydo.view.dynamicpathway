@@ -8,11 +8,13 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
+import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexShape;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 import org.caleydo.datadomain.pathway.manager.PathwayManager;
 import org.caleydo.view.dynamicpathway.ui.NodeElement;
+import org.caleydo.view.dynamicpathway.util.PathwayManagementUtil;
 import org.jgrapht.alg.EulerianCircuit;
 import org.jgrapht.graph.DefaultEdge;
 
@@ -48,7 +50,6 @@ public class DynamicPathwayGraph {
 	 * container for PathwayVertexRep
 	 */
 	private Map<PathwayVertexRep, NodeElement> vertexNodeMap;
-	
 
 	public DynamicPathwayGraph() {
 
@@ -96,15 +97,15 @@ public class DynamicPathwayGraph {
 	}
 
 	// adds a new focus or kontext pathway, so they will be displayed
-	public void addFocusOrKontextPathway(PathwayGraph pathway, Boolean addKontextPathway,
-			NodeElement currentSelectedNode) {
+	public Map<PathwayVertexRep, List<PathwayVertexRep>> addFocusOrKontextPathway(PathwayGraph pathway,
+			Boolean addKontextPathway, NodeElement currentSelectedNode) {
 
 		if (!addKontextPathway) {
 			addFocusPathway(pathway);
 		} else {
-			addKontextGraph(pathway, currentSelectedNode);
+			return addKontextGraph(pathway, currentSelectedNode);
 		}
-
+		return null;
 	}
 
 	public float getFocusPathwayWidth() {
@@ -153,13 +154,12 @@ public class DynamicPathwayGraph {
 				graph.getImage(), graph.getExternalLink());
 
 		for (PathwayVertexRep vrep : graph.vertexSet()) {
-			
+
 			/**
 			 * map is the type, which display the current pathway's name this should be layoutet
 			 * 
 			 * user can choose if only vertices with edges should be displayed, so that the workspace is not
-			 * so cluttered
-			 * TODO: implement user interaction
+			 * so cluttered TODO: implement user interaction
 			 */
 			if (vrep.getType() != EPathwayVertexType.map) {
 				if (DISPLAY_ONLY_VERTICES_WITH_EDGES
@@ -172,10 +172,16 @@ public class DynamicPathwayGraph {
 		}
 	}
 
-	private void addKontextGraph(PathwayGraph pathway, NodeElement currentSelectedNode) {
+	private Map<PathwayVertexRep, List<PathwayVertexRep>> addKontextGraph(PathwayGraph pathway,
+			NodeElement currentSelectedNode) {
 		kontextGraphs.add(pathway);
 		// Vector<PathwayVertexRep> vrepsToIgnore = new Vector<PathwayVertexRep>();
 
+		Map<PathwayVertexRep, List<PathwayVertexRep>> splittedUpVertexMap = new HashMap<PathwayVertexRep, List<PathwayVertexRep>>();
+
+		/**
+		 * contains all vertices, which represent the same vertices
+		 */
 		Map<PathwayVertexRep, PathwayVertexRep> equivalVertexMap = new HashMap<PathwayVertexRep, PathwayVertexRep>();
 
 		/**
@@ -185,11 +191,27 @@ public class DynamicPathwayGraph {
 		 */
 		for (PathwayVertexRep vrepToAdd : pathway.vertexSet()) {
 			for (PathwayVertexRep alreadyDisplayedVrep : combinedGraph.vertexSet()) {
-				if (PathwayManager.get().areVerticesEquivalent(alreadyDisplayedVrep, vrepToAdd)) {
+				List<PathwayVertex> equivalentVertices = PathwayManagementUtil.getEquivalentVertices(
+						alreadyDisplayedVrep, vrepToAdd);
+
+				/**
+				 * if the two vreps represent the same vertices
+				 */
+				if (equivalentVertices.size() == vrepToAdd.getPathwayVertices().size()
+						&& equivalentVertices.size() == alreadyDisplayedVrep.getPathwayVertices().size()) {
+					// if (PathwayManager.get().areVerticesEquivalent(alreadyDisplayedVrep, vrepToAdd)) {
 
 					// if(equivalVertexMap.get(vrepToAdd) != null)
 					equivalVertexMap.put(vrepToAdd, alreadyDisplayedVrep);
-
+				} else if (equivalentVertices.size() > 0) {
+					List<PathwayVertexRep> splittedUpVertexList = new LinkedList<PathwayVertexRep>();
+					for (PathwayVertex vertex : equivalentVertices) {
+						PathwayVertexRep splittedOfVertex = new PathwayVertexRep(vertex.getName(),
+								EPathwayVertexShape.rectangle.name(), vrepToAdd.getCenterX(),
+								vrepToAdd.getCenterY(), vrepToAdd.getWidth(), vrepToAdd.getHeight());
+						splittedUpVertexList.add(splittedOfVertex);
+//						combinedGraph.addVertex(splittedOfVertex);
+					}
 				}
 			}
 		}
@@ -240,6 +262,7 @@ public class DynamicPathwayGraph {
 			if (source.getType() != EPathwayVertexType.map && target.getType() != EPathwayVertexType.map)
 				combinedGraph.addEdge(source, target, edge);
 		}
+		return splittedUpVertexMap;
 
 	}
 
