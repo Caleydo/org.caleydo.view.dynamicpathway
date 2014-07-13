@@ -8,6 +8,7 @@ package org.caleydo.view.dynamicpathway.ui;
 import gleem.linalg.Vec2f;
 
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -107,6 +108,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				: false;
 
 		Map<PathwayVertexRep, List<PathwayVertexRep>> verticesToIgnore = pathway.addFocusOrKontextPathway(graph, addKontextPathway, currentSelectedNode);
+		List<NodeElement> nodesToBeRemoved = new LinkedList<NodeElement>();
+		
 		if (addKontextPathway) {
 			currentSelectedNode = null;
 			view.unfilterPathwayList();
@@ -146,6 +149,23 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			 */
 			nodeSet.add((IFRLayoutNode) node);
 			add(node);
+			
+			/**
+			 * remove PathwayVertices of Vrep, which where split of
+			 */
+			
+			if(verticesToIgnore != null && verticesToIgnore.get(vrep) != null && verticesToIgnore.get(vrep).size() > 0) {
+				if(vrep.getPathwayVertices().size() == verticesToIgnore.get(vrep).size())
+					System.out.println("waaaaaa");
+				for(PathwayVertexRep splitUpVrep : verticesToIgnore.get(vrep)) {
+					// if this is the last vertex of the node
+					if(node.removeVertex(splitUpVrep.getPathwayVertices().get(0)) == false){
+						nodesToBeRemoved.add(node);
+						nodeSet.remove(node);
+						remove(node);
+					}
+				}
+			}
 
 		}
 
@@ -155,6 +175,12 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			PathwayVertexRep vrepTarget = pathway.getEdgeTarget(e);
 			NodeElement nodeSource = pathway.getNodeOfVertex(vrepSource);
 			NodeElement nodeTarget = pathway.getNodeOfVertex(vrepTarget);
+			
+			/**
+			 * if the node is not gonna be displayed, don't display its edges either
+			 */
+			if(nodesToBeRemoved.contains(nodeSource) || nodesToBeRemoved.contains(nodeTarget))
+				continue;
 
 			EdgeElement edgeElement = new EdgeElement(e, nodeSource, nodeTarget);
 
@@ -170,7 +196,6 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 			add(edgeElement);
 		}
-
 	}
 
 	@Override

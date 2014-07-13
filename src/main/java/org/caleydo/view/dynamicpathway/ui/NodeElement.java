@@ -213,6 +213,15 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	public void setVertices(List<PathwayVertex> vertices) {
 		this.vertices = vertices;
 	}
+	
+	public Boolean removeVertex(PathwayVertex vertexToRemove) {
+		if(vertices.size() < 2)
+			return false;
+		vertices.remove(vertexToRemove);
+		this.displayedVertex = vertices.get(0);
+		this.label = displayedVertex.getHumanReadableName();
+		return true;
+	}
 
 	public PathwayVertex getDisplayedVertex() {
 		return displayedVertex;
