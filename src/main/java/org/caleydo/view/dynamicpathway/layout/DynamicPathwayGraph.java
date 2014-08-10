@@ -22,6 +22,7 @@ import org.jgrapht.graph.DefaultEdge;
 public class DynamicPathwayGraph {
 
 	private static final Boolean DISPLAY_ONLY_VERTICES_WITH_EDGES = true;
+	private static final String COMBINED_GRAPH_NAME = "Combined Graph";
 
 	/**
 	 * the actual focus pathway graph, which is completely represented

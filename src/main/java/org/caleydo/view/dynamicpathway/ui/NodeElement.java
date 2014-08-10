@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -57,15 +58,14 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	protected String label;
 
 	protected DynamicPathwayGraphRepresentation parentGraph;
-	
+
 	protected double height;
 	protected double width;
-	
+
 	/**
 	 * the context menu, which pops up, when a node is right clicked
 	 */
 	GenericContextMenuItem filterPathwayMenu;
-	
 
 	public NodeElement(PathwayVertexRep vertexRep, final DynamicPathwayGraphRepresentation parentGraph) {
 		this.vertexRep = vertexRep;
@@ -76,10 +76,11 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		this.isThisNodeUsedForFiltering = false;
 		this.isMouseOver = false;
 		this.parentGraph = parentGraph;
-		this.vertices = vertexRep.getPathwayVertices();
-		
+		this.vertices = new LinkedList<PathwayVertex>(
+				vertexRep.getPathwayVertices());
+
 		if (vertexRep.getType() != EPathwayVertexType.group) {
-//			this.vertices = vertexRep.getPathwayVertices();
+			// this.vertices = vertexRep.getPathwayVertices();
 			this.displayedVertex = vertices.get(0);
 			this.label = displayedVertex.getHumanReadableName();
 			this.height = this.vertexRep.getHeight();
@@ -88,16 +89,14 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 		filterPathwayMenu = new GenericContextMenuItem("Filter pathway list by this node",
 				new FilterPathwayListByVertexEvent(NodeElement.this));
-		
-		
-		
+
 		setVisibility(EVisibility.PICKABLE);
 
 	}
-	
+
 	@Override
 	protected void init(IGLElementContext context) {
-		
+
 		super.init(context);
 
 		// create a tooltip listener to render the tooltip of this element
@@ -164,7 +163,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	public Coordinates getCoords() {
 		return coords;
 	}
-	
+
 	public EPathwayVertexType getType() {
 		return vertexRep.getType();
 	}
@@ -187,7 +186,6 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		return null;
 	}
 
-
 	public void setIsNodeSelected(Boolean selection) {
 		this.isThisNodeSelected = selection;
 		repaint();
@@ -196,7 +194,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	public Boolean getIsNodeSelected() {
 		return this.isThisNodeSelected;
 	}
-	
+
 	public void setIsThisNodeUsedForFiltering(Boolean selection) {
 		this.isThisNodeUsedForFiltering = selection;
 		repaint();
@@ -224,6 +222,22 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	public void setDisplayedVertex(PathwayVertex displayedVertex) {
 		this.displayedVertex = displayedVertex;
+	}
+
+	/**
+	 * removes a vertex from the displayed vertex list -> needed to remove duplicate vertices within the graph
+	 * 
+	 * @param vertexToRemove
+	 * @return returns true if this is the last vertex of the NodeElement (which means the whole node needs to
+	 *         be removed) & false otherwise
+	 */
+	public Boolean removeVertex(PathwayVertex vertexToRemove) {
+		if (vertices.size() < 2)
+			return false;
+		vertices.remove(vertexToRemove);
+		this.displayedVertex = vertices.get(0);
+		this.label = displayedVertex.getHumanReadableName();
+		return true;
 	}
 
 }
