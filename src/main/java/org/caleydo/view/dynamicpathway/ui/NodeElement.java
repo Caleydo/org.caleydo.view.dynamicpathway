@@ -13,9 +13,11 @@ import org.caleydo.core.data.selection.SelectionType;
 import org.caleydo.core.util.base.ILabeled;
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.contextmenu.GenericContextMenuItem;
+import org.caleydo.core.view.opengl.layout2.GLElement;
 import org.caleydo.core.view.opengl.layout2.GLElementContainer;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.IGLElementContext;
+import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
 import org.caleydo.core.view.opengl.picking.AdvancedPick;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
@@ -29,7 +31,7 @@ import org.caleydo.view.dynamicpathway.util.Coordinates;
 
 import com.google.common.collect.Lists;
 
-public class NodeElement extends GLElementContainer implements IFRLayoutNode {
+public class NodeElement extends AnimatedGLElementContainer implements IFRLayoutNode {
 
 
 	protected static final int FONT_SIZE = 12;
@@ -235,5 +237,6 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	public String getLabel() {
 		return label;
 	}
+
 
 }

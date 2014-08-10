@@ -128,7 +128,8 @@ public class NodeGeneElement extends NodeElement {
 			
 		}
 
-		g.drawText(label, 0, 0, width, FONT_SIZE);
+//		g.drawText(label, 0, 0, width, FONT_SIZE);
+		g.drawText(vertices.get(0).getHumanReadableName(), 0, 0, width, FONT_SIZE);
 		
 
 	}

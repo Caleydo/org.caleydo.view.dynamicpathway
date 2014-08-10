@@ -11,6 +11,7 @@ import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexShape;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
+import org.caleydo.datadomain.pathway.manager.PathwayManager;
 import org.caleydo.view.dynamicpathway.ui.NodeElement;
 import org.caleydo.view.dynamicpathway.util.PathwayManagementUtil;
 import org.jgrapht.graph.DefaultEdge;
@@ -23,7 +24,7 @@ import org.jgrapht.graph.DefaultEdge;
  */
 public class DynamicPathwayGraph {
 
-	private static final Boolean DISPLAY_ONLY_VERTICES_WITH_EDGES = true;
+	private static final Boolean DISPLAY_ONLY_VERTICES_WITH_EDGES = false;
 
 	/**
 	 * the actual focus pathway graph, which is completely represented
@@ -147,7 +148,7 @@ public class DynamicPathwayGraph {
 		return false;
 	}
 
-	private void addFocusPathway(PathwayGraph graph) {
+	private void addFocusPathway(PathwayGraph graph) throws IllegalArgumentException {
 		focusGraph = graph;
 		kontextGraphs.clear();
 
@@ -169,8 +170,12 @@ public class DynamicPathwayGraph {
 			}
 		}
 		for (DefaultEdge edge : graph.edgeSet()) {
-			combinedGraph.addEdge(graph.getEdgeSource(edge), graph.getEdgeTarget(edge), edge);
+			PathwayVertexRep source = graph.getEdgeSource(edge);
+			PathwayVertexRep target = graph.getEdgeTarget(edge);
+			if(source != null && target != null)
+				combinedGraph.addEdge(source, target, edge);
 		}
+
 	}
 
 	private Map<PathwayVertexRep, List<PathwayVertexRep>> addKontextGraph(PathwayGraph pathway,
@@ -207,6 +212,8 @@ public class DynamicPathwayGraph {
 					equivalVertexMap.put(vrepToAdd, alreadyDisplayedVrep);
 				} else if (equivalentVertices.size() > 0) {
 
+					
+				
 					for (PathwayVertex vertex : equivalentVertices) {
 
 						if (!PathwayManagementUtil.pathwayVertexRepListContainsVertex(splittedUpVertexList,
@@ -293,5 +300,7 @@ public class DynamicPathwayGraph {
 		return splittedUpVertexMap;
 
 	}
+	
+	
 
 }
