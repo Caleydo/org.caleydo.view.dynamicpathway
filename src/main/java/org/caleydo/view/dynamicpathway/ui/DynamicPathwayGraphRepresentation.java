@@ -250,6 +250,11 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			currentFilteringNode = newFilteringNode;
 			currentFilteringNode.setIsThisNodeUsedForFiltering(true);
 		}
+		
+		else if(currentFilteringNode == newFilteringNode) {
+			currentFilteringNode.setIsThisNodeUsedForFiltering(false);
+			currentFilteringNode = null;
+		}
 
 		/**
 		 * if another node was selected before, deselect it and selected the new node
@@ -267,9 +272,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		/**
 		 * a new filter was added
 		 */
-		if (currentSelectedNode != null) {
-			view.filterPathwayList(currentSelectedNode.getVertexRep());
-			currentFilteringNode = currentSelectedNode;
+		if (currentFilteringNode != null) {
+			view.filterPathwayList(currentFilteringNode.getVertexRep());
 		}
 		// else {
 		// view.unfilterPathwayList();

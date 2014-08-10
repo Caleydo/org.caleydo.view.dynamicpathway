@@ -32,7 +32,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	protected static final Color FOCUS_FILLING_COLOR = Color.LIGHT_BLUE;
 	protected static final Color SELECTION_CONTOUR_COLOR = SelectionType.SELECTION.getColor();
 	protected static final Color MOUSEROVER_CONTOUR_COLOR = SelectionType.MOUSE_OVER.getColor();
-	protected static final Color FILTER_CONTOUR_COLOR = SelectionType.LEVEL_HIGHLIGHTING.getColor();
+	protected static final Color FILTER_CONTOUR_COLOR = Color.RED;
 
 	protected PathwayVertexRep vertexRep;
 	protected List<PathwayVertex> vertices;

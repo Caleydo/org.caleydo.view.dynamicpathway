@@ -1,5 +1,6 @@
 package org.caleydo.view.dynamicpathway.ui;
 
+import org.caleydo.core.view.contextmenu.GenericContextMenuItem;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.picking.AdvancedPick;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
@@ -36,7 +37,7 @@ public class NodeCompoundElement extends NodeElement {
 				 * if the user right clicked - show context menu
 				 */
 				if (pick.getPickingMode() == PickingMode.RIGHT_CLICKED) {
-					parentGraph.setOrResetSelectedNode(NodeCompoundElement.this);
+					parentGraph.setOrResetFilteringNode(NodeCompoundElement.this);
 
 					context.getSWTLayer().showContextMenu(Lists.newArrayList(filterPathwayMenu));
 				}
@@ -49,14 +50,9 @@ public class NodeCompoundElement extends NodeElement {
 					parentGraph.setOrResetSelectedNode(NodeCompoundElement.this);
 
 					if (p.isCtrlDown()) {
+						parentGraph.setOrResetFilteringNode(NodeCompoundElement.this);
 						parentGraph.filterPathwayList();
 					}
-
-					/**
-					 * select current node
-					 */
-
-					// parentGraph.setOrResetSelectedNode(NodeGeneElement.this);
 
 				}
 				/**
@@ -87,20 +83,32 @@ public class NodeCompoundElement extends NodeElement {
 	protected void renderImpl(GLGraphics g, float w, float h) {
 		short width = vertexRep.getWidth();
 
-		
-		if(isThisNodeSelected) {
-			g.color(SELECTION_CONTOUR_COLOR).fillCircle(-HIGHLIGHT_LEFT_PADDING,HIGHLIGHT_LEFT_PADDING, width+HIGHLIGHT_RIGHT_PADDING);;
+		// contour
+		if (isThisNodeUsedForFiltering) {
+			g.color(FILTER_CONTOUR_COLOR).fillCircle(-HIGHLIGHT_LEFT_PADDING,HIGHLIGHT_LEFT_PADDING, width+HIGHLIGHT_RIGHT_PADDING);
+		}
+		else if(isThisNodeSelected) {
+			g.color(SELECTION_CONTOUR_COLOR).fillCircle(-HIGHLIGHT_LEFT_PADDING,HIGHLIGHT_LEFT_PADDING, width+HIGHLIGHT_RIGHT_PADDING);
 		}
 		else if(isMouseOver) {
-			g.color(MOUSEROVER_CONTOUR_COLOR).fillCircle(HIGHLIGHT_LEFT_PADDING, HIGHLIGHT_LEFT_PADDING, width+HIGHLIGHT_RIGHT_PADDING);;
+			g.color(MOUSEROVER_CONTOUR_COLOR).fillCircle(HIGHLIGHT_LEFT_PADDING, HIGHLIGHT_LEFT_PADDING, width+HIGHLIGHT_RIGHT_PADDING);
 		}
 		else {
 			g.color(CONTOUR_COLOR).fillCircle(0, 0, width+INNER_PADDING);
 		}
 		
-		g.color(KONTEXT_FILLING_COLOR).fillCircle(0, 0, width);
-
+		// filling
+		GLGraphics filling;
+		if(parentGraph.getDynamicPathway().getFocusGraph() == vertexRep.getPathway())
+			filling = g.color(FOCUS_FILLING_COLOR);
+		else if(parentGraph.getDynamicPathway().getCombinedGraph() == vertexRep.getPathway())
+			filling = g.color(COMBINED_FILLING_COLOR);
+		else
+			filling = g.color(KONTEXT_FILLING_COLOR);
 		
+		filling.fillCircle(0, 0, width);
+
+		// TODO: label?
 		g.drawText(vertexRep.getName(), TEXT_X_POS, TEXT_Y_POS, width*FONT_SIZE_MULTIPLIER, FONT_SIZE);
 
 	}

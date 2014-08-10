@@ -1,5 +1,6 @@
 package org.caleydo.view.dynamicpathway.ui;
 
+import org.caleydo.core.view.contextmenu.GenericContextMenuItem;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.picking.AdvancedPick;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
@@ -50,14 +51,10 @@ public class NodeGeneElement extends NodeElement {
 
 					if (p.isCtrlDown()) {
 						parentGraph.setOrResetFilteringNode(NodeGeneElement.this);
+						
 						parentGraph.filterPathwayList();
 					}
 
-					/**
-					 * select or deselect current node
-					 */
-
-					// parentGraph.setOrResetSelectedNode(NodeGeneElement.this);
 
 				}
 				/**
