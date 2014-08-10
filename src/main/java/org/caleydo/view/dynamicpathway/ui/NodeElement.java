@@ -2,10 +2,10 @@ package org.caleydo.view.dynamicpathway.ui;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -16,10 +16,6 @@ import org.caleydo.core.view.contextmenu.GenericContextMenuItem;
 import org.caleydo.core.view.opengl.layout2.GLElementContainer;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.IGLElementContext;
-import org.caleydo.core.view.opengl.picking.AdvancedPick;
-import org.caleydo.core.view.opengl.picking.IPickingListener;
-import org.caleydo.core.view.opengl.picking.Pick;
-import org.caleydo.core.view.opengl.picking.PickingMode;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
@@ -27,15 +23,16 @@ import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
 import org.caleydo.view.dynamicpathway.util.CalculateIntersectionUtil;
 import org.caleydo.view.dynamicpathway.util.Coordinates;
 
-import com.google.common.collect.Lists;
-
 public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	protected static final int FONT_SIZE = 12;
 	protected static final Color CONTOUR_COLOR = Color.LIGHT_GRAY;
-	protected static final String FILLING_COLOR = "#F2F2F2";
+	protected static final String KONTEXT_FILLING_COLOR = "#F2F2F2";
+	protected static final String COMBINED_FILLING_COLOR = "#3067C6";
+	protected static final Color FOCUS_FILLING_COLOR = Color.LIGHT_BLUE;
 	protected static final Color SELECTION_CONTOUR_COLOR = SelectionType.SELECTION.getColor();
 	protected static final Color MOUSEROVER_CONTOUR_COLOR = SelectionType.MOUSE_OVER.getColor();
+	protected static final Color FILTER_CONTOUR_COLOR = SelectionType.LEVEL_HIGHLIGHTING.getColor();
 
 	protected PathwayVertexRep vertexRep;
 	protected List<PathwayVertex> vertices;
@@ -54,6 +51,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	 * needed for rendering node highlighting
 	 */
 	protected Boolean isThisNodeSelected;
+	protected Boolean isThisNodeUsedForFiltering;
 	protected Boolean isMouseOver;
 
 	protected String label;
@@ -75,6 +73,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		this.centerY = vertexRep.getCenterY();
 		this.coords = new Coordinates();
 		this.isThisNodeSelected = false;
+		this.isThisNodeUsedForFiltering = false;
 		this.isMouseOver = false;
 		this.parentGraph = parentGraph;
 		this.vertices = vertexRep.getPathwayVertices();
@@ -196,6 +195,15 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	public Boolean getIsNodeSelected() {
 		return this.isThisNodeSelected;
+	}
+	
+	public void setIsThisNodeUsedForFiltering(Boolean selection) {
+		this.isThisNodeUsedForFiltering = selection;
+		repaint();
+	}
+
+	public Boolean getIsThisNodeUsedForFiltering() {
+		return this.isThisNodeUsedForFiltering;
 	}
 
 	public PathwayVertexRep getVertexRep() {

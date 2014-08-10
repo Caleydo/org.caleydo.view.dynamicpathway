@@ -98,7 +98,7 @@ public class NodeCompoundElement extends NodeElement {
 			g.color(CONTOUR_COLOR).fillCircle(0, 0, width+INNER_PADDING);
 		}
 		
-		g.color(FILLING_COLOR).fillCircle(0, 0, width);
+		g.color(KONTEXT_FILLING_COLOR).fillCircle(0, 0, width);
 
 		
 		g.drawText(vertexRep.getName(), TEXT_X_POS, TEXT_Y_POS, width*FONT_SIZE_MULTIPLIER, FONT_SIZE);

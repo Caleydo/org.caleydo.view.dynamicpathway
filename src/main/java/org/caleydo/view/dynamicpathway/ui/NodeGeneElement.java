@@ -1,21 +1,10 @@
 package org.caleydo.view.dynamicpathway.ui;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.caleydo.core.util.base.ILabelProvider;
-import org.caleydo.core.util.base.ILabeled;
-import org.caleydo.core.view.contextmenu.GenericContextMenuItem;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
-import org.caleydo.core.view.opengl.layout2.IGLElementContext;
 import org.caleydo.core.view.opengl.picking.AdvancedPick;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.core.view.opengl.picking.PickingMode;
-import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 
 import com.google.common.collect.Lists;
@@ -46,9 +35,10 @@ public class NodeGeneElement extends NodeElement {
 				 * if the user right clicked - show context menu
 				 */
 				if (pick.getPickingMode() == PickingMode.RIGHT_CLICKED) {
-					parentGraph.setOrResetSelectedNode(NodeGeneElement.this);
+					parentGraph.setOrResetFilteringNode(NodeGeneElement.this);
 
 					context.getSWTLayer().showContextMenu(Lists.newArrayList(filterPathwayMenu));
+					
 				}
 
 				/**
@@ -59,6 +49,7 @@ public class NodeGeneElement extends NodeElement {
 					parentGraph.setOrResetSelectedNode(NodeGeneElement.this);
 
 					if (p.isCtrlDown()) {
+						parentGraph.setOrResetFilteringNode(NodeGeneElement.this);
 						parentGraph.filterPathwayList();
 					}
 
@@ -100,8 +91,13 @@ public class NodeGeneElement extends NodeElement {
 
 		short width = vertexRep.getWidth();
 		short height = vertexRep.getHeight();
+		
 
-		if (isThisNodeSelected) {
+		if (isThisNodeUsedForFiltering) {
+			g.color(FILTER_CONTOUR_COLOR).fillRoundedRect(-1, -1, width + INNER_BOUNDS + 2,
+					height + INNER_BOUNDS + 2, ROUND_EDGE_RADIUS);
+		}
+		else if (isThisNodeSelected) {
 			g.color(SELECTION_CONTOUR_COLOR).fillRoundedRect(-1, -1, width + INNER_BOUNDS + 2,
 					height + INNER_BOUNDS + 2, ROUND_EDGE_RADIUS);
 		} else if (isMouseOver) {
@@ -111,8 +107,16 @@ public class NodeGeneElement extends NodeElement {
 			g.color(CONTOUR_COLOR).fillRoundedRect(0, 0, width + INNER_BOUNDS, height + INNER_BOUNDS,
 					ROUND_EDGE_RADIUS);
 		}
-
-		g.color(FILLING_COLOR).fillRoundedRect(OUTER_BOUNDS, OUTER_BOUNDS, width, height, ROUND_EDGE_RADIUS);
+		
+		GLGraphics filling;
+		if(parentGraph.getDynamicPathway().getFocusGraph() == vertexRep.getPathway())
+			filling = g.color(FOCUS_FILLING_COLOR);
+		else if(parentGraph.getDynamicPathway().getCombinedGraph() == vertexRep.getPathway())
+			filling = g.color(COMBINED_FILLING_COLOR);
+		else
+			filling = g.color(KONTEXT_FILLING_COLOR);
+			
+		filling.fillRoundedRect(OUTER_BOUNDS, OUTER_BOUNDS, width, height, ROUND_EDGE_RADIUS);
 
 		if (displayedVertex == null)
 			displayedVertex = vertexRep.getPathwayVertices().get(0);

@@ -39,7 +39,11 @@ import org.jgrapht.graph.DefaultEdge;
  * @author Christiane Schwarzl
  * 
  */
-public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContainer implements IFRLayoutGraph, IEventBasedSelectionManagerUser {	
+public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContainer implements IFRLayoutGraph,
+		IEventBasedSelectionManagerUser {
+
+	private static final Boolean DISPLAY_ONLY_VERTICES_WITH_EDGES = false;
+
 	/**
 	 * contains focus & kontextpathway informations
 	 */
@@ -51,16 +55,14 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	private Set<IFRLayoutNode> nodeSet;
 	private Set<IFRLayoutEdge> edgeSet;
 
-
 	/**
 	 * the currently selected node
 	 */
 	private NodeElement currentSelectedNode;
-	
+
 	/**
-	 * node after which the pathway list is filtered,
-	 * so we now if the list is filtered or not
-	 * is null if the list is unfiltered
+	 * is null if no node was selected, otherwise it is a reference to the currently selected node -> needed
+	 * for merging
 	 */
 	private NodeElement currentFilteringNode;
 
@@ -68,7 +70,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 * the view that hold the pathway list & the pathway representation
 	 */
 	private DynamicPathwayView view;
-	
+
 	/**
 	 * informs other that (and which) vertex (nodeElement) was selected
 	 */
@@ -82,8 +84,9 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		this.edgeSet = new HashSet<IFRLayoutEdge>();
 
 		this.view = view;
-		
-		this.vertexSelectionManager = new EventBasedSelectionManager(this, IDType.getIDType(EGeneIDTypes.PATHWAY_VERTEX.name()));
+
+		this.vertexSelectionManager = new EventBasedSelectionManager(this,
+				IDType.getIDType(EGeneIDTypes.PATHWAY_VERTEX.name()));
 		this.vertexSelectionManager.registerEventListeners();
 
 		setLayout(layout);
@@ -106,17 +109,24 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				: false;
 
 		pathway.addFocusOrKontextPathway(graph, addKontextPathway, currentSelectedNode);
-		if (addKontextPathway) {
+		if (!addKontextPathway) {
 			currentSelectedNode = null;
 			view.unfilterPathwayList();
+
+			nodeSet.clear();
+			edgeSet.clear();
+
+			clear();
 		}
 
-		nodeSet.clear();
-		edgeSet.clear();
-
-		clear();
-
 		for (PathwayVertexRep vrep : pathway.getCombinedVertexSet()) {
+			if (DISPLAY_ONLY_VERTICES_WITH_EDGES) {
+				if (pathway.getCombinedGraph().inDegreeOf(vrep) <= 0
+						&& pathway.getCombinedGraph().outDegreeOf(vrep) <= 0) {
+					System.out.println("ignoring: " + vrep.getShortName());
+					continue;
+				}
+			}
 
 			NodeElement node;
 
@@ -148,10 +158,13 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		}
 
-
 		for (DefaultEdge e : pathway.getCombinedEdgeSet()) {
 			PathwayVertexRep vrepSource = pathway.getEdgeSource(e);
 			PathwayVertexRep vrepTarget = pathway.getEdgeTarget(e);
+
+			if (vrepSource == null || vrepTarget == null)
+				continue;
+
 			NodeElement nodeSource = pathway.getNodeOfVertex(vrepSource);
 			NodeElement nodeTarget = pathway.getNodeOfVertex(vrepTarget);
 
@@ -209,19 +222,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		if (currentSelectedNode == null) {
 			currentSelectedNode = newSelectedNode;
 			currentSelectedNode.setIsNodeSelected(true);
-
-//			view.filterPathwayList(currentSelectedNode.getVertexRep());
 		}
-/*		*//**
-		 * if the node was already selected, deselect it
-		 *//*
-		else if (currentSelectedNode == newSelectedNode) {
-			currentSelectedNode.setIsNodeSelected(false);
-			currentSelectedNode = null;
 
-			view.unfilterPathwayList();
-
-		}*/
 		/**
 		 * if another node was selected before, deselect it and selected the new node
 		 */
@@ -230,49 +232,76 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			currentSelectedNode = newSelectedNode;
 			currentSelectedNode.setIsNodeSelected(true);
 
-//			view.filterPathwayList(currentSelectedNode.getVertexRep());
 		}
 
 	}
 	
+	/**
+	 * if a node (wrapper for PathwayVertexRep) is selected via the filtering command, it is highlighted and the pathway list on the
+	 * left is filtered by pathways, which contain this element
+	 * 
+	 * @param newSelectedNode
+	 */
+	public void setOrResetFilteringNode(NodeElement newFilteringNode) {
+		/**
+		 * if nothing was selected, just set the new node
+		 */
+		if (currentFilteringNode == null) {
+			currentFilteringNode = newFilteringNode;
+			currentFilteringNode.setIsThisNodeUsedForFiltering(true);
+		}
+
+		/**
+		 * if another node was selected before, deselect it and selected the new node
+		 */
+		else {
+			currentFilteringNode.setIsThisNodeUsedForFiltering(false);
+			currentFilteringNode = newFilteringNode;
+			currentFilteringNode.setIsThisNodeUsedForFiltering(true);
+
+		}
+
+	}
+
 	public void filterPathwayList() {
-		/** 
+		/**
 		 * a new filter was added
 		 */
-		if(currentSelectedNode != null) {
+		if (currentSelectedNode != null) {
 			view.filterPathwayList(currentSelectedNode.getVertexRep());
 			currentFilteringNode = currentSelectedNode;
-		} 
-//		else {
-//			view.unfilterPathwayList();
-//			currentFilteringNode = null;
-//		}
-		
+		}
+		// else {
+		// view.unfilterPathwayList();
+		// currentFilteringNode = null;
+		// }
+
 	}
-	
+
 	/**
-	 * listens if the path should be filtered or not 
-	 * used for selecting a kontext pathway, which contains the requested vertex
-	 *  
-	 * @param event 
+	 * listens if the path should be filtered or not used for selecting a kontext pathway, which contains the
+	 * requested vertex
+	 * 
+	 * @param event
 	 */
 	@ListenTo
 	public void onFilterPathwayListByNodeElement(FilterPathwayListByVertexEvent event) {
 		filterPathwayList();
 	}
 
-
 	public DynamicPathwayView getView() {
 		return view;
 	}
-	
+
 	/**
 	 * if a vertex was called, other views are informed
 	 * 
 	 * called by NodeElement
 	 * 
-	 * @param vertex which was selected
-	 * @param node to the which the vertex belongs
+	 * @param vertex
+	 *            which was selected
+	 * @param node
+	 *            to the which the vertex belongs
 	 * @param pick
 	 */
 	public void onSelect(List<PathwayVertex> vertices, NodeElement node, Pick pick) {
@@ -280,24 +309,24 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		case MOUSE_OVER:
 			vertexSelectionManager.clearSelection(SelectionType.MOUSE_OVER);
-			for(PathwayVertex vertex : vertices)
+			for (PathwayVertex vertex : vertices)
 				vertexSelectionManager.addToType(SelectionType.MOUSE_OVER, vertex.getID());
 			break;
 
 		case MOUSE_OUT:
-			for(PathwayVertex vertex : vertices)
+			for (PathwayVertex vertex : vertices)
 				vertexSelectionManager.removeFromType(SelectionType.MOUSE_OVER, vertex.getID());
 			break;
 
 		case CLICKED:
 			vertexSelectionManager.clearSelection(SelectionType.SELECTION);
-			for(PathwayVertex vertex : vertices)
+			for (PathwayVertex vertex : vertices)
 				vertexSelectionManager.addToType(SelectionType.SELECTION, vertex.getID());
 			break;
-			
+
 		case RIGHT_CLICKED:
 			vertexSelectionManager.clearSelection(SelectionType.SELECTION);
-			for(PathwayVertex vertex : vertices)
+			for (PathwayVertex vertex : vertices)
 				vertexSelectionManager.addToType(SelectionType.SELECTION, vertex.getID());
 			break;
 
@@ -305,15 +334,15 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			// Do not trigger a selection update for other picking modes
 			return;
 		}
-		
+
 		vertexSelectionManager.triggerSelectionUpdateEvent();
 		repaint();
 	}
 
 	@Override
-	public void notifyOfSelectionChange(EventBasedSelectionManager selectionManager) {		
+	public void notifyOfSelectionChange(EventBasedSelectionManager selectionManager) {
 		repaint();
-		
+
 	}
 
 	@Override
@@ -321,6 +350,15 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		vertexSelectionManager.unregisterEventListeners();
 		vertexSelectionManager = null;
 		super.takeDown();
+	}
+	
+
+	public NodeElement getCurrentFilteringNode() {
+		return currentFilteringNode;
+	}
+
+	public void setCurrentFilteringNode(NodeElement currentFilteringNode) {
+		this.currentFilteringNode = currentFilteringNode;
 	}
 
 }

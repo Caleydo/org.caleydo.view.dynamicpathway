@@ -5,15 +5,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
-import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 import org.caleydo.datadomain.pathway.manager.PathwayManager;
 import org.caleydo.view.dynamicpathway.ui.NodeElement;
-import org.jgrapht.alg.EulerianCircuit;
 import org.jgrapht.graph.DefaultEdge;
 
 /**
@@ -102,7 +99,8 @@ public class DynamicPathwayGraph {
 		if (!addKontextPathway) {
 			addFocusPathway(pathway);
 		} else {
-			addKontextGraph(pathway, currentSelectedNode);
+			kontextGraphs.add(pathway);
+//			addKontextGraph(pathway, currentSelectedNode);
 		}
 
 	}
@@ -161,13 +159,18 @@ public class DynamicPathwayGraph {
 			 * so cluttered
 			 * TODO: implement user interaction
 			 */
-			if (vrep.getType() != EPathwayVertexType.map) {
-				if (DISPLAY_ONLY_VERTICES_WITH_EDGES
-						&& !(graph.inDegreeOf(vrep) == 0 && graph.outDegreeOf(vrep) == 0))
+//			if (vrep.getType() != EPathwayVertexType.map) {
+//				if (DISPLAY_ONLY_VERTICES_WITH_EDGES) {
+//					if(graph.inDegreeOf(vrep) > 0 && graph.outDegreeOf(vrep) > 0)
+//						combinedGraph.addVertex(vrep);
+//				}
+//				else
 					combinedGraph.addVertex(vrep);
-			}
+					
+//			}
 		}
 		for (DefaultEdge edge : graph.edgeSet()) {
+			
 			combinedGraph.addEdge(graph.getEdgeSource(edge), graph.getEdgeTarget(edge), edge);
 		}
 	}
