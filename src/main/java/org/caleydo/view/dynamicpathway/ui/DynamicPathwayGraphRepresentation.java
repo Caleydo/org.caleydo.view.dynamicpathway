@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -49,7 +50,7 @@ import com.google.common.collect.Lists;
 public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContainer implements IFRLayoutGraph,
 		IEventBasedSelectionManagerUser {
 
-	private static final boolean DISPLAY_ONLY_VERTICES_WITH_EDGES = true;
+	private static final boolean DISPLAY_ONLY_VERTICES_WITH_EDGES = false;
 
 	/**
 	 * contains focus & kontextpathway informations
@@ -130,53 +131,51 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			preventDuplicatesMap.clear();
 
 			clear();
-			
-			for (PathwayVertexRep vrep : pathway.getCombinedVertexSet()) {
-				if (DISPLAY_ONLY_VERTICES_WITH_EDGES) {
-					if (pathway.getCombinedGraph().inDegreeOf(vrep) <= 0
-							&& pathway.getCombinedGraph().outDegreeOf(vrep) <= 0) {
-						System.out.println("ignoring: " + vrep.getShortName());
-						continue;
-					}
-				}
 
-				NodeElement node = addNewNodeElement(vrep);
+			// for (PathwayVertexRep vrep : pathway.getCombinedVertexSet()) {
+			// if (DISPLAY_ONLY_VERTICES_WITH_EDGES) {
+			// if (pathway.getCombinedGraph().inDegreeOf(vrep) <= 0
+			// && pathway.getCombinedGraph().outDegreeOf(vrep) <= 0) {
+			// System.out.println("ignoring: " + vrep.getShortName());
+			// continue;
+			// }
+			// }
+			//
+			// NodeElement node = addNewNodeElement(vrep);
+			//
+			// /**
+			// * needed for the layouting algorithm
+			// */
+			// // nodeSet.add(node);
+			//
+			// }
 
-				/**
-				 * needed for the layouting algorithm
-				 */
-				nodeSet.add(node);
+			removeDuplicateNodeElements(graph);
+		} else {
+			// for(PathwayVertexRep vrep : graph.vertexSet()) {
+			// if (DISPLAY_ONLY_VERTICES_WITH_EDGES) {
+			// if (graph.inDegreeOf(vrep) <= 0
+			// && graph.outDegreeOf(vrep) <= 0) {
+			// System.out.println("ignoring: " + vrep.getShortName());
+			// continue;
+			// }
+			// }
+			//
+			// NodeElement node = addNewNodeElement(vrep);
+			//
+			// /**
+			// * needed for the layouting algorithm
+			// */
+			// // nodeSet.add(node);
+			//
+			// }
 
-			}
-
-			removeDuplicateNodeElements(pathway.getFocusGraph());
-		}
-		else {
-			for(PathwayVertexRep vrep : graph.vertexSet()) {
-				if (DISPLAY_ONLY_VERTICES_WITH_EDGES) {
-					if (graph.inDegreeOf(vrep) <= 0
-							&& graph.outDegreeOf(vrep) <= 0) {
-						System.out.println("ignoring: " + vrep.getShortName());
-						continue;
-					}
-				}
-
-				NodeElement node = addNewNodeElement(vrep);
-
-				/**
-				 * needed for the layouting algorithm
-				 */
-				nodeSet.add(node);
-
-			}
-			
 			int index = pathway.getKontextGraphs().indexOf(graph);
-			
-			assert(index != -1);
 
-			removeDuplicateNodeElements(pathway.getKontextGraphs().get(index));
-			}
+			assert (index != -1);
 
+			 removeDuplicateNodeElements(pathway.getKontextGraphs().get(index));
+		}
 
 		// for (DefaultEdge e : pathway.getCombinedEdgeSet()) {
 		// PathwayVertexRep vrepSource = pathway.getEdgeSource(e);
@@ -247,78 +246,101 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		 * much of a mess
 		 */
 		Map<PathwayVertex, NodeElement> newNodeElements = new HashMap<PathwayVertex, NodeElement>();
-		
+		Map<NodeElement, NodeElement> removedNodeSubstitutedByNewNodeMap = new HashMap<NodeElement, NodeElement>();
 
-		for (Iterator<NodeElement> nodeSetIterator = nodeSet.iterator(); nodeSetIterator.hasNext();) {
-			boolean removeCurrentNodeFromNodeSet = false;
+		// for (Iterator<NodeElement> nodeSetIterator = nodeSet.iterator(); nodeSetIterator.hasNext();) {
+		// for (PathwayVertexRep vrepOfGraph : graphToSaveNewElementsTo.vertexSet()) {
+		for (Iterator<PathwayVertexRep> vrepIterator = graphToSaveNewElementsTo.vertexSet().iterator(); vrepIterator
+				.hasNext();) {
+			PathwayVertexRep vrepOfGraph = vrepIterator.next();
+			// System.out.println(vrepOfGraph.getName() + " type: " + vrepOfGraph.getType());
+			if (vrepOfGraph.getType() == EPathwayVertexType.map) 
+				continue;
 
-			NodeElement node = nodeSetIterator.next();
+				boolean removeCurrentNodeFromNodeSet = false;
+				NodeElement substitutedByNode = null;
 
-			for (Iterator<PathwayVertex> vrepOfNodeIterator = node.getVertices().iterator(); vrepOfNodeIterator
-					.hasNext();) {
+				NodeElement node = addNewNodeElement(vrepOfGraph);
+				// NodeElement node = nodeSetIterator.next();
 
-				PathwayVertex vertexOfNode = vrepOfNodeIterator.next();
-				PathwayVertexRep vrepOfNode = node.getVertexRep();
+				for (Iterator<PathwayVertex> vrepOfNodeIterator = node.getVertices().iterator(); vrepOfNodeIterator
+						.hasNext();) {
 
-				// if this is the first (and maybe only) time, this PathwayVertex is in the PathwayVertex,
-				// make a new entry
-				if (preventDuplicatesMap.get(vertexOfNode) == null) {
-					List<NodeElement> referencesToThisString = new LinkedList<NodeElement>();
-					referencesToThisString.add(node);
+					PathwayVertex vertexOfNode = vrepOfNodeIterator.next();
+					PathwayVertexRep vrepOfNode = node.getVertexRep();
 
-					preventDuplicatesMap.put(vertexOfNode, referencesToThisString);
-					removeCurrentNodeFromNodeSet = false;
-				}
-				// make new NodeElement
-				else {
-					assert (preventDuplicatesMap.get(vertexOfNode).size() >= 1);
+					// if this is the first (and maybe only) time, this PathwayVertex is in the PathwayVertex,
+					// make a new entry
+					if (preventDuplicatesMap.get(vertexOfNode) == null) {
+						List<NodeElement> referencesToThisString = new LinkedList<NodeElement>();
+						referencesToThisString.add(node);
 
-					// if there was no merged node created yet
-					if (newNodeElements.get(vertexOfNode) == null) {
-						String shapeType = vrepOfNode.getShapeType().name();
-						PathwayVertexRep newMergedVrep = new PathwayVertexRep(
-								vertexOfNode.getHumanReadableName(), vrepOfNode.getShapeType().name(),
-								vrepOfNode.getCenterX(), vrepOfNode.getCenterY(), vrepOfNode.getWidth(),
-								vrepOfNode.getHeight());
-						newMergedVrep.addPathwayVertex(vertexOfNode);
-						newMergedVrep.setPathway(graphToSaveNewElementsTo);
-						graphToSaveNewElementsTo.addVertex(newMergedVrep);
-
-						NodeElement newMergedNode = addNewNodeElement(newMergedVrep);
-						newNodeElements.put(vertexOfNode, newMergedNode);
-					}
-
-					// if this was the last vertex of this node -> delete node (merged graph node is its
-					// replacement)
-					if (node.getVertices().size() <= 1) {
-						removeCurrentNodeFromNodeSet = true;
-					} else {
+						preventDuplicatesMap.put(vertexOfNode, referencesToThisString);
 						removeCurrentNodeFromNodeSet = false;
+						substitutedByNode = null;
 					}
+					// make new NodeElement
+					else {
+						assert (preventDuplicatesMap.get(vertexOfNode).size() >= 1);
 
-					vrepOfNodeIterator.remove();
+						// if there was no merged node created yet
+						if (newNodeElements.get(vertexOfNode) == null) {
+							String shapeType = vrepOfNode.getShapeType().name();
+							PathwayVertexRep newMergedVrep = new PathwayVertexRep(
+									vertexOfNode.getHumanReadableName(), vrepOfNode.getShapeType().name(),
+									vrepOfNode.getCenterX(), vrepOfNode.getCenterY(), vrepOfNode.getWidth(),
+									vrepOfNode.getHeight());
+							newMergedVrep.addPathwayVertex(vertexOfNode);
+							newMergedVrep.setPathway(graphToSaveNewElementsTo);
+							
+							
+							
+
+							NodeElement newMergedNode = addNewNodeElement(newMergedVrep);
+							newNodeElements.put(vertexOfNode, newMergedNode);
+						}
+
+						// if this was the last vertex of this node -> delete node (merged graph node is its
+						// replacement)
+						if (node.getVertices().size() <= 1) {
+							removeCurrentNodeFromNodeSet = true;
+							substitutedByNode = newNodeElements.get(vrepOfNode);
+							assert (substitutedByNode != null);
+						} else {
+							removeCurrentNodeFromNodeSet = false;
+							substitutedByNode = null;
+						}
+
+						vrepOfNodeIterator.remove();
+
+					}
 
 				}
 
-			}
-
-			if (removeCurrentNodeFromNodeSet) {
-				nodeSetIterator.remove();
-			} else
-				add(node);
-
+				if (removeCurrentNodeFromNodeSet) {
+					removedNodeSubstitutedByNewNodeMap.put(node, substitutedByNode);
+					// nodeSetIterator.remove();
+				} else {
+					nodeSet.add(node);
+					// add(node);
+				}
 		}
-	
-		
+
 		/**
-		 *  add all new merged node elements to the nodeset & the rendered children set
+		 * add all new merged node elements to the nodeset & the rendered children set
 		 */
-		for(Map.Entry<PathwayVertex, NodeElement> newNodeElementEntry : newNodeElements.entrySet()) {
-			NodeElement newNodeElement = newNodeElementEntry.getValue();
+		for (Map.Entry<PathwayVertex, NodeElement> newNodeElementEntry : newNodeElements.entrySet()) {
 			
+			NodeElement newNodeElement = newNodeElementEntry.getValue();
+			graphToSaveNewElementsTo.addVertex(newNodeElement.getVertexRep());
+
 			nodeSet.add(newNodeElement);
-			add(newNodeElement);
+			// add(newNodeElement);
 		}
+
+		 for(NodeElement node : nodeSet) {
+		 add(node);
+		 }
 
 	}
 
