@@ -9,6 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.caleydo.core.data.selection.SelectionType;
 import org.caleydo.core.util.base.ILabeled;
@@ -25,7 +26,7 @@ import org.caleydo.view.dynamicpathway.util.CalculateIntersectionUtil;
 import org.caleydo.view.dynamicpathway.util.Coordinates;
 
 public class NodeElement extends GLElementContainer implements IFRLayoutNode {
-
+	
 	protected static final int FONT_SIZE = 12;
 	protected static final Color CONTOUR_COLOR = Color.LIGHT_GRAY;
 	protected static final String KONTEXT_FILLING_COLOR = "#F2F2F2";
@@ -37,6 +38,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	protected PathwayVertexRep vertexRep;
 	protected List<PathwayVertex> vertices;
+	protected List<PathwayVertexRep> vrepsWithThisNodesVerticesList;
 
 	/**
 	 * the Vertex, which's name is displayed in the graph by default, this is the first vertex in
@@ -61,11 +63,18 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	protected double height;
 	protected double width;
+	
+	/**
+	 * if this node element is merged (artificially created - not in original PathwayGraph) 
+	 * set false by default
+	 */
+	protected boolean isMerged = false;
 
 	/**
 	 * the context menu, which pops up, when a node is right clicked
 	 */
 	GenericContextMenuItem filterPathwayMenu;
+	
 
 	public NodeElement(PathwayVertexRep vertexRep, final DynamicPathwayGraphRepresentation parentGraph) {
 		this.vertexRep = vertexRep;
@@ -223,6 +232,11 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	public void setDisplayedVertex(PathwayVertex displayedVertex) {
 		this.displayedVertex = displayedVertex;
 	}
+	
+
+	public String getLabel() {
+		return label;
+	}
 
 	/**
 	 * removes a vertex from the displayed vertex list -> needed to remove duplicate vertices within the graph
@@ -231,13 +245,62 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	 * @return returns true if this is the last vertex of the NodeElement (which means the whole node needs to
 	 *         be removed) & false otherwise
 	 */
-	public Boolean removeVertex(PathwayVertex vertexToRemove) {
+	public boolean removeVertex(PathwayVertex vertexToRemove) {
 		if (vertices.size() < 2)
 			return false;
-		vertices.remove(vertexToRemove);
+		boolean containedElement = vertices.remove(vertexToRemove);
 		this.displayedVertex = vertices.get(0);
 		this.label = displayedVertex.getHumanReadableName();
-		return true;
+		return containedElement;
 	}
+	
+	/**
+	 * remove multiple vertices from the nodes displayed vertex list
+	 * 
+	 * @param node
+	 * @param verticesToRemove
+	 */
+	public boolean removeMultipleVertices(List<PathwayVertex> verticesToRemove) {
+
+		boolean success = true;
+		for(PathwayVertex vertexToRemove : verticesToRemove) {
+			boolean tmp = this.removeVertex(vertexToRemove);
+			success = success && tmp;
+		}
+		
+		return success;
+	}
+	
+
+	@Override
+	public String toString() {
+		String outputString = label + ": ";
+		outputString += "Vrep( " +vertexRep + ") ";
+		outputString += "Vertices[" + vertices + "]";
+		
+		return outputString;
+	}
+
+	public boolean isMerged() {
+		return isMerged;
+	}
+
+	public void setIsMerged(boolean isMerged) {
+		this.isMerged = isMerged;
+	}
+
+	public List<PathwayVertexRep> getVrepsWithThisNodesVerticesList() {
+		return vrepsWithThisNodesVerticesList;
+	}
+
+	public void setVrepsWithThisNodesVerticesList(List<PathwayVertexRep> vrepsWithThisNodesVerticesList) {
+		this.vrepsWithThisNodesVerticesList = vrepsWithThisNodesVerticesList;
+	}
+	
+	public void addVrepWithThisNodesVerticesList(PathwayVertexRep vrepWithThisNodesVertices) {
+		this.vrepsWithThisNodesVerticesList.add(vrepWithThisNodesVertices);
+	}
+	
+	
 
 }

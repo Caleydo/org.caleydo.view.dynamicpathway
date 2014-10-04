@@ -15,8 +15,7 @@ public class NodeGeneElement extends NodeElement {
 	private static final int INNER_BOUNDS = 2;
 	private static final int OUTER_BOUNDS = 1;
 	private static final int ROUND_EDGE_RADIUS = 2;
-
-
+	
 	public NodeGeneElement(final PathwayVertexRep vertexRep,
 			final DynamicPathwayGraphRepresentation parentGraph) {
 		super(vertexRep, parentGraph);
@@ -90,6 +89,10 @@ public class NodeGeneElement extends NodeElement {
 		short height = vertexRep.getHeight();
 		
 
+		/**
+		 * represent BORDER of node different:
+		 * if it was used for filtering, clicked on, the mouse is moved over or nothing of these was done
+		 */
 		if (isThisNodeUsedForFiltering) {
 			g.color(FILTER_CONTOUR_COLOR).fillRoundedRect(-1, -1, width + INNER_BOUNDS + 2,
 					height + INNER_BOUNDS + 2, ROUND_EDGE_RADIUS);
@@ -105,6 +108,9 @@ public class NodeGeneElement extends NodeElement {
 					ROUND_EDGE_RADIUS);
 		}
 		
+		/**
+		 * choose filling color according to which graph it belongs
+		 */
 		GLGraphics filling;
 		if(parentGraph.getDynamicPathway().getFocusGraph() == vertexRep.getPathway())
 			filling = g.color(FOCUS_FILLING_COLOR);
@@ -128,5 +134,15 @@ public class NodeGeneElement extends NodeElement {
 		super.renderPickImpl(g, w, h);
 
 	}
+
+
+
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return super.toString();
+	}
+	
+	
 
 }
