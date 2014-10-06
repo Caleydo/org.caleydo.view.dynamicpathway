@@ -26,7 +26,9 @@ import org.caleydo.view.dynamicpathway.util.CalculateIntersectionUtil;
 import org.caleydo.view.dynamicpathway.util.Coordinates;
 
 public class NodeElement extends GLElementContainer implements IFRLayoutNode {
-	
+
+	protected String uid;
+
 	protected static final int FONT_SIZE = 12;
 	protected static final Color CONTOUR_COLOR = Color.LIGHT_GRAY;
 	protected static final String KONTEXT_FILLING_COLOR = "#F2F2F2";
@@ -63,10 +65,10 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	protected double height;
 	protected double width;
-	
+
 	/**
-	 * if this node element is merged (artificially created - not in original PathwayGraph) 
-	 * set false by default
+	 * if this node element is merged (artificially created - not in original PathwayGraph) set false by
+	 * default
 	 */
 	protected boolean isMerged = false;
 
@@ -74,9 +76,9 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	 * the context menu, which pops up, when a node is right clicked
 	 */
 	GenericContextMenuItem filterPathwayMenu;
-	
 
 	public NodeElement(PathwayVertexRep vertexRep, final DynamicPathwayGraphRepresentation parentGraph) {
+		this.uid = UUID.randomUUID().toString();
 		this.vertexRep = vertexRep;
 		this.centerX = vertexRep.getCenterX();
 		this.centerY = vertexRep.getCenterY();
@@ -85,8 +87,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		this.isThisNodeUsedForFiltering = false;
 		this.isMouseOver = false;
 		this.parentGraph = parentGraph;
-		this.vertices = new LinkedList<PathwayVertex>(
-				vertexRep.getPathwayVertices());
+		this.vertices = new LinkedList<PathwayVertex>(vertexRep.getPathwayVertices());
 
 		if (vertexRep.getType() != EPathwayVertexType.group) {
 			// this.vertices = vertexRep.getPathwayVertices();
@@ -232,7 +233,6 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	public void setDisplayedVertex(PathwayVertex displayedVertex) {
 		this.displayedVertex = displayedVertex;
 	}
-	
 
 	public String getLabel() {
 		return label;
@@ -253,7 +253,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		this.label = displayedVertex.getHumanReadableName();
 		return containedElement;
 	}
-	
+
 	/**
 	 * remove multiple vertices from the nodes displayed vertex list
 	 * 
@@ -263,21 +263,23 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	public boolean removeMultipleVertices(List<PathwayVertex> verticesToRemove) {
 
 		boolean success = true;
-		for(PathwayVertex vertexToRemove : verticesToRemove) {
+		for (PathwayVertex vertexToRemove : verticesToRemove) {
 			boolean tmp = this.removeVertex(vertexToRemove);
 			success = success && tmp;
 		}
-		
+
 		return success;
 	}
-	
 
 	@Override
 	public String toString() {
-		String outputString = label + ": ";
-		outputString += "Vrep( " +vertexRep + ") ";
+		String outputString = uid + ": ";
+		outputString += "Label(" + label + ") ";
+		outputString += "VrepSize("
+				+ ((vrepsWithThisNodesVerticesList != null) ? Integer.toString(vrepsWithThisNodesVerticesList
+						.size()) : "1") + ") ";
 		outputString += "Vertices[" + vertices + "]";
-		
+
 		return outputString;
 	}
 
@@ -296,11 +298,9 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	public void setVrepsWithThisNodesVerticesList(List<PathwayVertexRep> vrepsWithThisNodesVerticesList) {
 		this.vrepsWithThisNodesVerticesList = vrepsWithThisNodesVerticesList;
 	}
-	
+
 	public void addVrepWithThisNodesVerticesList(PathwayVertexRep vrepWithThisNodesVertices) {
 		this.vrepsWithThisNodesVerticesList.add(vrepWithThisNodesVertices);
 	}
-	
-	
 
 }

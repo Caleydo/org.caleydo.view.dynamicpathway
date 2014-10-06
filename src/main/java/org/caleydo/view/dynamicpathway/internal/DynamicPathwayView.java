@@ -74,6 +74,8 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 		root.add(currentPathwayElement);
 		GLElementContainer cont = new GLElementContainer(new GLSizeRestrictiveFlowLayout(false, 3, GLPadding.ZERO));
 		cont.setSize(200, Float.NaN);
+		ControllbarContainer controllCont = new ControllbarContainer();
+		cont.add(controllCont);
 		root.add(cont);
 
 		// vertexSelectionManager = new EventBasedSelectionManager(this,
@@ -113,6 +115,7 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 	 */
 	public void addPathway(PathwayGraph pathway) {
 		this.currentPathwayElement.addPathwayRep(pathway);
+		
 	}
 
 	/**

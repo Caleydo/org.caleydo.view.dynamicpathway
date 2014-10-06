@@ -85,9 +85,11 @@ public class NodeGeneElement extends NodeElement {
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {
 
-		short width = vertexRep.getWidth();
-		short height = vertexRep.getHeight();
+//		short width = vertexRep.getWidth();
+//		short height = vertexRep.getHeight();
 		
+		short width = (short)this.width;
+		short height = (short)this.height;		
 
 		/**
 		 * represent BORDER of node different:
