@@ -167,7 +167,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			// continue;
 			// }
 
-			addGraphWithoutDuplicates(graph, true);
+			addGraphWithoutDuplicates(graph, true, true);
 //			 addGraphWithDuplicates(graph);
 
 			try {
@@ -176,6 +176,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				e.printStackTrace();
 			}
 		} else {
+			clear();
 			setOrResetFilteringNode(currentFilteringNode);
 			// for(PathwayVertexRep vrep : graph.vertexSet()) {
 			// if (DISPLAY_ONLY_VERTICES_WITH_EDGES) {
@@ -186,41 +187,13 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			// }
 			// }
 
-			int index = pathway.getKontextGraphs().indexOf(graph);
+			
+			addGraphWithoutDuplicates(graph, false, false);
 
-			assert (index != -1);
-
-			addGraphWithoutDuplicatesOld(pathway.getKontextGraphs().get(index));
+//			addGraphWithoutDuplicatesOld(pathway.getKontextGraphs().get(index));
 
 		}
 
-		// for (DefaultEdge e : pathway.getCombinedEdgeSet()) {
-		// PathwayVertexRep vrepSource = pathway.getEdgeSource(e);
-		// PathwayVertexRep vrepTarget = pathway.getEdgeTarget(e);
-		//
-		// if (vrepSource == null || vrepTarget == null)
-		// continue;
-		//
-		// NodeElement nodeSource = pathway.getNodeOfVertex(vrepSource);
-		// NodeElement nodeTarget = pathway.getNodeOfVertex(vrepTarget);
-		//
-		// if (nodeSource == null || nodeTarget == null)
-		// continue;
-		//
-		// EdgeElement edgeElement = new EdgeElement(e, nodeSource, nodeTarget);
-		//
-		// /**
-		// * so the layouting algorithm can extinguish, if it's a node or an edge
-		// */
-		// edgeElement.setLayoutData(false);
-		//
-		// /**
-		// * needed for the layouting algorithm
-		// */
-		// edgeSet.add((IFRLayoutEdge) edgeElement);
-		//
-		// add(edgeElement);
-		// }
 
 	}
 
@@ -262,7 +235,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		 * needed for the edge, because edges just get you the vertexRep of the source & target vertices, but
 		 * not the element, which contain the new position
 		 */
-		pathway.addVertexNodeMapEntry(vrep, node);
+//		pathway.addVertexNodeMapEntry(vrep, node);
 
 		return node;
 
@@ -273,24 +246,18 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 * 
 	 * @param newGraph
 	 */
-	private void addGraphWithoutDuplicates(PathwayGraph newGraph, boolean addToSameGraph) {
+	private void addGraphWithoutDuplicates(PathwayGraph newGraph, boolean addToSameGraph, boolean doDraw) {
 		/**
 		 * contains information, which PathwayVertex belongs to which NodeElement
 		 */
-		// Map<PathwayVertex, NodeElement> uniqueVertexMap = new HashMap<PathwayVertex, NodeElement>();
-
-		/**
-		 * needed for creating edges correctly (only contain information about original PathwayVertexRep - not
-		 * merged; contains information, where to redirect edges
-		 */
-		Map<PathwayVertexRep, List<NodeElement>> vrepNodeMap = new HashMap<PathwayVertexRep, List<NodeElement>>();
+//		 Map<PathwayVertex, NodeElement> uniqueVertexMap2 = new HashMap<PathwayVertex, NodeElement>();
 
 		for (PathwayVertexRep vrep : newGraph.vertexSet()) {
 			if (vrep.getType() == EPathwayVertexType.map)
 				continue;
 
 			try {
-				vrepNodeMap = checkAndMergeNodes(newGraph, vrep, vrepNodeMap);
+				checkAndMergeNodes(newGraph, vrep, uniqueVertexMap, addToSameGraph);
 			} catch (NodeMergingException e) {
 				System.err.println(e.getMessage());
 				System.exit(-1);
@@ -300,13 +267,14 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		for (DefaultEdge edge : newGraph.edgeSet()) {
 			try {
-				addEdgeToEdgeSet(edge, newGraph, vrepNodeMap);
+				addEdgeToEdgeSet(edge, newGraph, uniqueVertexMap);
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
 			}
 		}
-
-		mergeLogger.info("vrepNodeMap: " + vrepNodeMap.toString());
+		
+//		if(!doDraw)
+//			return;
 
 		for (NodeElement node : nodeSet)
 			add(node);
@@ -315,8 +283,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			add(edge);
 	}
 
-	private void addEdgeToEdgeSet(DefaultEdge edge, PathwayGraph pathway,
-			Map<PathwayVertexRep, List<NodeElement>> vrepNodeMap) throws Exception {
+	private void addEdgeToEdgeSet(DefaultEdge edge, PathwayGraph pathway, Map<PathwayVertex, NodeElement> vertexNodeMap) throws Exception {
 		PathwayVertexRep srcVrep = pathway.getEdgeSource(edge);
 		PathwayVertexRep targetVrep = pathway.getEdgeTarget(edge);
 		
@@ -324,25 +291,27 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		List<NodeElement> targetNodes = new LinkedList<NodeElement>();
 		
 		for(PathwayVertex srcVertex : srcVrep.getPathwayVertices()) {		
-			if(!uniqueVertexMap.containsKey(srcVertex) || uniqueVertexMap.get(srcVertex) == null)
+			if(!vertexNodeMap.containsKey(srcVertex) || vertexNodeMap.get(srcVertex) == null)
 				throw new NodeMergingException("srcVertex(" + srcVertex + ") not in uniqueVertexMap");
 			
-			srcNodes.add(uniqueVertexMap.get(srcVertex));		
+			srcNodes.add(vertexNodeMap.get(srcVertex));		
 		}
 		
 		for(PathwayVertex targetVertex : targetVrep.getPathwayVertices()) {		
-			if(!uniqueVertexMap.containsKey(targetVertex) || uniqueVertexMap.get(targetVertex) == null)
+			if(!vertexNodeMap.containsKey(targetVertex) || vertexNodeMap.get(targetVertex) == null)
 				throw new NodeMergingException("targetVertex(" + targetVertex + ") not in uniqueVertexMap");
 			
-			targetNodes.add(uniqueVertexMap.get(targetVertex));		
+			targetNodes.add(vertexNodeMap.get(targetVertex));		
 		}
 		
 		for(NodeElement srcNode : srcNodes) {
 			for(NodeElement targetNode : targetNodes) {
 				if(srcNode == targetNode)
-					throw new NodeMergingException("srcNode == targetNode");
+					continue;
+//					throw new NodeMergingException("srcNode == targetNode");
 				
 				EdgeElement edgeEl = new EdgeElement(edge, srcNode, targetNode);
+				edgeEl.setLayoutData(false);
 				edgeSet.add(edgeEl);
 			}
 		}
@@ -357,25 +326,23 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 *            the graph that should be added without duplicates
 	 * @param pathwayVertexRepToCheck
 	 *            check its vertices for duplicates within the uniqueVertexMap
-	 * @return map that contains information, where to redirect edges; needed for creating edges correctly
-	 *         (only contain information about original PathwayVertexRep - not merged;
 	 * @throws NodeMergingException
 	 *             internal error - tool didn't behave as expected
 	 */
-	private Map<PathwayVertexRep, List<NodeElement>> checkAndMergeNodes(PathwayGraph graphToAdd,
-			PathwayVertexRep pathwayVertexRepToCheck, Map<PathwayVertexRep, List<NodeElement>> vrepNodeMap)
+	private void checkAndMergeNodes(PathwayGraph graphToAdd,
+			PathwayVertexRep pathwayVertexRepToCheck, Map<PathwayVertex, NodeElement> vertexNodeMap, boolean addToSameGraph)
 			throws NodeMergingException {
 
 		List<PathwayVertex> verticesToCheckList = new ArrayList<PathwayVertex>(
 				pathwayVertexRepToCheck.getPathwayVertices());
 		
-		printUniqueVertexMap();
+//		printUniqueVertexMap();
 		
 		if (verticesToCheckList.size() < 1) {
 			System.err.println("-----------------------------------------------------------");
 			System.err.println("Vrep (" + pathwayVertexRepToCheck + ") doesn't have vertices");
 			System.err.println("-----------------------------------------------------------");
-			return vrepNodeMap;
+			return;
 		}
 		/**
 		 * just for debugging: remove vertices with duplicate names
@@ -392,7 +359,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		/**
 		 * get map with all duplicate nodes
 		 */
-		Map<NodeElement, List<PathwayVertex>> nodesWithSameVerticesMap = getNodeElementsContainingSameVertices(verticesToCheckList);
+		Map<NodeElement, List<PathwayVertex>> nodesWithSameVerticesMap = getNodeElementsContainingSameVertices(vertexNodeMap, verticesToCheckList);
 		if (nodesWithSameVerticesMap.size() > 0)
 			mergeLogger.info("nodesWithSameVerticesMap for " + pathwayVertexRepToCheck.getShortName()
 					+ ": \n" + nodesWithSameVerticesMap + "\n--------------------------------------");
@@ -412,10 +379,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			nodeSet.add(node);
 
 			for (PathwayVertex vertex : nonDuplicateVertexList) {
-				uniqueVertexMap.put(vertex, node);
+				vertexNodeMap.put(vertex, node);
 			}
-
-			addNodeToVrepNodeMap(vrepNodeMap, pathwayVertexRepToCheck, node);
 		}
 
 		/**
@@ -439,8 +404,11 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 						nodeVrep.getCenterY(), nodeVrep.getWidth(), nodeVrep.getHeight());
 				for (PathwayVertex mergedVertex : sameVerticesList)
 					mergedVrep.addPathwayVertex(mergedVertex);
-				// mergedVrep.setPathway(graphToAdd);
-				mergedVrep.setPathway(pathway.getCombinedGraph());
+				
+				if(addToSameGraph)
+					mergedVrep.setPathway(graphToAdd);
+				else 
+					mergedVrep.setPathway(pathway.getCombinedGraph());
 				pathway.getCombinedGraph().addVertex(mergedVrep);
 				List<PathwayVertexRep> vreps = new LinkedList<PathwayVertexRep>();
 				vreps.add(pathwayVertexRepToCheck);
@@ -453,14 +421,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				 * deleted, because the merged node took its purpose
 				 */
 				if (nodeWithDuplicateVertices.getVertices().size() == sameVerticesList.size()) {
-					List<NodeElement> edgeRedirectionList = vrepNodeMap.get(nodeVrep);
-					boolean containedNode = edgeRedirectionList.remove(nodeWithDuplicateVertices);
-
-					if (containedNode == false)
-						throw new NodeMergingException("NodeElement list of vrepNodeMap.get("
-								+ nodeVrep.getName() + ") didn't contain node to be deleted");
-
-					containedNode = nodeSet.remove(nodeWithDuplicateVertices);
+					
+					boolean containedNode = nodeSet.remove(nodeWithDuplicateVertices);
 
 					if (containedNode == false)
 						throw new NodeMergingException("nodeSet didn't contain node("
@@ -480,12 +442,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				 * add new vertices, node elements, replace old node with new merged
 				 */
 				for (PathwayVertex sameVertex : sameVerticesList) {
-					uniqueVertexMap.put(sameVertex, mergedNode);
+					vertexNodeMap.put(sameVertex, mergedNode);
 				}
-				vrepNodeMap.get(nodeVrep).add(mergedNode);
-				List<NodeElement> mergedNodes = new LinkedList<NodeElement>();
-				mergedNodes.add(mergedNode);
-				vrepNodeMap.put(mergedVrep, mergedNodes);
 
 			} // if the node element to check with is already a merged node
 			else {
@@ -533,29 +491,23 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 					for (PathwayVertex mergedVertex : splitOfMergedVertexList) {
 						mergedVrep.addPathwayVertex(mergedVertex);
-						uniqueVertexMap.put(mergedVertex, mergedNode);
+						vertexNodeMap.put(mergedVertex, mergedNode);
 					}
 
 					nodeSet.add(mergedNode);
-
-					// for(PathwayVertexRep vrepOfNode : vrepsOfNode)
-					// vrepNodeMap.get(vrepOfNode).add(mergedNode);
-					for (PathwayVertexRep vrepOfNode : vrepsOfNode)
-						addNodeToVrepNodeMap(vrepNodeMap, vrepOfNode, mergedNode);
 
 				} else {
 					/**
 					 * all of node's vertices are a subset of vrep, so just add it to the vrep-node entry
 					 */
-					if(!vrepNodeMap.containsKey(pathwayVertexRepToCheck)) {
-						System.out.print("[");
-						for(PathwayVertex vertex : nodeWithDuplicateVertices.getVertices())
-							System.out.print(vertex.getHumanReadableName() + ", ");
-						System.out.println("]");
-//						throw new NodeMergingException("vrepNodeMap did not contain vrep, even though node is merged. Vrep type: " + pathwayVertexRepToCheck.getType());
-					}
+//					if(!vrepNodeMap.containsKey(pathwayVertexRepToCheck)) {
+//						System.out.print("[");
+//						for(PathwayVertex vertex : nodeWithDuplicateVertices.getVertices())
+//							System.out.print(vertex.getHumanReadableName() + ", ");
+//						System.out.println("]");
+////						throw new NodeMergingException("vrepNodeMap did not contain vrep, even though node is merged. Vrep type: " + pathwayVertexRepToCheck.getType());
+//					}
 					
-					addNodeToVrepNodeMap(vrepNodeMap, pathwayVertexRepToCheck, nodeWithDuplicateVertices);
 					nodeWithDuplicateVertices.addVrepWithThisNodesVerticesList(pathwayVertexRepToCheck);
 				}
 
@@ -563,7 +515,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		}
 
-		return vrepNodeMap;
+		return;
 	}
 
 	private List<PathwayVertex> filterVerticesByName(List<PathwayVertex> vertexListToFilter) {
@@ -589,11 +541,11 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		return filteredList;
 	}
 	
-	private void printUniqueVertexMap() {		
-		for(PathwayVertex vertex : uniqueVertexMap.keySet()) {
-			System.out.println(vertex.getHumanReadableName() + " : " + uniqueVertexMap.get(vertex));
-		}
-	}
+//	private void printUniqueVertexMap(Map<>) {		
+//		for(PathwayVertex vertex : vertexNodeMap.keySet()) {
+//			System.out.println(vertex.getHumanReadableName() + " : " + vertexNodeMap.get(vertex));
+//		}
+//	}
 
 	/**
 	 * adds value to map: <br />
@@ -626,13 +578,13 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 *         also in verticesToCheckList
 	 */
 	private Map<NodeElement, List<PathwayVertex>> getNodeElementsContainingSameVertices(
-			List<PathwayVertex> verticesToCheckList) {
+			Map<PathwayVertex, NodeElement> vertexNodeMap, List<PathwayVertex> verticesToCheckList) {
 
 		Map<NodeElement, List<PathwayVertex>> equivalentVerticesMap = new HashMap<NodeElement, List<PathwayVertex>>();
 
 		for (PathwayVertex vertexToCheck : verticesToCheckList) {
-			if (uniqueVertexMap.containsKey(vertexToCheck)) {
-				NodeElement existingNodeElement = uniqueVertexMap.get(vertexToCheck);
+			if (vertexNodeMap.containsKey(vertexToCheck)) {
+				NodeElement existingNodeElement = vertexNodeMap.get(vertexToCheck);
 				if (!equivalentVerticesMap.containsKey(existingNodeElement)) {
 					List<PathwayVertex> duplicateVertices = new LinkedList<PathwayVertex>();
 					duplicateVertices.add(vertexToCheck);
@@ -646,185 +598,6 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		return equivalentVerticesMap;
 	}
 
-	// insert all PathwayVertex into
-	private void addGraphWithoutDuplicatesOld(PathwayGraph newGraph) {
-
-		/**
-		 * storing the new NodeElements (which contain the merged elements) in a list & adding the afterwards
-		 * to the nodeSet list adding them while iterating over the list & deleting elements, would be too
-		 * much of a mess
-		 */
-		Map<PathwayVertex, NodeElement> newNodeElements = new HashMap<PathwayVertex, NodeElement>();
-		Map<NodeElement, NodeElement> removedNodeSubstitutedByNewNodeMap = new HashMap<NodeElement, NodeElement>();
-
-		// for (Iterator<NodeElement> nodeSetIterator = nodeSet.iterator(); nodeSetIterator.hasNext();) {
-		// for (PathwayVertexRep vrepOfGraph : graphToSaveNewElementsTo.vertexSet()) {
-		for (Iterator<PathwayVertexRep> vrepIterator = newGraph.vertexSet().iterator(); vrepIterator
-				.hasNext();) {
-			PathwayVertexRep vrepOfGraph = vrepIterator.next();
-			// System.out.println(vrepOfGraph.getName() + " type: " + vrepOfGraph.getType());
-			if (vrepOfGraph.getType() == EPathwayVertexType.map)
-				continue;
-
-			boolean removeCurrentNodeFromNodeSet = false;
-			boolean addedMergedNode = false;
-			PathwayVertex vertexForAddedMergedNode = null;
-			NodeElement mergedNode = null;
-			NodeElement substitutedByNode = null;
-
-			NodeElement node = addNewNodeElement(vrepOfGraph, null, null);
-			// NodeElement node = nodeSetIterator.next();
-
-			System.out.println(node.getLabel());
-
-			for (Iterator<PathwayVertex> vertexOfNodeIterator = node.getVertices().iterator(); vertexOfNodeIterator
-					.hasNext();) {
-
-				PathwayVertex vertexOfNode = vertexOfNodeIterator.next();
-				PathwayVertexRep vrepOfNode = node.getVertexRep();
-
-				// if this is the first (and maybe only) time, this PathwayVertex is in the Graph,
-				// make a new entry
-				if (preventDuplicatesMap.get(vertexOfNode) == null) {
-					List<NodeElement> referencesToThisString = new LinkedList<NodeElement>();
-					referencesToThisString.add(node);
-
-					preventDuplicatesMap.put(vertexOfNode, referencesToThisString);
-					removeCurrentNodeFromNodeSet = false;
-					substitutedByNode = null;
-					addedMergedNode = false;
-					vertexForAddedMergedNode = null;
-					mergedNode = null;
-				}
-				// make new NodeElement
-				else {
-					assert (preventDuplicatesMap.get(vertexOfNode).size() >= 1);
-
-					// if there was no merged node created yet
-					if (newNodeElements.get(vertexOfNode) == null) {
-						String shapeType = vrepOfNode.getShapeType().name();
-						PathwayVertexRep newMergedVrep = new PathwayVertexRep(
-								vertexOfNode.getHumanReadableName(), vrepOfNode.getShapeType().name(),
-								vrepOfNode.getCenterX(), vrepOfNode.getCenterY(), vrepOfNode.getWidth(),
-								vrepOfNode.getHeight());
-						newMergedVrep.addPathwayVertex(vertexOfNode);
-						newMergedVrep.setPathway(pathway.getCombinedGraph());
-						pathway.getCombinedGraph().addVertex(newMergedVrep);
-
-						NodeElement newMergedNode = addNewNodeElement(newMergedVrep, null, null);
-						newNodeElements.put(vertexOfNode, newMergedNode);
-
-						// add new node to map of all nodes
-						preventDuplicatesMap.get(vertexOfNode).add(newMergedNode);
-						preventDuplicatesMap.get(vertexOfNode).add(node);
-
-						nodeSet.add(newMergedNode);
-						addedMergedNode = true;
-						vertexForAddedMergedNode = vertexOfNode;
-						mergedNode = newMergedNode;
-					}
-
-					// if this was the last vertex of this node -> delete node (merged graph node is its
-					// replacement)
-					if (node.getVertices().size() <= 1) {
-						removeCurrentNodeFromNodeSet = true;
-						substitutedByNode = newNodeElements.get(vertexOfNode);
-
-						// remove node from list
-						if (substitutedByNode == null)
-							throw new NullPointerException("substitudedbyNode is null; vrep: " + vrepOfNode);
-					} else {
-						removeCurrentNodeFromNodeSet = false;
-						substitutedByNode = null;
-					}
-
-					vertexOfNodeIterator.remove();
-
-				}
-
-			}
-
-			if (removeCurrentNodeFromNodeSet) {
-				removedNodeSubstitutedByNewNodeMap.put(node, substitutedByNode);
-				preventDuplicatesMap.get(substitutedByNode.getVertices().get(0)).remove(node);
-				// nodeSetIterator.remove();
-			} else if (addedMergedNode) {
-				// not sure if correct
-				NodeElement first = preventDuplicatesMap.get(vertexForAddedMergedNode).get(0);
-				if (nodeSet.contains(first)) {
-					removedNodeSubstitutedByNewNodeMap.put(first, mergedNode);
-					preventDuplicatesMap.get(vertexForAddedMergedNode).remove(first);
-					nodeSet.remove(first);
-				}
-				System.out.println("wahhh!");
-			} else {
-				nodeSet.add(node);
-				// add(node);
-			}
-		}
-
-		/**
-		 * add all new merged node elements to the nodeset & the rendered children set
-		 */
-		for (Map.Entry<PathwayVertex, NodeElement> newNodeElementEntry : newNodeElements.entrySet()) {
-
-			NodeElement newNodeElement = newNodeElementEntry.getValue();
-			newGraph.addVertex(newNodeElement.getVertexRep());
-
-			nodeSet.add(newNodeElement);
-			// add(newNodeElement);
-		}
-
-		for (DefaultEdge edge : newGraph.edgeSet()) {
-			PathwayVertexRep srcVrep = newGraph.getEdgeSource(edge);
-			PathwayVertexRep targetVrep = newGraph.getEdgeTarget(edge);
-
-			assert (srcVrep != null);
-			assert (targetVrep != null);
-
-			NodeElement srcNode = pathway.getNodeOfVertex(srcVrep);
-
-			// if this node is to be replaced by a new merged node
-			if (removedNodeSubstitutedByNewNodeMap.containsKey(srcNode)) {
-				assert (nodeSet.contains(srcNode) == false);
-				srcNode = removedNodeSubstitutedByNewNodeMap.get(srcNode);
-				assert (nodeSet.contains(srcNode));
-				assert (srcNode != null);
-			}
-			NodeElement targetNode = pathway.getNodeOfVertex(targetVrep);
-			NodeElement oldTarget = targetNode;
-			if (removedNodeSubstitutedByNewNodeMap.containsKey(oldTarget)) {
-				assert (nodeSet.contains(targetNode) == false);
-				targetNode = removedNodeSubstitutedByNewNodeMap.get(oldTarget);
-				assert (nodeSet.contains(targetNode));
-				assert (targetNode != null);
-			}
-
-			EdgeElement edgeElement = new EdgeElement(edge, srcNode, targetNode);
-
-			/**
-			 * so the layouting algorithm can extinguish, if it's a node or an edge
-			 */
-			edgeElement.setLayoutData(false);
-
-			/**
-			 * needed for the layouting algorithm
-			 */
-			edgeSet.add(edgeElement);
-			//
-			// add(edgeElement);
-
-		}
-
-		for (NodeElement node : nodeSet) {
-			add(node);
-		}
-
-		for (EdgeElement edge : edgeSet) {
-			add(edge);
-		}
-
-	}
 
 	/**
 	 * represent graph biologically correct, with duplicates <br />
