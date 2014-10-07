@@ -145,4 +145,20 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		this.centerToCenterLine.setLine(centerToCenterLine);
 	}
 
+	public NodeElement getSourceNode() {
+		return sourceNode;
+	}
+
+	public void setSourceNode(NodeElement sourceNode) {
+		this.sourceNode = sourceNode;
+	}
+
+	public NodeElement getTargetNode() {
+		return targetNode;
+	}
+
+	public void setTargetNode(NodeElement targetNode) {
+		this.targetNode = targetNode;
+	}
+
 }

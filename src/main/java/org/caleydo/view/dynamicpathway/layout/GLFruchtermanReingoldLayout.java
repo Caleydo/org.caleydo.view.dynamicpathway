@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.caleydo.core.view.opengl.layout2.layout.IGLLayout2;
 import org.caleydo.core.view.opengl.layout2.layout.IGLLayoutElement;
+import org.caleydo.view.dynamicpathway.internal.NodeMergingException;
 
 /**
  * calculates new vertex position according to the Fruchterman & Reingold algorithm
@@ -271,7 +272,12 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 				double xDisplacementFactor = (xDistance / distance) * repulsiveForce;
 				double yDisplacementFactor = (yDistance / distance) * repulsiveForce;
 
-				editDisplacement(currentNode, xDisplacementFactor, yDisplacementFactor);
+				try {
+					editDisplacement(currentNode, xDisplacementFactor, yDisplacementFactor);
+				} catch (NodeMergingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
 			}
 		}
@@ -302,8 +308,19 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 			double xDisplacementTargetFactor = xDistance / distance * attractiveForce;
 			double yDisplacementTargetFactor = yDistance / distance * attractiveForce;
 
-			editDisplacement(sourceNode, xDisplacementSourceFactor, yDisplacementSourceFactor);
-			editDisplacement(targetNode, xDisplacementTargetFactor, yDisplacementTargetFactor);
+			try {
+				editDisplacement(sourceNode, xDisplacementSourceFactor, yDisplacementSourceFactor);
+			} catch (NodeMergingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				editDisplacement(targetNode, xDisplacementTargetFactor, yDisplacementTargetFactor);
+			} catch (NodeMergingException e) {
+				// TODO Auto-generated catch block
+				System.out.println("tmp");
+				e.printStackTrace();
+			}
 
 		}
 	}
@@ -371,9 +388,17 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 	 *            which's displacement has to be edited
 	 * @param x the addend for the xDisplacement value
 	 * @param y the addend for the yDisplacement value
+	 * @throws NodeMergingException 
 	 * 
 	 */
-	private void editDisplacement(IFRLayoutNode node, double x, double y) {
+	private void editDisplacement(IFRLayoutNode node, double x, double y) throws NodeMergingException {
+		
+		if(!displacementMap.containsKey(node))
+			throw new NodeMergingException("Node(" + node + ") is not in displacementMap");
+		
+		if(displacementMap.get(node) == null)
+			throw new NodeMergingException("Node(" + node + ") contained no value in displacementMap");
+		
 		double xDisplacement = displacementMap.get(node).getX() + x;
 		double yDisplacement = displacementMap.get(node).getY() + y;
 		displacementMap.remove(node);
