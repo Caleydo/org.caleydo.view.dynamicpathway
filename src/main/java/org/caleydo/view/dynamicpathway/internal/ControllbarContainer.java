@@ -12,6 +12,8 @@ import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer
 import org.caleydo.core.view.opengl.layout2.basic.EButtonIcon;
 import org.caleydo.core.view.opengl.layout2.basic.GLButton;
 import org.caleydo.core.view.opengl.layout2.basic.GLButton.EButtonMode;
+import org.caleydo.core.view.opengl.layout2.basic.GLButton.IconLabelRenderer;
+import org.caleydo.core.view.opengl.layout2.basic.RadioController;
 import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
 import org.caleydo.core.view.opengl.layout2.layout.IGLLayout;
 import org.caleydo.core.view.opengl.layout2.layout.IGLLayout2;
@@ -29,33 +31,39 @@ public class ControllbarContainer extends AnimatedGLElementContainer {
 
 	public ControllbarContainer() {		
 		super();
-		// TODO Auto-generated constructor stub
 		
-		setLayout(GLLayouts.flowVertical(1));
+		RadioController radioController = new RadioController();
+		
+		
+		
+		setLayout(GLLayouts.flowVertical(10));
 		pinButton = new GLButton(EButtonMode.CHECKBOX);
 		pinButton.setVisibility(EVisibility.PICKABLE);
 		pinButton.setSize(16, 16);
-//		pinButton.setLocation(20, 50);
 		pinButton.setTooltip("Pin");
-//		pinButton.setRenderer(GLRenderers.fillImage("resources/icons/general/pin.png"));
-		pinButton.setRenderer(GLRenderers.fillImage(EButtonIcon.RADIO.get(false)));
-		pinButton.setSelectedRenderer(GLRenderers.fillImage(EButtonIcon.RADIO.get(true)));
-//		pinButton.onPick(new APickingListener() {
-//			@Override
-//			protected void clicked(Pick pick) {
-////				pinButton.setSelected(true);
-////				repaint();
-//			}
-//		}
-//			
-//		);
+//		pinButton.setRenderer(GLRenderers.fillImage(EButtonIcon.RADIO.get(false)));
+		DynamicPathwayIconLabelRenderer dynamicPwIconLabelRenderer1 = new DynamicPathwayIconLabelRenderer("Button 1", EButtonIcon.RADIO);
+		pinButton.setRenderer(dynamicPwIconLabelRenderer1);
+		pinButton.setSelectedRenderer(dynamicPwIconLabelRenderer1);
+		radioController.add(pinButton);
 
-//		pinButton.setVisibility(EVisibility.VISIBLE);
+		GLButton pinButton2 = new GLButton(EButtonMode.CHECKBOX);
+		pinButton2.setVisibility(EVisibility.PICKABLE);
+		pinButton2.setSize(16, 16);
+		pinButton2.setTooltip("Pin 2");
+		DynamicPathwayIconLabelRenderer dynamicPwIconLabelRenderer2 = new DynamicPathwayIconLabelRenderer("Button 2", EButtonIcon.RADIO);
+		pinButton2.setRenderer(dynamicPwIconLabelRenderer2);
+		pinButton2.setSelectedRenderer(dynamicPwIconLabelRenderer2);
+		radioController.add(pinButton2);
+		
 		GLElement label = new GLElement(GLRenderers.drawText(TITLE));
 		label.setSize(Float.NaN, 20);
 		add(label);
 		add(pinButton);
+		add(pinButton2);
 	}
+	
+	
 
 
 
@@ -70,6 +78,28 @@ public class ControllbarContainer extends AnimatedGLElementContainer {
 		
 
 		
+	}
+	
+	public class DynamicPathwayIconLabelRenderer implements IGLRenderer {
+		private final String label;
+		private final EButtonIcon icon;
+		
+		
+		private DynamicPathwayIconLabelRenderer(String label, EButtonIcon prefix) {
+			this.label = label;
+			this.icon = prefix;
+		}
+		
+		@Override
+		public void render(GLGraphics g, float w, float h, GLElement parent) {
+			boolean s = ((GLButton) parent).isSelected();
+
+			String icon = this.icon.get(s);
+			g.fillImage(icon, 1, 1, h - 2, h - 2);
+			if (label != null && label.length() > 0)
+				g.drawText(label, 15, h-16, 100, h);
+			
+		}
 	}
 
 	

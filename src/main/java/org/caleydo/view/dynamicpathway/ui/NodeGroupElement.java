@@ -8,6 +8,7 @@ import java.util.List;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
+import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexGroupRep;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 
@@ -19,8 +20,8 @@ public class NodeGroupElement extends NodeElement {
 	private int groupSize;
 	private LinkedList<NodeGeneElement> elementsOfThisGroup;
 
-	public NodeGroupElement(PathwayVertexRep vrep, DynamicPathwayGraphRepresentation parentGraph) {
-		super(vrep, parentGraph);
+	public NodeGroupElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices, DynamicPathwayGraphRepresentation parentGraph) {
+		super(vrep, pathwayVertices, parentGraph);
 		
 		setLayout(GLLayouts.flowVertical(GAP_BETWEEN_NODES));
 
@@ -35,7 +36,7 @@ public class NodeGroupElement extends NodeElement {
 
 		for (PathwayVertexRep subVrep : groupRep.getGroupedVertexReps()) {
 			
-			NodeGeneElement node = new NodeGeneElement(subVrep, parentGraph);
+			NodeGeneElement node = new NodeGeneElement(subVrep, subVrep.getPathwayVertices(), parentGraph);
 			
 			height += node.getHeight() + GAP_BETWEEN_NODES;		
 			

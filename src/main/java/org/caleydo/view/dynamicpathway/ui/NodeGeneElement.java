@@ -1,11 +1,14 @@
 package org.caleydo.view.dynamicpathway.ui;
 
+import java.util.List;
+
 import org.caleydo.core.view.contextmenu.GenericContextMenuItem;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.picking.AdvancedPick;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.core.view.opengl.picking.PickingMode;
+import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 
 import com.google.common.collect.Lists;
@@ -16,9 +19,9 @@ public class NodeGeneElement extends NodeElement {
 	private static final int OUTER_BOUNDS = 1;
 	private static final int ROUND_EDGE_RADIUS = 2;
 	
-	public NodeGeneElement(final PathwayVertexRep vertexRep,
+	public NodeGeneElement(final PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
 			final DynamicPathwayGraphRepresentation parentGraph) {
-		super(vertexRep, parentGraph);
+		super(vertexRep, pathwayVertices, parentGraph);
 		
 		onPick(new IPickingListener() {
 

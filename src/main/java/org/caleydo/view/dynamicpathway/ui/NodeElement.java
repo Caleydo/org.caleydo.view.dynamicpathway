@@ -77,7 +77,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	 */
 	GenericContextMenuItem filterPathwayMenu;
 
-	public NodeElement(PathwayVertexRep vertexRep, final DynamicPathwayGraphRepresentation parentGraph) {
+	public NodeElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices, final DynamicPathwayGraphRepresentation parentGraph) {
 		this.uid = UUID.randomUUID().toString();
 		this.vertexRep = vertexRep;
 		this.centerX = vertexRep.getCenterX();
@@ -87,9 +87,9 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		this.isThisNodeUsedForFiltering = false;
 		this.isMouseOver = false;
 		this.parentGraph = parentGraph;
-		this.vertices = new LinkedList<PathwayVertex>(vertexRep.getPathwayVertices());
+		this.vertices = new LinkedList<PathwayVertex>(pathwayVertices);
 
-		if (vertexRep.getType() != EPathwayVertexType.group) {
+		if (vertices.get(0).getType() != EPathwayVertexType.group) {
 			// this.vertices = vertexRep.getPathwayVertices();
 			this.displayedVertex = vertices.get(0);
 			this.label = displayedVertex.getHumanReadableName();
@@ -224,6 +224,8 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	public void setVertices(List<PathwayVertex> vertices) {
 		this.vertices = vertices;
+		this.displayedVertex = vertices.get(0);
+		this.label = displayedVertex.getHumanReadableName();
 	}
 
 	public PathwayVertex getDisplayedVertex() {
@@ -232,6 +234,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	public void setDisplayedVertex(PathwayVertex displayedVertex) {
 		this.displayedVertex = displayedVertex;
+		this.label = displayedVertex.getHumanReadableName();
 	}
 
 	public String getLabel() {
