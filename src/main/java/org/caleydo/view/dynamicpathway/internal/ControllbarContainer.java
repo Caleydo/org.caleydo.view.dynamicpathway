@@ -12,6 +12,7 @@ import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer
 import org.caleydo.core.view.opengl.layout2.basic.EButtonIcon;
 import org.caleydo.core.view.opengl.layout2.basic.GLButton;
 import org.caleydo.core.view.opengl.layout2.basic.GLButton.EButtonMode;
+import org.caleydo.core.view.opengl.layout2.basic.GLButton.ISelectionCallback;
 import org.caleydo.core.view.opengl.layout2.basic.GLButton.IconLabelRenderer;
 import org.caleydo.core.view.opengl.layout2.basic.RadioController;
 import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
@@ -22,74 +23,165 @@ import org.caleydo.core.view.opengl.layout2.renderer.IGLRenderer;
 import org.caleydo.core.view.opengl.picking.APickingListener;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
+import org.caleydo.vis.lineup.ui.RenderStyle;
 
-public class ControllbarContainer extends AnimatedGLElementContainer {
-	
+public class ControllbarContainer extends AnimatedGLElementContainer implements ISelectionCallback {
+
 	private static final String TITLE = "Controllbar";
-	private GLButton pinButton;
-	
 
-	public ControllbarContainer() {		
+	private DynamicPathwayView view;
+
+	/**
+	 * radio group for allowing/ignoring zero degree nodes
+	 */
+	private RadioController zeroDegreeNodesRadioController;
+	private GLButton ignoreZeroDegreeNodesButton;
+	private GLButton allowZeroDegreeNodesButton;
+
+	/**
+	 * radio group for allowing/removing duplicate vertices
+	 */
+	private RadioController duplicateVerticesRadioController;
+	private GLButton allowDuplicateVerticesButton;
+	private GLButton removeDuplicateVerticesButton;
+
+	public ControllbarContainer(DynamicPathwayView view) {
 		super();
-		
-		RadioController radioController = new RadioController();
-		
-		
-		
 		setLayout(GLLayouts.flowVertical(10));
-		pinButton = new GLButton(EButtonMode.CHECKBOX);
-		pinButton.setVisibility(EVisibility.PICKABLE);
-		pinButton.setSize(16, 16);
-		pinButton.setTooltip("Pin");
-//		pinButton.setRenderer(GLRenderers.fillImage(EButtonIcon.RADIO.get(false)));
-		DynamicPathwayIconLabelRenderer dynamicPwIconLabelRenderer1 = new DynamicPathwayIconLabelRenderer("Button 1", EButtonIcon.RADIO);
-		pinButton.setRenderer(dynamicPwIconLabelRenderer1);
-		pinButton.setSelectedRenderer(dynamicPwIconLabelRenderer1);
-		radioController.add(pinButton);
 
-		GLButton pinButton2 = new GLButton(EButtonMode.CHECKBOX);
-		pinButton2.setVisibility(EVisibility.PICKABLE);
-		pinButton2.setSize(16, 16);
-		pinButton2.setTooltip("Pin 2");
-		DynamicPathwayIconLabelRenderer dynamicPwIconLabelRenderer2 = new DynamicPathwayIconLabelRenderer("Button 2", EButtonIcon.RADIO);
-		pinButton2.setRenderer(dynamicPwIconLabelRenderer2);
-		pinButton2.setSelectedRenderer(dynamicPwIconLabelRenderer2);
-		radioController.add(pinButton2);
+		this.view = view;
+
+		/**
+		 * create header
+		 */
+		GLElement controllbarHeader = new GLElement(GLRenderers.drawText(TITLE));
+		controllbarHeader.setSize(Float.NaN, 26);
+
+		add(controllbarHeader);
+
+		/**
+		 * Radio group: allow/ignore 0 degree nodes
+		 */
+		zeroDegreeNodesRadioController = new RadioController(this);
+		ignoreZeroDegreeNodesButton = createRadioButton("Ignore 0° nodes", "Allow vertices with no edges",
+				zeroDegreeNodesRadioController);
+		allowZeroDegreeNodesButton = createRadioButton("Allow 0° nodes", "Disallow vertices with no edges",
+				zeroDegreeNodesRadioController);
+		GLElement allowIgnoreZeroDegreeNodesLabel = createSubHeader("Allow/Ignore 0° Nodes");
+
+		add(allowIgnoreZeroDegreeNodesLabel);
+		add(ignoreZeroDegreeNodesButton);
+		add(allowZeroDegreeNodesButton);
+
+		add(createLineSeparator());
 		
-		GLElement label = new GLElement(GLRenderers.drawText(TITLE));
-		label.setSize(Float.NaN, 20);
-		add(label);
-		add(pinButton);
-		add(pinButton2);
+		/**
+		 * Radio group: allow/remove duplicate vertices
+		 */
+		duplicateVerticesRadioController = new RadioController(this);
+		removeDuplicateVerticesButton = createRadioButton("Remove duplicate vertices",
+				"Mandatory for merged graphs", duplicateVerticesRadioController);
+		allowDuplicateVerticesButton = createRadioButton("Allow duplicate vertices",
+				"Only possible for unmerged graphs", duplicateVerticesRadioController);
+
+		GLElement allowIgnoreDuplicateVerticesLabel1 = createSubHeader("Allow/Remove");
+		GLElement allowIgnoreDuplicateVerticesLabel2 = createSubHeader("duplicate vertices");
+
+		add(allowIgnoreDuplicateVerticesLabel1);
+		add(allowIgnoreDuplicateVerticesLabel2);		
+		add(removeDuplicateVerticesButton);
+		add(allowDuplicateVerticesButton);
+		
+		add(createLineSeparator());
+		
+		/**
+		 * current focus graph
+		 */
+		GLElement focusPathwayLabel = createSubHeader("Current Focus Pathway");
+		add(focusPathwayLabel);
+		
+		
+		
 	}
-	
-	
-
-
-
 
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {
-		// TODO Auto-generated method stub
-		super.renderImpl(g, w, h);
-//		g.color(new Color(.95f, .95f, .95f)).fillRect(0, 0, w, h);
-//		g.color(Color.LIGHT_GRAY).fillRect(0, 0, w, 35);
-//		g.drawText(TITLE, (w/2-47), 5, 94, 18);
-		
 
-		
+		g.color(RenderStyle.COLOR_BACKGROUND_EVEN).fillRect(0, 0, w, h);
+
+		super.renderImpl(g, w, h);
+
+	}
+
+	/**
+	 * creates a pickable checkbox {@link GLButton} of the size 16x16 Pixels
+	 * 
+	 * @param buttonLabel
+	 *            the label of the newly created button
+	 * @param toolTip
+	 *            the text that is shown, when the mouse is hovered over the button
+	 * @param parentRadioGroup
+	 *            the radio group it belongs to -> only on button of this group can be selected at once
+	 * @return the created button
+	 */
+	private GLButton createRadioButton(String buttonLabel, String toolTip, RadioController parentRadioGroup) {
+		GLButton pinButton = new GLButton(EButtonMode.CHECKBOX);
+		pinButton.setVisibility(EVisibility.PICKABLE);
+		pinButton.setSize(16, 16);
+		pinButton.setTooltip(toolTip);
+		DynamicPathwayIconLabelRenderer dynamicPwIconLabelRenderer = new DynamicPathwayIconLabelRenderer(
+				buttonLabel, EButtonIcon.RADIO);
+		pinButton.setRenderer(dynamicPwIconLabelRenderer);
+		pinButton.setSelectedRenderer(dynamicPwIconLabelRenderer);
+		parentRadioGroup.add(pinButton);
+		return pinButton;
 	}
 	
+	/**
+	 * creates a label text of size 16 pixel
+	 * 
+	 * @param labelText
+	 * @return created label
+	 */
+	private GLElement createSubHeader(String labelText) {
+		GLElement label = new GLElement(
+				GLRenderers.drawText(labelText));
+		label.setSize(Float.NaN, 16);
+		return label;
+	}
+	
+	/**
+	 * creates a text of size 12 pixel
+	 * 
+	 * @param contentText
+	 * @return created label
+	 */
+	private GLElement createContentText(String contentText) {
+		GLElement text = new GLElement(
+				GLRenderers.drawText(contentText));
+		text.setSize(Float.NaN, 12);
+		return text;
+	}
+	
+	/**
+	 * 
+	 * @return a black line with with 2 pixel thickness
+	 */
+	private GLElement createLineSeparator() {
+		GLElement lineSeparator = new GLElement(GLRenderers.fillRect(Color.GRAY));
+		lineSeparator.setSize(Float.NaN, 2);
+		return lineSeparator;
+	}
+
 	public class DynamicPathwayIconLabelRenderer implements IGLRenderer {
 		private final String label;
 		private final EButtonIcon icon;
-		
-		
+
 		private DynamicPathwayIconLabelRenderer(String label, EButtonIcon prefix) {
 			this.label = label;
 			this.icon = prefix;
 		}
-		
+
 		@Override
 		public void render(GLGraphics g, float w, float h, GLElement parent) {
 			boolean s = ((GLButton) parent).isSelected();
@@ -97,10 +189,28 @@ public class ControllbarContainer extends AnimatedGLElementContainer {
 			String icon = this.icon.get(s);
 			g.fillImage(icon, 1, 1, h - 2, h - 2);
 			if (label != null && label.length() > 0)
-				g.drawText(label, 15, h-16, 100, h);
-			
+				g.drawText(label, 18, h - 16, 200, h - 2);
+
 		}
 	}
 
-	
+	/**
+	 * if any of the buttons has changed
+	 */
+	@Override
+	public void onSelectionChanged(GLButton button, boolean selected) {
+
+		if (!selected)
+			return;
+
+		if (button.equals(ignoreZeroDegreeNodesButton))
+			view.paintGraphWithOrWithoutZeroDegreeVertices(true);
+		else if (button.equals(allowZeroDegreeNodesButton))
+			view.paintGraphWithOrWithoutZeroDegreeVertices(false);
+		else if (button.equals(allowDuplicateVerticesButton))
+			view.paintGraphWithOrWithoutDuplicateVertices(true);
+		else if (button.equals(removeDuplicateVerticesButton))
+			view.paintGraphWithOrWithoutDuplicateVertices(false);
+	}
+
 }

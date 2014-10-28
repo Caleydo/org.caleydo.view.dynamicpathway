@@ -48,12 +48,13 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 	private DynamicPathwayGraphRepresentation currentPathwayElement;
 	private GLFruchtermanReingoldLayout pathwayLayout;
 
-	private GLElementContainer root = new GLElementContainer(new GLSizeRestrictiveFlowLayout(true, 1, GLPadding.ZERO));
+	private GLElementContainer root = new GLElementContainer(new GLSizeRestrictiveFlowLayout(true, 1,
+			GLPadding.ZERO));
 
 	private AnimatedGLElementContainer baseContainer = new AnimatedGLElementContainer(
 			new GLSizeRestrictiveFlowLayout(true, 10, GLPadding.ZERO));
 
-//	private final DragAndDropController dndController = new DragAndDropController(this);
+	// private final DragAndDropController dndController = new DragAndDropController(this);
 
 	// private EventBasedSelectionManager vertexSelectionManager;
 
@@ -66,15 +67,16 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 
 		createRankingSideBar();
 		baseContainer.setSize(200, Float.NaN);
-//		baseContainer.setRenderer(GLRenderers.fillRect(Color.RED));
-//		currentPathwayElement.setLayoutData(1.0f);
-//		currentPathwayElement.setRenderer(GLRenderers.fillRect(Color.GREEN));
+		// baseContainer.setRenderer(GLRenderers.fillRect(Color.RED));
+		// currentPathwayElement.setLayoutData(1.0f);
+		// currentPathwayElement.setRenderer(GLRenderers.fillRect(Color.GREEN));
 
 		root.add(baseContainer);
 		root.add(currentPathwayElement);
-		GLElementContainer cont = new GLElementContainer(new GLSizeRestrictiveFlowLayout(false, 3, GLPadding.ZERO));
+		GLElementContainer cont = new GLElementContainer(new GLSizeRestrictiveFlowLayout(false, 3,
+				GLPadding.ZERO));
 		cont.setSize(200, Float.NaN);
-		ControllbarContainer controllCont = new ControllbarContainer();
+		ControllbarContainer controllCont = new ControllbarContainer(this);
 		cont.add(controllCont);
 		root.add(cont);
 
@@ -114,13 +116,54 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 	 *            the pathway which was selected
 	 */
 	public void addPathway(PathwayGraph pathway) {
-		this.currentPathwayElement.addPathwayRep(pathway);
+		Boolean addKontextPathway = (currentPathwayElement.getFocusGraph() != null && (currentPathwayElement.getCurrentFilteringNode() != null)) ? true : false;
 		
+		currentPathwayElement.addPathwayRep(pathway, !addKontextPathway);
 	}
 
 	/**
-	 * check if this pathway is not already the main drawn pathway
-	 * so it isn't drawn again
+	 * if the option display nodes with or without 0 degree (doesn't have nodes) was selected, this method is
+	 * called
+	 * 
+	 * it repaint all displayed pathways, if the option has changed
+	 * 
+	 * @param addWithZeroDegreeVertices
+	 */
+	public void paintGraphWithOrWithoutZeroDegreeVertices(boolean addWithZeroDegreeVertices) {
+		if (currentPathwayElement.isDisplayOnlyVerticesWithEdges() == addWithZeroDegreeVertices)
+			return;
+
+		currentPathwayElement.setDisplayOnlyVerticesWithEdges(addWithZeroDegreeVertices);
+
+		if (currentPathwayElement.getFocusGraph() != null)
+			currentPathwayElement.addPathwayRep(currentPathwayElement.getFocusGraph(), true);
+
+		if (currentPathwayElement.getKontextGraphs().size() > 0) {
+			for (PathwayGraph kontextGraph : currentPathwayElement.getKontextGraphs())
+				currentPathwayElement.addPathwayRep(kontextGraph, false);
+		}
+
+	}
+
+	public void paintGraphWithOrWithoutDuplicateVertices(boolean addWithDuplicateVertices) {
+
+		/**
+		 * can't be called, when context graphs are already displayed -> can't merge graphs with duplicates
+		 */
+		if (currentPathwayElement.getKontextGraphs().size() > 0) {
+			System.out
+					.println("Can't change this option, when kontext graphs are displayed, because merging graphs with duplicates is not possible");
+			return;
+		}
+		
+		currentPathwayElement.setRemoveDuplicateVertices(!addWithDuplicateVertices);
+		
+		if (currentPathwayElement.getFocusGraph() != null)
+			currentPathwayElement.addPathwayRep(currentPathwayElement.getFocusGraph(), true);
+	}
+
+	/**
+	 * check if this pathway is not already the main drawn pathway so it isn't drawn again
 	 * 
 	 * @param pathway
 	 *            the pathway which should be checked
@@ -153,6 +196,10 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 		rankingElement.removeFilter(filter);
 		rankingElement.relayout();
 	}
+	
+	public PathwayGraph getCurrentFocusPathway() {
+		return currentPathwayElement.getFocusGraph();
+	}
 
 	/**
 	 * view for representing pathway graphs
@@ -162,7 +209,7 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 				.attractionMultiplier(18.0).nodeBoundsExtension(4.0).buildLayout();
 
 		currentPathwayElement = new DynamicPathwayGraphRepresentation(pathwayLayout, this);
-//		currentPathwayElement.setLocation(200, 0);
+		// currentPathwayElement.setLocation(200, 0);
 	}
 
 	/**
@@ -177,8 +224,8 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 		rankingWindow = new DynamicPathwaySideWindow("Pathways", this, SideWindow.SLIDE_LEFT_OUT);
 		rankingElement = new RankingElement(this);
 		rankingWindow.setContent(rankingElement);
-//		rankingWindow.setLocation(0, Float.NaN);
-//		rankingWindow.setSize(200, Float.NaN);
+		// rankingWindow.setLocation(0, Float.NaN);
+		// rankingWindow.setSize(200, Float.NaN);
 
 		SlideInElement slideInElement = new SlideInElement(rankingWindow, ESlideInElementPosition.RIGHT);
 		slideInElement.setCallBack(new ISelectionCallback() {
@@ -201,5 +248,6 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 
 		baseContainer.add(rankingWindow);
 	}
+
 
 }

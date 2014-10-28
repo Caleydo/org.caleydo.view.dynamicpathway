@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.caleydo.core.data.selection.SelectionType;
 import org.caleydo.core.util.base.ILabeled;
@@ -87,9 +88,9 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		this.isThisNodeUsedForFiltering = false;
 		this.isMouseOver = false;
 		this.parentGraph = parentGraph;
-		this.vertices = new LinkedList<PathwayVertex>(pathwayVertices);
+		this.vertices = new CopyOnWriteArrayList<PathwayVertex>(pathwayVertices);
 
-		if (vertices.get(0).getType() != EPathwayVertexType.group) {
+		if (vertices.size() > 0 && vertices.get(0).getType() != EPathwayVertexType.group) {
 			// this.vertices = vertexRep.getPathwayVertices();
 			this.displayedVertex = vertices.get(0);
 			this.label = displayedVertex.getHumanReadableName();
