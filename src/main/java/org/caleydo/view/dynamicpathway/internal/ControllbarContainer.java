@@ -1,11 +1,14 @@
 package org.caleydo.view.dynamicpathway.internal;
 
 import java.awt.Checkbox;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.media.opengl.GL;
 
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLElement;
+import org.caleydo.core.view.opengl.layout2.GLElementContainer;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.GLElement.EVisibility;
 import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
@@ -28,6 +31,7 @@ import org.caleydo.vis.lineup.ui.RenderStyle;
 public class ControllbarContainer extends AnimatedGLElementContainer implements ISelectionCallback {
 
 	private static final String TITLE = "Controllbar";
+	private static final String BULLET_POINT = "• ";
 
 	private DynamicPathwayView view;
 
@@ -45,11 +49,21 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 	private GLButton allowDuplicateVerticesButton;
 	private GLButton removeDuplicateVerticesButton;
 
+	private GLElement focusGraphElement;
+	
+	private GLElement focusKontextLineSeparator;
+	private GLElement kontextGraphsLabel;
+	private Map<String, GLElement> kontextGraphs;
+	private GLElementContainer kontextGraphElements;
+	private boolean isFocusGraphSet = false;
+	
+
 	public ControllbarContainer(DynamicPathwayView view) {
 		super();
 		setLayout(GLLayouts.flowVertical(10));
 
 		this.view = view;
+		this.kontextGraphs = new HashMap<String, GLElement>();
 
 		/**
 		 * create header
@@ -99,9 +113,42 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		 */
 		GLElement focusPathwayLabel = createSubHeader("Current Focus Pathway");
 		add(focusPathwayLabel);
+		this.focusGraphElement = createContentText("");
+		add(focusGraphElement);
 		
+		this.focusKontextLineSeparator = createLineSeparator();
+		this.focusKontextLineSeparator.setVisibility(EVisibility.HIDDEN);
+		add(focusKontextLineSeparator);
+				
+		this.kontextGraphsLabel = createSubHeader("Current Kontext Pathways");
+		this.kontextGraphsLabel.setVisibility(EVisibility.HIDDEN);
+		add(kontextGraphsLabel);
 		
+		this.kontextGraphElements = new GLElementContainer(GLLayouts.flowVertical(10));
+		add(kontextGraphElements);
+	}
+	
+	public void addPathwayTitle(String title, boolean isFocusPathway) {
+		if(isFocusPathway)
+			addFocusPathwayTitle(title);
+		else
+			addKontextPathwayTitle(title);
+	}
+	private void addFocusPathwayTitle(String title) {
+		this.kontextGraphElements.clear();
 		
+		this.focusGraphElement.setRenderer(GLRenderers.drawText(BULLET_POINT + title));
+		this.focusKontextLineSeparator.setVisibility(EVisibility.VISIBLE);
+		this.kontextGraphsLabel.setVisibility(EVisibility.VISIBLE);
+	}
+	
+	private void addKontextPathwayTitle(String title) {
+		if(kontextGraphs.containsKey(title))
+			return;
+		
+		GLElement kontextGraphTitle = createContentText(BULLET_POINT + title);
+		kontextGraphs.put(title, kontextGraphTitle);
+		kontextGraphElements.add(kontextGraphTitle);
 	}
 
 	@Override
@@ -136,6 +183,7 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		parentRadioGroup.add(pinButton);
 		return pinButton;
 	}
+	
 	
 	/**
 	 * creates a label text of size 16 pixel

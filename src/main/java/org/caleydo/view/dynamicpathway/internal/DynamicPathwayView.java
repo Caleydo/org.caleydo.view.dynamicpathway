@@ -5,6 +5,9 @@
  ******************************************************************************/
 package org.caleydo.view.dynamicpathway.internal;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.caleydo.core.event.EventListenerManager;
 import org.caleydo.core.serialize.ASerializedView;
 import org.caleydo.core.util.color.Color;
@@ -53,6 +56,8 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 
 	private AnimatedGLElementContainer baseContainer = new AnimatedGLElementContainer(
 			new GLSizeRestrictiveFlowLayout(true, 10, GLPadding.ZERO));
+	
+	private ControllbarContainer controllBar;
 
 	// private final DragAndDropController dndController = new DragAndDropController(this);
 
@@ -76,8 +81,8 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 		GLElementContainer cont = new GLElementContainer(new GLSizeRestrictiveFlowLayout(false, 3,
 				GLPadding.ZERO));
 		cont.setSize(200, Float.NaN);
-		ControllbarContainer controllCont = new ControllbarContainer(this);
-		cont.add(controllCont);
+		this.controllBar = new ControllbarContainer(this);
+		cont.add(controllBar);
 		root.add(cont);
 
 		// vertexSelectionManager = new EventBasedSelectionManager(this,
@@ -120,6 +125,10 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 		
 		currentPathwayElement.addPathwayRep(pathway, !addKontextPathway);
 	}
+	
+	public void addPathwayToControllBar(String pathwayTitle, boolean isFocusPathway) {
+		controllBar.addPathwayTitle(pathwayTitle, isFocusPathway);
+	}
 
 	/**
 	 * if the option display nodes with or without 0 degree (doesn't have nodes) was selected, this method is
@@ -134,12 +143,14 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 			return;
 
 		currentPathwayElement.setDisplayOnlyVerticesWithEdges(addWithZeroDegreeVertices);
+		
+		List<PathwayGraph> kontextGraphs = new LinkedList<PathwayGraph>(currentPathwayElement.getKontextGraphs());
 
 		if (currentPathwayElement.getFocusGraph() != null)
 			currentPathwayElement.addPathwayRep(currentPathwayElement.getFocusGraph(), true);
 
-		if (currentPathwayElement.getKontextGraphs().size() > 0) {
-			for (PathwayGraph kontextGraph : currentPathwayElement.getKontextGraphs())
+		if (kontextGraphs.size() > 0) {
+			for (PathwayGraph kontextGraph : kontextGraphs)
 				currentPathwayElement.addPathwayRep(kontextGraph, false);
 		}
 

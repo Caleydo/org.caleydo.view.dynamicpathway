@@ -11,6 +11,7 @@ import org.caleydo.core.util.collection.Pair;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
+import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexGroupRep;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 import org.caleydo.view.dynamicpathway.internal.NodeMergingException;
 import org.caleydo.view.dynamicpathway.ui.DynamicPathwayGraphRepresentation;
@@ -24,194 +25,60 @@ import org.jgrapht.graph.DefaultEdge;
 public class GraphMergeUtil {
 	
 	
-	
 	/**
-	 * method checks if pathwayVertexRepToCheck's vertices already exist in the uniqueVertexMap, if so the
-	 * surrounding nodes are merged, if not a new node for pathwayVertexRepToCheck is added
+	 * creates a new node element depending on it's vertices type -> either ground, gene or compound
 	 * 
-	 * @param graphToAdd
-	 *            the graph that should be added without duplicates
-	 * @param pathwayVertexRepToCheck
-	 *            check its vertices for duplicates within the uniqueVertexMap
-	 * @throws NodeMergingException
-	 *             internal error - tool didn't behave as expected
+	 * @param vrep
+	 *            the vertex representation of the node (provides information, such as the shape type, size,
+	 *            etc.)
+	 * @param pathwayVertices
+	 *            the vertices, which the node element is representing
+	 * @param vrepsWithThisNodesVertices
+	 *            if the node links to multiple vreps
+	 * @param graphRep
+	 *            needed for callback method
+	 * @return the created node element
 	 */
-	public static void checkAndMergeNodes(PathwayGraph graphToAdd, PathwayVertexRep pathwayVertexRepToCheck,
-			Map<PathwayVertex, NodeElement> vertexNodeMap, Set<NodeElement> nodeSetToAdd, Set<EdgeElement> edgeSetToAdd, boolean addToSameGraph, PathwayGraph combinedGraph, DynamicPathwayGraphRepresentation pathwayRep)
-			throws NodeMergingException {
+	public static NodeElement addNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
+			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwayGraphRepresentation graphRepresenation) {
+		/**
+		 * create node of correct type to vertex rep -> different shapes
+		 */
+		NodeElement node;
 		
-//		if(pathwayRep.DISPLAY_ONLY_VERTICES_WITH_EDGES && (graphToAdd.inDegreeOf(pathwayVertexRepToCheck) < 1) && (graphToAdd.outDegreeOf(pathwayVertexRepToCheck) < 1))
-//			return;
-
-		List<PathwayVertex> verticesToCheckList = new ArrayList<PathwayVertex>(
-				pathwayVertexRepToCheck.getPathwayVertices());
-
-		// printUniqueVertexMap();
-
-		if (verticesToCheckList.size() < 1) {
-			System.err.println("-----------------------------------------------------------");
-			System.err.println("Vrep (" + pathwayVertexRepToCheck + ") doesn't have vertices");
-			System.err.println("-----------------------------------------------------------");
-			return;
-		}
+		if(pathwayVertices.size() == 0 && vrep.getPathwayVertices().size() == 0) {
+			PathwayVertexGroupRep groupVrep = (PathwayVertexGroupRep) vrep;
+			
+			if(groupVrep.getGroupedVertexReps().size() > 0)
+				node = new NodeGroupElement(vrep, pathwayVertices, graphRepresenation);
+			else
+				return null;
+		} else if (pathwayVertices.get(0).getType() == EPathwayVertexType.compound) {
+			node = new NodeCompoundElement(vrep, pathwayVertices, graphRepresenation);		
+		}  else {		
+			node = new NodeGeneElement(vrep, pathwayVertices, graphRepresenation);	
+		} 
 
 		/**
-		 * get map with all duplicate nodes
+		 * so the layouting algorithm can extinguish, if it's a node or an edge
 		 */
-		Map<NodeElement, List<PathwayVertex>> nodesWithSameVerticesMap = pathwayRep.getNodeElementsContainingSameVertices(
-				vertexNodeMap, verticesToCheckList);
+		node.setLayoutData(true);
 
 		/**
-		 * get list of all non duplicate vertices of verticesToCheckList by removing all duplicate vertices
+		 * if this node contains vertices from 2 or more PathwayVertexReps, i.e. it's a merged node
 		 */
-		List<PathwayVertex> alreadyExistingPathwayVertexList = new ArrayList<PathwayVertex>();
-		for (NodeElement nodeContainingDuplicateVertices : nodesWithSameVerticesMap.keySet())
-			alreadyExistingPathwayVertexList.addAll(nodesWithSameVerticesMap
-					.get(nodeContainingDuplicateVertices));
-		List<PathwayVertex> nonDuplicateVertexList = new ArrayList<PathwayVertex>(verticesToCheckList);
-		nonDuplicateVertexList.removeAll(alreadyExistingPathwayVertexList);
+		if (pathwayVertices != null) {
 
-		if (nonDuplicateVertexList.size() > 0) {
-			NodeElement node = pathwayRep.addNewNodeElement(pathwayVertexRepToCheck, nonDuplicateVertexList, null);
-			nodeSetToAdd.add(node);
+			// node.setVertices(pathwayVertices);
 
-			for (PathwayVertex vertex : nonDuplicateVertexList) {
-				vertexNodeMap.put(vertex, node);
+			if (vrepsWithThisNodesVertices != null) {
+				node.setVrepsWithThisNodesVerticesList(vrepsWithThisNodesVertices);
+				node.setIsMerged(true);
 			}
 		}
 
-		/**
-		 * merge with nodes that contain same vertices
-		 */
-		for (NodeElement nodeWithDuplicateVertices : nodesWithSameVerticesMap.keySet()) {
-			List<PathwayVertex> sameVerticesList = nodesWithSameVerticesMap.get(nodeWithDuplicateVertices);
-			PathwayVertexRep nodeVrep = nodeWithDuplicateVertices.getVertexRep();
+		return node;
 
-			if (sameVerticesList.size() < 1) {
-				throw new NodeMergingException("Node(" + nodeWithDuplicateVertices.getLabel()
-						+ ") was added to nodesWithSameVerticesMap, but didn't contain same vertices");
-			}
-
-			/**
-			 * if this element is not a merged one, it will be deleted
-			 */
-			if (!nodeWithDuplicateVertices.isMerged()) {
-				PathwayVertexRep mergedVrep = new PathwayVertexRep(sameVerticesList.get(0)
-						.getHumanReadableName(), nodeVrep.getShapeType().name(), nodeVrep.getCenterX(),
-						nodeVrep.getCenterY(), nodeVrep.getWidth(), nodeVrep.getHeight());
-				for (PathwayVertex mergedVertex : sameVerticesList)
-					mergedVrep.addPathwayVertex(mergedVertex);
-
-				if (addToSameGraph)
-					mergedVrep.setPathway(graphToAdd);
-				else
-					mergedVrep.setPathway(combinedGraph);
-				combinedGraph.addVertex(mergedVrep);
-				List<PathwayVertexRep> vreps = new LinkedList<PathwayVertexRep>();
-				vreps.add(pathwayVertexRepToCheck);
-				vreps.add(nodeWithDuplicateVertices.getVertexRep());
-				NodeElement mergedNode = pathwayRep.addNewNodeElement(mergedVrep, sameVerticesList, vreps);
-				nodeSetToAdd.add(mergedNode);
-
-				/**
-				 * if the duplicate vertices are all of the (not merged) node's vertices, it needs to be
-				 * deleted, because the merged node took its purpose
-				 */
-				if (nodeWithDuplicateVertices.getVertices().size() == sameVerticesList.size()) {
-
-					boolean containedNode = nodeSetToAdd.remove(nodeWithDuplicateVertices);					
-					
-					List<Pair<EdgeElement, Boolean>> edgesContainingThisNode = GraphMergeUtil.getEdgeWithThisNodeAsSourceOrTarget(edgeSetToAdd, nodeWithDuplicateVertices);
-					for(Pair<EdgeElement, Boolean> edgePair : edgesContainingThisNode) {
-						// node was edge source
-						if(edgePair.getSecond()) 
-							edgePair.getFirst().setSourceNode(mergedNode);
-						else
-							edgePair.getFirst().setTargetNode(mergedNode);
-					}				
-
-					if (containedNode == false)
-						throw new NodeMergingException("nodeSet didn't contain node("
-								+ nodeWithDuplicateVertices + ") to remove");
-
-				} else {
-					boolean containedNodes = nodeWithDuplicateVertices
-							.removeMultipleVertices(sameVerticesList);
-
-					if (containedNodes == false)
-						throw new NodeMergingException("nodeWithDuplicateVertices("
-								+ nodeWithDuplicateVertices
-								+ ") didn't contain at leat one of sameVerticesList");
-				}
-
-				/**
-				 * add new vertices, node elements, replace old node with new merged
-				 */
-				for (PathwayVertex sameVertex : sameVerticesList) {
-					vertexNodeMap.put(sameVertex, mergedNode);
-				}
-
-			} // if the node element to check with is already a merged node
-			else {
-				List<PathwayVertex> nodeWithDuplicateVerticesList = nodeWithDuplicateVertices.getVertices();
-				/**
-				 * if sameVerticesList is subset of nodeWithDuplicateVertices.getVertices(), make new node for
-				 * all vertices, which are not in sameVerticesList, link vreps of
-				 * nodeWithDuplicateVertices.vreps to it & link current vrep to nodeWithDuplicateVertices
-				 */
-				if (nodeWithDuplicateVerticesList.size() != sameVerticesList.size()) {
-
-					List<PathwayVertex> splitOfMergedVertexList = new LinkedList<PathwayVertex>();
-
-					/**
-					 * get all vertices that are not in sameVerticesList
-					 */
-					for (Iterator<PathwayVertex> nodeVerticesIter = nodeWithDuplicateVerticesList.iterator(); nodeVerticesIter
-							.hasNext();) {
-						PathwayVertex nodeVertex = nodeVerticesIter.next();
-
-						if (!sameVerticesList.contains(nodeVertex)) {
-							splitOfMergedVertexList.add(nodeVertex);
-							nodeWithDuplicateVerticesList.remove(nodeVertex);
-							nodeWithDuplicateVertices.setDisplayedVertex(nodeWithDuplicateVerticesList.get(0));
-						}
-					}
-
-					if (splitOfMergedVertexList.size() < 1) {
-						throw new NodeMergingException("splitOfMergedVertexList didn't contain elements");
-					}
-
-					PathwayVertexRep mergedVrep = new PathwayVertexRep(splitOfMergedVertexList.get(0)
-							.getHumanReadableName(), nodeVrep.getShapeType().name(), nodeVrep.getCenterX(),
-							nodeVrep.getCenterY(), nodeVrep.getWidth(), nodeVrep.getHeight());
-
-					mergedVrep.setPathway(combinedGraph);
-
-					List<PathwayVertexRep> vrepsOfNode = nodeWithDuplicateVertices
-							.getVrepsWithThisNodesVerticesList();
-					if (vrepsOfNode == null) {
-						throw new NodeMergingException("nodeWithDuplicateVertices didn't contain Vreps");
-					}
-					NodeElement mergedNode = pathwayRep.addNewNodeElement(mergedVrep, splitOfMergedVertexList,
-							vrepsOfNode);
-
-					for (PathwayVertex mergedVertex : splitOfMergedVertexList) {
-						mergedVrep.addPathwayVertex(mergedVertex);
-						vertexNodeMap.put(mergedVertex, mergedNode);
-					}
-
-					nodeSetToAdd.add(mergedNode);
-
-				} else {
-
-					nodeWithDuplicateVertices.addVrepWithThisNodesVerticesList(pathwayVertexRepToCheck);
-				}
-
-			}
-
-		}
-
-		return;
 	}
 
 	/**
