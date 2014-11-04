@@ -26,6 +26,7 @@ import org.caleydo.core.view.opengl.layout2.renderer.IGLRenderer;
 import org.caleydo.core.view.opengl.picking.APickingListener;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
+import org.caleydo.view.dynamicpathway.ui.ControllbarPathwayTitleEntry;
 import org.caleydo.vis.lineup.ui.RenderStyle;
 
 public class ControllbarContainer extends AnimatedGLElementContainer implements ISelectionCallback {
@@ -49,14 +50,14 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 	private GLButton allowDuplicateVerticesButton;
 	private GLButton removeDuplicateVerticesButton;
 
-	private GLElement focusGraphElement;
-	
+	private ControllbarPathwayTitleEntry focusGraphElement;
+	private String focusGraphTitle = "";
+
 	private GLElement focusKontextLineSeparator;
 	private GLElement kontextGraphsLabel;
 	private Map<String, GLElement> kontextGraphs;
-	private GLElementContainer kontextGraphElements;
+	private AnimatedGLElementContainer kontextGraphElements;
 	private boolean isFocusGraphSet = false;
-	
 
 	public ControllbarContainer(DynamicPathwayView view) {
 		super();
@@ -88,7 +89,7 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		add(allowZeroDegreeNodesButton);
 
 		add(createLineSeparator());
-		
+
 		/**
 		 * Radio group: allow/remove duplicate vertices
 		 */
@@ -102,51 +103,85 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		GLElement allowIgnoreDuplicateVerticesLabel2 = createSubHeader("duplicate vertices");
 
 		add(allowIgnoreDuplicateVerticesLabel1);
-		add(allowIgnoreDuplicateVerticesLabel2);		
+		add(allowIgnoreDuplicateVerticesLabel2);
 		add(removeDuplicateVerticesButton);
 		add(allowDuplicateVerticesButton);
-		
+
 		add(createLineSeparator());
-		
+
 		/**
 		 * current focus graph
 		 */
 		GLElement focusPathwayLabel = createSubHeader("Current Focus Pathway");
 		add(focusPathwayLabel);
-		this.focusGraphElement = createContentText("");
+		this.focusGraphElement = new ControllbarPathwayTitleEntry(focusGraphTitle, view);//createContentText(focusGraphTitle);
+		this.focusGraphElement.setVisibility(EVisibility.HIDDEN);
 		add(focusGraphElement);
-		
+
 		this.focusKontextLineSeparator = createLineSeparator();
 		this.focusKontextLineSeparator.setVisibility(EVisibility.HIDDEN);
 		add(focusKontextLineSeparator);
-				
+
 		this.kontextGraphsLabel = createSubHeader("Current Kontext Pathways");
 		this.kontextGraphsLabel.setVisibility(EVisibility.HIDDEN);
 		add(kontextGraphsLabel);
-		
-		this.kontextGraphElements = new GLElementContainer(GLLayouts.flowVertical(10));
+
+		this.kontextGraphElements = new AnimatedGLElementContainer(GLLayouts.flowVertical(5));
 		add(kontextGraphElements);
 	}
-	
+
 	public void addPathwayTitle(String title, boolean isFocusPathway) {
-		if(isFocusPathway)
+		if (isFocusPathway)
 			addFocusPathwayTitle(title);
 		else
 			addKontextPathwayTitle(title);
 	}
+
+	public void removeKontextPathwayTitle(String title) throws Exception {
+		GLElement elementToRemove = kontextGraphs.get(title);
+		if(elementToRemove == null)
+			throw new Exception(
+					"INTERNAL ERROR: Wanted to remove kontext pathway title from controllbar, but title to remove ("
+							+ title + ") wasn't equal to any of the kontext pathay titles (" + kontextGraphs.keySet() + ")");
+		
+		kontextGraphElements.remove(elementToRemove);
+		kontextGraphs.remove(title);
+	}
+
+	public void removeFocusPathwayTitle(String title) throws Exception {
+		if (!focusGraphTitle.contentEquals(title))
+			throw new Exception(
+					"INTERNAL ERROR: Wanted to remove focus pathway title from controllbar, but title to remove ("
+							+ title + ") wasn't equal to the focus pathay title (" + focusGraphTitle + ")");
+		
+		this.focusGraphTitle = "";
+		this.kontextGraphElements.clear();
+		this.kontextGraphs.clear();
+		this.focusGraphElement.setVisibility(EVisibility.HIDDEN);
+		this.focusKontextLineSeparator.setVisibility(EVisibility.HIDDEN);
+		this.kontextGraphsLabel.setVisibility(EVisibility.HIDDEN);
+		this.kontextGraphElements.setVisibility(EVisibility.HIDDEN);
+	}
+
 	private void addFocusPathwayTitle(String title) {
 		this.kontextGraphElements.clear();
-		
-		this.focusGraphElement.setRenderer(GLRenderers.drawText(BULLET_POINT + title));
+		this.kontextGraphs.clear();
+		this.focusGraphTitle = title;
+
+		this.focusGraphElement.setPathwayTitle(title);
+		this.focusGraphElement.setVisibility(EVisibility.PICKABLE);
 		this.focusKontextLineSeparator.setVisibility(EVisibility.VISIBLE);
 		this.kontextGraphsLabel.setVisibility(EVisibility.VISIBLE);
+		this.kontextGraphElements.setVisibility(EVisibility.VISIBLE);
 	}
-	
+
 	private void addKontextPathwayTitle(String title) {
-		if(kontextGraphs.containsKey(title))
+		if (kontextGraphs.containsKey(title))
 			return;
-		
-		GLElement kontextGraphTitle = createContentText(BULLET_POINT + title);
+
+		ControllbarPathwayTitleEntry kontextGraphTitle = new ControllbarPathwayTitleEntry(title, view);// createContentText(BULLET_POINT
+		kontextGraphTitle.setVisibility(EVisibility.PICKABLE);																								// +
+																										// title);
 		kontextGraphs.put(title, kontextGraphTitle);
 		kontextGraphElements.add(kontextGraphTitle);
 	}
@@ -183,8 +218,7 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		parentRadioGroup.add(pinButton);
 		return pinButton;
 	}
-	
-	
+
 	/**
 	 * creates a label text of size 16 pixel
 	 * 
@@ -192,12 +226,11 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 	 * @return created label
 	 */
 	private GLElement createSubHeader(String labelText) {
-		GLElement label = new GLElement(
-				GLRenderers.drawText(labelText));
+		GLElement label = new GLElement(GLRenderers.drawText(labelText));
 		label.setSize(Float.NaN, 16);
 		return label;
 	}
-	
+
 	/**
 	 * creates a text of size 12 pixel
 	 * 
@@ -205,12 +238,11 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 	 * @return created label
 	 */
 	private GLElement createContentText(String contentText) {
-		GLElement text = new GLElement(
-				GLRenderers.drawText(contentText));
+		GLElement text = new GLElement(GLRenderers.drawText(contentText));
 		text.setSize(Float.NaN, 12);
 		return text;
 	}
-	
+
 	/**
 	 * 
 	 * @return a black line with with 2 pixel thickness

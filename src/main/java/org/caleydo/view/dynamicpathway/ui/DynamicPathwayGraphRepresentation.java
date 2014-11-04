@@ -145,15 +145,9 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		// if you want to add a new focus graph
 		if (isFocusPathway) {
-			currentSelectedNode = null;
-			currentFilteringNode = null;
-			view.unfilterPathwayList();
-
-			nodeSet.clear();
-			edgeSet.clear();
-			uniqueVertexMap.clear();
-
-			clear();		
+			
+			// clears all from past selection
+			clearCanvasAndInfo();		
 			
 
 			/** 
@@ -196,6 +190,27 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		}
 
+	}
+	
+	/**
+	 * clears all sets, view & maps, so it can be set again
+	 */
+	public void clearCanvasAndInfo() {
+		// clear all selection
+		currentSelectedNode = null;
+		currentFilteringNode = null;	
+
+		// clear all sets -> might be reset again
+		nodeSet.clear();
+		edgeSet.clear();
+		uniqueVertexMap.clear();
+
+		// clear the canvas
+		clear();	
+		
+		//TODO: doesn't work for removing the focus pathway
+		// unfilter the pathway list
+		view.unfilterPathwayList();
 	}
 
 	/**

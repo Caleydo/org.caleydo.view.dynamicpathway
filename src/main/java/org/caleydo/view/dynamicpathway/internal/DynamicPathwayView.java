@@ -5,6 +5,7 @@
  ******************************************************************************/
 package org.caleydo.view.dynamicpathway.internal;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -172,6 +173,36 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 		if (currentPathwayElement.getFocusGraph() != null)
 			currentPathwayElement.addPathwayRep(currentPathwayElement.getFocusGraph(), true);
 	}
+	
+	
+	public void removeGraph(String graphTitle) {
+		try {
+			PathwayGraph pathwayToRemove = currentPathwayElement.getDynamicPathway().getPathwayWithThisTitle(graphTitle);		
+			
+			// if the graph to remove is the focus graph, reset everything
+			if(currentPathwayElement.getDynamicPathway().isFocusGraph(pathwayToRemove)) {
+				currentPathwayElement.clearCanvasAndInfo();
+				controllBar.removeFocusPathwayTitle(graphTitle);
+			} else {
+				controllBar.removeKontextPathwayTitle(graphTitle);
+				
+				List<PathwayGraph> presentKontextGraphs = new ArrayList<PathwayGraph>(currentPathwayElement.getKontextGraphs());
+				presentKontextGraphs.remove(pathwayToRemove);
+				
+				currentPathwayElement.addPathwayRep(currentPathwayElement.getFocusGraph(), true);
+				
+				for(PathwayGraph kontextGraph : presentKontextGraphs) {
+					currentPathwayElement.addPathwayRep(kontextGraph, false);
+				}
+			}
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		
+	}
 
 	/**
 	 * check if this pathway is not already the main drawn pathway so it isn't drawn again
@@ -180,8 +211,8 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 	 *            the pathway which should be checked
 	 * @return true if it's the same, that is already drawn, false otherwise
 	 */
-	public boolean isGraphPresented(PathwayGraph pathway) {
-		if (currentPathwayElement.getDynamicPathway().isGraphPresented(pathway))
+	public boolean isGraphPresent(PathwayGraph pathway) {
+		if (currentPathwayElement.getDynamicPathway().isPathwayPresent(pathway))
 			return true;
 		return false;
 	}

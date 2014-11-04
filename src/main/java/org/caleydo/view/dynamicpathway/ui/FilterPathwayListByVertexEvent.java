@@ -5,11 +5,8 @@ import org.caleydo.core.event.AEvent;
 public class FilterPathwayListByVertexEvent extends AEvent {
 	
 	NodeElement nodeElementToFilterBy;
-	
-	
 
-	public FilterPathwayListByVertexEvent(NodeElement nodeElementToFilterBy) {
-		
+	public FilterPathwayListByVertexEvent(NodeElement nodeElementToFilterBy) {	
 		this.nodeElementToFilterBy = nodeElementToFilterBy;
 	}
 

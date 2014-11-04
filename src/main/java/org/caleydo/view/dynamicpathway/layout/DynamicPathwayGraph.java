@@ -83,14 +83,37 @@ public class DynamicPathwayGraph {
 		return vertexNodeMap.get(vrep);
 	}
 
-	public boolean isGraphPresented(PathwayGraph pathway) {
-		if (isFocusGraph(pathway))
-			return true;
-
-		if (isKontextGraph(pathway))
+	/** 
+	 * checks if the current pathway is present
+	 * 
+	 * @param pathway the pathway to check
+	 * 
+	 * @return true if the 
+	 */
+	public boolean isPathwayPresent(PathwayGraph pathway) {
+		if (isFocusGraph(pathway) || isKontextGraph(pathway))
 			return true;
 
 		return false;
+	}
+	
+	/**
+	 * returns the pathway with this title, if it exists
+	 * 
+	 * @param title the title of the pathway to return
+	 * @return the graph
+	 * @throws Exception if there is no pathway with this title 
+	 */
+	public PathwayGraph getPathwayWithThisTitle(String title) throws Exception {
+		if(focusGraph.getTitle().contentEquals(title))
+			return focusGraph;
+		
+		for(PathwayGraph kontextGraph : kontextGraphs) {
+			if(kontextGraph.getTitle().contentEquals(title))
+				return kontextGraph;
+		}
+				
+		throw new Exception("INTERNAL ERROR: Pathway with this title (" + title + ") doesn't exist.");
 	}
 
 	// adds a new focus or kontext pathway, so they will be displayed
@@ -130,13 +153,13 @@ public class DynamicPathwayGraph {
 
 	// ----------------------------------------------------
 
-	private boolean isFocusGraph(PathwayGraph pathway) {
+	public boolean isFocusGraph(PathwayGraph pathway) {
 		if (pathway == focusGraph)
 			return true;
 		return false;
 	}
 
-	private boolean isKontextGraph(PathwayGraph pathway) {
+	public boolean isKontextGraph(PathwayGraph pathway) {
 		for (PathwayGraph kontextPathway : kontextGraphs) {
 			if (pathway == kontextPathway)
 				return true;
