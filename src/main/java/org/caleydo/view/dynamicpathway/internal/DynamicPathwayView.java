@@ -28,6 +28,7 @@ import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayout;
 import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayoutBuilder;
 import org.caleydo.view.dynamicpathway.ranking.RankingElement;
 import org.caleydo.view.dynamicpathway.ui.DynamicPathwayGraphRepresentation;
+import org.caleydo.view.dynamicpathway.ui.MakeFocusPathwayEvent;
 import org.caleydo.view.dynamicpathway.ui.RemoveDisplayedPathwayEvent;
 import org.caleydo.view.entourage.SideWindow;
 import org.caleydo.view.entourage.SlideInElement;
@@ -151,7 +152,7 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 
 		currentPathwayElement.setDisplayOnlyVerticesWithEdges(addWithZeroDegreeVertices);
 		
-		List<PathwayGraph> kontextGraphs = new LinkedList<PathwayGraph>(currentPathwayElement.getKontextGraphs());
+		List<PathwayGraph> kontextGraphs = new LinkedList<PathwayGraph>(currentPathwayElement.getContextGraphs());
 
 		if (currentPathwayElement.getFocusGraph() != null)
 			currentPathwayElement.addPathwayRep(currentPathwayElement.getFocusGraph(), true);
@@ -168,7 +169,7 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 		/**
 		 * can't be called, when context graphs are already displayed -> can't merge graphs with duplicates
 		 */
-		if (currentPathwayElement.getKontextGraphs().size() > 0) {
+		if (currentPathwayElement.getContextGraphs().size() > 0) {
 			System.out
 					.println("Can't change this option, when kontext graphs are displayed, because merging graphs with duplicates is not possible");
 			return;
@@ -185,6 +186,34 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 		removeGraph(removePathwayEvent.getPathway());
 	}
 	
+	@ListenTo
+	public void onMakeThisPathwayFocus(MakeFocusPathwayEvent makeFocusPathwayEvent) {
+		
+		PathwayGraph newFocusPathwayGraph = makeFocusPathwayEvent.getPathway();
+		
+		if(newFocusPathwayGraph == null || currentPathwayElement.getDynamicPathway().isFocusGraph(newFocusPathwayGraph))
+			return;
+		
+		/** 
+		 * get the old focus pathway & add it to the new context graphs
+		 * 
+		 * remove new focus pathway from old context pathways
+		 */
+		PathwayGraph oldFocusPathway = currentPathwayElement.getFocusGraph();
+		System.out.println("Old Title: " + oldFocusPathway.getTitle());		
+		List<PathwayGraph> newContextGraphs = new ArrayList<PathwayGraph>(currentPathwayElement.getContextGraphs());		
+		newContextGraphs.remove(newFocusPathwayGraph);
+		newContextGraphs.add(oldFocusPathway);
+		
+		currentPathwayElement.addPathwayRep(newFocusPathwayGraph, true);
+		System.out.println("New Title: " + currentPathwayElement.getFocusGraph() + ", old Title: " + oldFocusPathway.getTitle());
+		
+		for(PathwayGraph contextGraph : newContextGraphs) {
+			currentPathwayElement.addPathwayRep(contextGraph, false);
+		}
+		
+	}
+	
 	public void removeGraph(PathwayGraph pathwayToRemove) {
 		try {
 //			PathwayGraph pathwayToRemove = currentPathwayElement.getDynamicPathway().getPathwayWithThisTitle(graphTitle);		
@@ -196,13 +225,13 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 			} else {
 				controllBar.removeContextPathwayTitle(pathwayToRemove);
 				
-				List<PathwayGraph> presentKontextGraphs = new ArrayList<PathwayGraph>(currentPathwayElement.getKontextGraphs());
-				presentKontextGraphs.remove(pathwayToRemove);
+				List<PathwayGraph> presentContextGraphs = new ArrayList<PathwayGraph>(currentPathwayElement.getContextGraphs());
+				presentContextGraphs.remove(pathwayToRemove);
 				
 				currentPathwayElement.addPathwayRep(currentPathwayElement.getFocusGraph(), true);
 				
-				for(PathwayGraph kontextGraph : presentKontextGraphs) {
-					currentPathwayElement.addPathwayRep(kontextGraph, false);
+				for(PathwayGraph contextGraph : presentContextGraphs) {
+					currentPathwayElement.addPathwayRep(contextGraph, false);
 				}
 			}
 			

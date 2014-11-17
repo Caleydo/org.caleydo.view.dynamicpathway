@@ -116,7 +116,7 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		 */
 		GLElement focusPathwayLabel = createSubHeader("Current Focus Pathway");
 		add(focusPathwayLabel);
-		this.focusGraphElement = new ControllbarPathwayTitleEntry(null, view);// createContentText(focusGraphTitle);
+		this.focusGraphElement = new ControllbarPathwayTitleEntry(null, true, view);// createContentText(focusGraphTitle);
 		this.focusGraphElement.setVisibility(EVisibility.HIDDEN);
 		add(focusGraphElement);
 
@@ -197,7 +197,7 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		if (contextGraphs.containsKey(pathway.getTitle()))
 			return;
 
-		ControllbarPathwayTitleEntry contextGraphTitle = new ControllbarPathwayTitleEntry(pathway, view);// createContentText(BULLET_POINT
+		ControllbarPathwayTitleEntry contextGraphTitle = new ControllbarPathwayTitleEntry(pathway,false, view);// createContentText(BULLET_POINT
 		contextGraphTitle.setVisibility(EVisibility.PICKABLE); // +
 		// title);
 		contextGraphs.put(pathway.getTitle(), contextGraphTitle);
@@ -309,6 +309,16 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 			view.paintGraphWithOrWithoutDuplicateVertices(true);
 		else if (button.equals(removeDuplicateVerticesButton))
 			view.paintGraphWithOrWithoutDuplicateVertices(false);
+	}
+
+	@Override
+	public String toString() {
+		String toPrint = "Focus: " + focusGraphTitle + "; Context: [";
+		for(String contextTitles : contextGraphs.keySet())
+			toPrint += contextTitles + ", ";
+		
+		toPrint += "]";
+		return toPrint;
 	}
 
 }

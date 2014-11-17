@@ -34,7 +34,7 @@ public class DynamicPathwayGraph {
 	 * KontextGraph contains: PathwayGraph, to which it belong, the main vertex, list of represented vertices
 	 * & edges
 	 */
-	private List<PathwayGraph> kontextGraphs;
+	private List<PathwayGraph> contextGraphs;
 
 	/**
 	 * needed for searching all currently represented vertices
@@ -50,7 +50,7 @@ public class DynamicPathwayGraph {
 
 	public DynamicPathwayGraph() {
 
-		kontextGraphs = new LinkedList<PathwayGraph>();
+		contextGraphs = new LinkedList<PathwayGraph>();
 		vertexNodeMap = new HashMap<PathwayVertexRep, NodeElement>();
 
 	}
@@ -108,7 +108,7 @@ public class DynamicPathwayGraph {
 		if(focusGraph.getTitle().contentEquals(title))
 			return focusGraph;
 		
-		for(PathwayGraph kontextGraph : kontextGraphs) {
+		for(PathwayGraph kontextGraph : contextGraphs) {
 			if(kontextGraph.getTitle().contentEquals(title))
 				return kontextGraph;
 		}
@@ -123,7 +123,7 @@ public class DynamicPathwayGraph {
 		if (!addKontextPathway) {
 			addFocusPathway(pathway);
 		} else {
-			kontextGraphs.add(pathway);
+			contextGraphs.add(pathway);
 //			addKontextGraph(pathway, currentSelectedNode);
 		}
 
@@ -147,8 +147,8 @@ public class DynamicPathwayGraph {
 		return focusGraph;
 	}
 
-	public List<PathwayGraph> getKontextGraphs() {
-		return kontextGraphs;
+	public List<PathwayGraph> getContextGraphs() {
+		return contextGraphs;
 	}
 
 	// ----------------------------------------------------
@@ -160,7 +160,7 @@ public class DynamicPathwayGraph {
 	}
 
 	public boolean isKontextGraph(PathwayGraph pathway) {
-		for (PathwayGraph kontextPathway : kontextGraphs) {
+		for (PathwayGraph kontextPathway : contextGraphs) {
 			if (pathway == kontextPathway)
 				return true;
 		}
@@ -169,7 +169,7 @@ public class DynamicPathwayGraph {
 
 	private void addFocusPathway(PathwayGraph graph) {
 		focusGraph = graph;
-		kontextGraphs.clear();
+		contextGraphs.clear();
 
 		combinedGraph = new PathwayGraph(graph.getType(), graph.getName(), graph.getTitle(),
 				graph.getImage(), graph.getExternalLink());
@@ -200,7 +200,7 @@ public class DynamicPathwayGraph {
 	}
 
 	private void addKontextGraph(PathwayGraph pathway, NodeElement currentSelectedNode) {
-		kontextGraphs.add(pathway);
+		contextGraphs.add(pathway);
 		// Vector<PathwayVertexRep> vrepsToIgnore = new Vector<PathwayVertexRep>();
 
 		Map<PathwayVertexRep, PathwayVertexRep> equivalVertexMap = new HashMap<PathwayVertexRep, PathwayVertexRep>();

@@ -224,7 +224,10 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			Map<PathwayVertex, NodeElement> vertexNodeMap, Set<NodeElement> nodeSetToAdd,
 			Set<EdgeElement> edgeSetToAdd, boolean addToSameGraph, PathwayGraph combinedGraph) {
 
-		for (PathwayVertexRep vrep : newGraph.vertexSet()) {
+//		for (PathwayVertexRep vrep : newGraph.vertexSet()) {
+		for(Iterator<PathwayVertexRep> vRepIterator = newGraph.vertexSet().iterator(); vRepIterator.hasNext();) {	
+			PathwayVertexRep vrep = vRepIterator.next();
+			
 			if (vrep.getType() == EPathwayVertexType.map)
 				continue;
 
@@ -783,7 +786,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		return pathway.getFocusGraph();
 	}
 
-	public List<PathwayGraph> getKontextGraphs() {
-		return pathway.getKontextGraphs();
+	public List<PathwayGraph> getContextGraphs() {
+		return pathway.getContextGraphs();
 	}
 }

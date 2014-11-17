@@ -88,7 +88,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		this.isThisNodeUsedForFiltering = false;
 		this.isMouseOver = false;
 		this.parentGraph = parentGraph;
-		this.vertices = new ArrayList<PathwayVertex>(pathwayVertices);
+		this.vertices = new CopyOnWriteArrayList<PathwayVertex>(pathwayVertices);
 
 		if (vertices.size() > 0 && vertices.get(0).getType() != EPathwayVertexType.group) {
 			// this.vertices = vertexRep.getPathwayVertices();
