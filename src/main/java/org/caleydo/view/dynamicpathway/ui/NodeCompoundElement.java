@@ -1,7 +1,9 @@
 package org.caleydo.view.dynamicpathway.ui;
 
+
 import java.util.List;
 
+import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.contextmenu.GenericContextMenuItem;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.picking.AdvancedPick;
@@ -24,7 +26,7 @@ public class NodeCompoundElement extends NodeElement {
 
 	public NodeCompoundElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
 			final DynamicPathwayGraphRepresentation parentGraph) {
-		super(vertexRep, pathwayVertices, parentGraph);
+		super(vertexRep, pathwayVertices, parentGraph, Color.BLACK);
 
 		onPick(new IPickingListener() {
 

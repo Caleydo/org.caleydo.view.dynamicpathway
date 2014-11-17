@@ -116,7 +116,7 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		 */
 		GLElement focusPathwayLabel = createSubHeader("Current Focus Pathway");
 		add(focusPathwayLabel);
-		this.focusGraphElement = new ControllbarPathwayTitleEntry(null, true, view);// createContentText(focusGraphTitle);
+		this.focusGraphElement = new ControllbarPathwayTitleEntry(null, Color.BLACK, true, view);// createContentText(focusGraphTitle);
 		this.focusGraphElement.setVisibility(EVisibility.HIDDEN);
 		add(focusGraphElement);
 
@@ -132,11 +132,11 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		add(contextGraphElements);
 	}
 
-	public void addPathwayTitle(PathwayGraph pathwayToAdd, boolean isFocusPathway) throws Exception {
+	public void addPathwayTitle(PathwayGraph pathwayToAdd, boolean isFocusPathway, Color titleColor) throws Exception {
 		if (isFocusPathway)
-			addFocusPathwayTitle(pathwayToAdd);
+			addFocusPathwayTitle(pathwayToAdd, titleColor);
 		else
-			addContextPathwayTitle(pathwayToAdd);
+			addContextPathwayTitle(pathwayToAdd, titleColor);
 	}
 
 	public void removeContextPathwayTitle(PathwayGraph pathwayToRemove) throws Exception {
@@ -169,13 +169,15 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		this.contextGraphElements.setVisibility(EVisibility.HIDDEN);
 	}
 
-	private void addFocusPathwayTitle(PathwayGraph pathwayToAdd) {
+	private void addFocusPathwayTitle(PathwayGraph pathwayToAdd, Color titleColor) {
 		this.contextGraphElements.clear();
 		this.contextGraphs.clear();
 		this.focusPathway = pathwayToAdd;
 		this.focusGraphTitle = pathwayToAdd.getTitle();
+		
 
 		this.focusGraphElement.setPathway(pathwayToAdd);
+		this.focusGraphElement.setNormalTitleColor(titleColor);
 		this.focusGraphElement.setVisibility(EVisibility.PICKABLE);
 		this.focusContextLineSeparator.setVisibility(EVisibility.VISIBLE);
 		this.contextGraphsLabel.setVisibility(EVisibility.VISIBLE);
@@ -190,14 +192,14 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 	 * @throws Exception
 	 *             thrown when the pathway is null
 	 */
-	private void addContextPathwayTitle(PathwayGraph pathway) throws Exception {
+	private void addContextPathwayTitle(PathwayGraph pathway, Color titleColor) throws Exception {
 		if (pathway == null)
 			throw new Exception("Context pathway was null");
 
 		if (contextGraphs.containsKey(pathway.getTitle()))
 			return;
 
-		ControllbarPathwayTitleEntry contextGraphTitle = new ControllbarPathwayTitleEntry(pathway,false, view);// createContentText(BULLET_POINT
+		ControllbarPathwayTitleEntry contextGraphTitle = new ControllbarPathwayTitleEntry(pathway,titleColor, false, view);// createContentText(BULLET_POINT
 		contextGraphTitle.setVisibility(EVisibility.PICKABLE); // +
 		// title);
 		contextGraphs.put(pathway.getTitle(), contextGraphTitle);

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.caleydo.core.util.collection.Pair;
+import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
@@ -41,7 +42,7 @@ public class GraphMergeUtil {
 	 * @return the created node element
 	 */
 	public static NodeElement addNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
-			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwayGraphRepresentation graphRepresenation) {
+			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwayGraphRepresentation graphRepresenation, Color nodeColor) {
 		/**
 		 * create node of correct type to vertex rep -> different shapes
 		 */
@@ -57,7 +58,7 @@ public class GraphMergeUtil {
 		} else if (pathwayVertices.get(0).getType() == EPathwayVertexType.compound) {
 			node = new NodeCompoundElement(vrep, pathwayVertices, graphRepresenation);		
 		}  else {		
-			node = new NodeGeneElement(vrep, pathwayVertices, graphRepresenation);	
+			node = new NodeGeneElement(vrep, pathwayVertices, graphRepresenation, nodeColor);	
 		} 
 
 		/**

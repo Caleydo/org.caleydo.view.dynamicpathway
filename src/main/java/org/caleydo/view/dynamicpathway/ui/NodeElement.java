@@ -77,8 +77,10 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	 * the context menu, which pops up, when a node is right clicked
 	 */
 	GenericContextMenuItem filterPathwayMenu;
+	
+	protected Color nodeColor;
 
-	public NodeElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices, final DynamicPathwayGraphRepresentation parentGraph) {
+	public NodeElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices, final DynamicPathwayGraphRepresentation parentGraph, Color nodeColor) {
 		this.uid = UUID.randomUUID().toString();
 		this.vertexRep = vertexRep;
 		this.centerX = vertexRep.getCenterX();
@@ -89,6 +91,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		this.isMouseOver = false;
 		this.parentGraph = parentGraph;
 		this.vertices = new CopyOnWriteArrayList<PathwayVertex>(pathwayVertices);
+		this.nodeColor = nodeColor;
 
 		if (vertices.size() > 0 && vertices.get(0).getType() != EPathwayVertexType.group) {
 			// this.vertices = vertexRep.getPathwayVertices();
@@ -305,6 +308,10 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	public void addVrepWithThisNodesVerticesList(PathwayVertexRep vrepWithThisNodesVertices) {
 		this.vrepsWithThisNodesVerticesList.add(vrepWithThisNodesVertices);
+	}
+
+	public Color getColor() {
+		return nodeColor;
 	}
 
 }

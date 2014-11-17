@@ -2,7 +2,7 @@ package org.caleydo.view.dynamicpathway.ui;
 
 import java.util.List;
 
-import org.caleydo.core.view.contextmenu.GenericContextMenuItem;
+import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.picking.AdvancedPick;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
@@ -20,8 +20,8 @@ public class NodeGeneElement extends NodeElement {
 	private static final int ROUND_EDGE_RADIUS = 2;
 	
 	public NodeGeneElement(final PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
-			final DynamicPathwayGraphRepresentation parentGraph) {
-		super(vertexRep, pathwayVertices, parentGraph);
+			final DynamicPathwayGraphRepresentation parentGraph, Color nodeColor) {
+		super(vertexRep, pathwayVertices, parentGraph, nodeColor);
 		
 		onPick(new IPickingListener() {
 
@@ -118,11 +118,11 @@ public class NodeGeneElement extends NodeElement {
 		 */
 		GLGraphics filling;
 		if(parentGraph.getDynamicPathway().getFocusGraph() == vertexRep.getPathway())
-			filling = g.color(FOCUS_FILLING_COLOR);
+			filling = g.color(nodeColor);
 		else if(parentGraph.getDynamicPathway().getCombinedGraph() == vertexRep.getPathway())
 			filling = g.color(COMBINED_FILLING_COLOR);
 		else
-			filling = g.color(KONTEXT_FILLING_COLOR);
+			filling = g.color(nodeColor);
 			
 		filling.fillRoundedRect(OUTER_BOUNDS, OUTER_BOUNDS, width, height, ROUND_EDGE_RADIUS);
 

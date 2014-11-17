@@ -24,6 +24,8 @@ public class ControllbarPathwayTitleEntry extends GLElement {
 	private String pathwayTitle;
 	private boolean rightClicked = false;
 	private final boolean isFocusPathway;
+	
+	private Color normalTitleColor;
 
 	/**
 	 * menu item in right click menu that triggers the deletion of the pathway represented by this entry
@@ -31,7 +33,8 @@ public class ControllbarPathwayTitleEntry extends GLElement {
 	GenericContextMenuItem removePathwayMenuItem;
 	GenericContextMenuItem makeFocusGraphMenuItem;
 
-	public ControllbarPathwayTitleEntry(PathwayGraph representedPathway, final boolean isFocusPathway, final DynamicPathwayView view) {
+	public ControllbarPathwayTitleEntry(PathwayGraph representedPathway, Color titleColor, final boolean isFocusPathway, final DynamicPathwayView view) {
+		this.normalTitleColor = titleColor;
 		this.representedPathway = representedPathway;
 		this.isFocusPathway = isFocusPathway;
 		if (representedPathway != null)
@@ -89,9 +92,11 @@ public class ControllbarPathwayTitleEntry extends GLElement {
 		if (rightClicked)
 			textColor = RIGHT_CLICKED_TEXT_COLOR;
 		else
-			textColor = NORMAL_TEXT_COLOR;
+			textColor = normalTitleColor;
 
 		g.color(textColor).drawText(BULLET_POINT + pathwayTitle, 0, 0, w, TEXT_HEIGHT);
+//		g.color(textColor).drawLine(0+3, TEXT_HEIGHT +1, w -2, TEXT_HEIGHT+ 1).;
+		g.color(textColor).fillRect(0, TEXT_HEIGHT+2, w, 2);
 	}
 
 	@Override
@@ -112,6 +117,15 @@ public class ControllbarPathwayTitleEntry extends GLElement {
 
 	public PathwayGraph getRepresentedPathway() {
 		return representedPathway;
+	}
+
+	public Color getNormalTitleColor() {
+		return normalTitleColor;
+	}
+
+	public void setNormalTitleColor(Color normalTitleColor) {
+		this.normalTitleColor = normalTitleColor;
+		repaint();
 	}
 
 }

@@ -5,6 +5,7 @@ import gleem.linalg.Vec2f;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
@@ -21,7 +22,7 @@ public class NodeGroupElement extends NodeElement {
 	private LinkedList<NodeGeneElement> elementsOfThisGroup;
 
 	public NodeGroupElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices, DynamicPathwayGraphRepresentation parentGraph) {
-		super(vrep, pathwayVertices, parentGraph);
+		super(vrep, pathwayVertices, parentGraph, Color.BLACK);
 		
 		setLayout(GLLayouts.flowVertical(GAP_BETWEEN_NODES));
 
@@ -36,7 +37,7 @@ public class NodeGroupElement extends NodeElement {
 
 		for (PathwayVertexRep subVrep : groupRep.getGroupedVertexReps()) {
 			
-			NodeGeneElement node = new NodeGeneElement(subVrep, subVrep.getPathwayVertices(), parentGraph);
+			NodeGeneElement node = new NodeGeneElement(subVrep, subVrep.getPathwayVertices(), parentGraph, Color.BLACK);
 			
 			height += node.getHeight() + GAP_BETWEEN_NODES;		
 			

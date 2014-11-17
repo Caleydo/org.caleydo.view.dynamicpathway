@@ -12,6 +12,7 @@ import java.util.List;
 import org.caleydo.core.event.EventListenerManager;
 import org.caleydo.core.event.EventListenerManager.ListenTo;
 import org.caleydo.core.serialize.ASerializedView;
+import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.canvas.IGLCanvas;
 import org.caleydo.core.view.opengl.layout2.AGLElementView;
 import org.caleydo.core.view.opengl.layout2.GLElement;
@@ -128,9 +129,9 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 		currentPathwayElement.addPathwayRep(pathway, !addKontextPathway);
 	}
 	
-	public void addPathwayToControllBar(PathwayGraph pathwayToAdd, boolean isFocusPathway) {
+	public void addPathwayToControllBar(PathwayGraph pathwayToAdd, boolean isFocusPathway, Color titleColor) {
 		try {
-			controllBar.addPathwayTitle(pathwayToAdd, isFocusPathway);
+			controllBar.addPathwayTitle(pathwayToAdd, isFocusPathway, titleColor);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
