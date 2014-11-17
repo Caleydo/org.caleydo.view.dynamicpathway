@@ -26,6 +26,7 @@ import org.caleydo.core.view.opengl.layout2.renderer.IGLRenderer;
 import org.caleydo.core.view.opengl.picking.APickingListener;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
+import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.view.dynamicpathway.ui.ControllbarPathwayTitleEntry;
 import org.caleydo.vis.lineup.ui.RenderStyle;
 
@@ -51,12 +52,13 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 	private GLButton removeDuplicateVerticesButton;
 
 	private ControllbarPathwayTitleEntry focusGraphElement;
+	private PathwayGraph focusPathway = null;
 	private String focusGraphTitle = "";
 
-	private GLElement focusKontextLineSeparator;
-	private GLElement kontextGraphsLabel;
-	private Map<String, GLElement> kontextGraphs;
-	private AnimatedGLElementContainer kontextGraphElements;
+	private GLElement focusContextLineSeparator;
+	private GLElement contextGraphsLabel;
+	private Map<String, GLElement> contextGraphs;
+	private AnimatedGLElementContainer contextGraphElements;
 	private boolean isFocusGraphSet = false;
 
 	public ControllbarContainer(DynamicPathwayView view) {
@@ -64,7 +66,7 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		setLayout(GLLayouts.flowVertical(10));
 
 		this.view = view;
-		this.kontextGraphs = new HashMap<String, GLElement>();
+		this.contextGraphs = new HashMap<String, GLElement>();
 
 		/**
 		 * create header
@@ -114,76 +116,92 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		 */
 		GLElement focusPathwayLabel = createSubHeader("Current Focus Pathway");
 		add(focusPathwayLabel);
-		this.focusGraphElement = new ControllbarPathwayTitleEntry(focusGraphTitle, view);//createContentText(focusGraphTitle);
+		this.focusGraphElement = new ControllbarPathwayTitleEntry(null, view);// createContentText(focusGraphTitle);
 		this.focusGraphElement.setVisibility(EVisibility.HIDDEN);
 		add(focusGraphElement);
 
-		this.focusKontextLineSeparator = createLineSeparator();
-		this.focusKontextLineSeparator.setVisibility(EVisibility.HIDDEN);
-		add(focusKontextLineSeparator);
+		this.focusContextLineSeparator = createLineSeparator();
+		this.focusContextLineSeparator.setVisibility(EVisibility.HIDDEN);
+		add(focusContextLineSeparator);
 
-		this.kontextGraphsLabel = createSubHeader("Current Kontext Pathways");
-		this.kontextGraphsLabel.setVisibility(EVisibility.HIDDEN);
-		add(kontextGraphsLabel);
+		this.contextGraphsLabel = createSubHeader("Current Context Pathways");
+		this.contextGraphsLabel.setVisibility(EVisibility.HIDDEN);
+		add(contextGraphsLabel);
 
-		this.kontextGraphElements = new AnimatedGLElementContainer(GLLayouts.flowVertical(5));
-		add(kontextGraphElements);
+		this.contextGraphElements = new AnimatedGLElementContainer(GLLayouts.flowVertical(5));
+		add(contextGraphElements);
 	}
 
-	public void addPathwayTitle(String title, boolean isFocusPathway) {
+	public void addPathwayTitle(PathwayGraph pathwayToAdd, boolean isFocusPathway) throws Exception {
 		if (isFocusPathway)
-			addFocusPathwayTitle(title);
+			addFocusPathwayTitle(pathwayToAdd);
 		else
-			addKontextPathwayTitle(title);
+			addContextPathwayTitle(pathwayToAdd);
 	}
 
-	public void removeKontextPathwayTitle(String title) throws Exception {
-		GLElement elementToRemove = kontextGraphs.get(title);
-		if(elementToRemove == null)
+	public void removeContextPathwayTitle(PathwayGraph pathwayToRemove) throws Exception {
+		String pathwayTitle = pathwayToRemove.getTitle();
+		
+		GLElement elementToRemove = contextGraphs.get(pathwayTitle);
+		if (elementToRemove == null)
 			throw new Exception(
 					"INTERNAL ERROR: Wanted to remove kontext pathway title from controllbar, but title to remove ("
-							+ title + ") wasn't equal to any of the kontext pathay titles (" + kontextGraphs.keySet() + ")");
-		
-		kontextGraphElements.remove(elementToRemove);
-		kontextGraphs.remove(title);
+							+ pathwayTitle + ") wasn't equal to any of the kontext pathay titles ("
+							+ contextGraphs.keySet() + ")");
+
+		contextGraphElements.remove(elementToRemove);
+		contextGraphs.remove(pathwayTitle);
 	}
 
-	public void removeFocusPathwayTitle(String title) throws Exception {
-		if (!focusGraphTitle.contentEquals(title))
+	public void removeFocusPathwayTitle(PathwayGraph graphToRemove) throws Exception {
+		if (!focusPathway.equals(graphToRemove))
 			throw new Exception(
 					"INTERNAL ERROR: Wanted to remove focus pathway title from controllbar, but title to remove ("
-							+ title + ") wasn't equal to the focus pathay title (" + focusGraphTitle + ")");
-		
+							+ graphToRemove.getTitle() + ") wasn't equal to the focus pathay title (" + focusGraphTitle + ")");
+
+		this.focusPathway = null;
 		this.focusGraphTitle = "";
-		this.kontextGraphElements.clear();
-		this.kontextGraphs.clear();
+		this.contextGraphElements.clear();
+		this.contextGraphs.clear();
 		this.focusGraphElement.setVisibility(EVisibility.HIDDEN);
-		this.focusKontextLineSeparator.setVisibility(EVisibility.HIDDEN);
-		this.kontextGraphsLabel.setVisibility(EVisibility.HIDDEN);
-		this.kontextGraphElements.setVisibility(EVisibility.HIDDEN);
+		this.focusContextLineSeparator.setVisibility(EVisibility.HIDDEN);
+		this.contextGraphsLabel.setVisibility(EVisibility.HIDDEN);
+		this.contextGraphElements.setVisibility(EVisibility.HIDDEN);
 	}
 
-	private void addFocusPathwayTitle(String title) {
-		this.kontextGraphElements.clear();
-		this.kontextGraphs.clear();
-		this.focusGraphTitle = title;
+	private void addFocusPathwayTitle(PathwayGraph pathwayToAdd) {
+		this.contextGraphElements.clear();
+		this.contextGraphs.clear();
+		this.focusPathway = pathwayToAdd;
+		this.focusGraphTitle = pathwayToAdd.getTitle();
 
-		this.focusGraphElement.setPathwayTitle(title);
+		this.focusGraphElement.setPathway(pathwayToAdd);
 		this.focusGraphElement.setVisibility(EVisibility.PICKABLE);
-		this.focusKontextLineSeparator.setVisibility(EVisibility.VISIBLE);
-		this.kontextGraphsLabel.setVisibility(EVisibility.VISIBLE);
-		this.kontextGraphElements.setVisibility(EVisibility.VISIBLE);
+		this.focusContextLineSeparator.setVisibility(EVisibility.VISIBLE);
+		this.contextGraphsLabel.setVisibility(EVisibility.VISIBLE);
+		this.contextGraphElements.setVisibility(EVisibility.VISIBLE);
 	}
 
-	private void addKontextPathwayTitle(String title) {
-		if (kontextGraphs.containsKey(title))
+	/**
+	 * method that adds the given parameter to the listed context pathways in the control bar
+	 * 
+	 * @param pathway
+	 *            the context pathway to add
+	 * @throws Exception
+	 *             thrown when the pathway is null
+	 */
+	private void addContextPathwayTitle(PathwayGraph pathway) throws Exception {
+		if (pathway == null)
+			throw new Exception("Context pathway was null");
+
+		if (contextGraphs.containsKey(pathway.getTitle()))
 			return;
 
-		ControllbarPathwayTitleEntry kontextGraphTitle = new ControllbarPathwayTitleEntry(title, view);// createContentText(BULLET_POINT
-		kontextGraphTitle.setVisibility(EVisibility.PICKABLE);																								// +
-																										// title);
-		kontextGraphs.put(title, kontextGraphTitle);
-		kontextGraphElements.add(kontextGraphTitle);
+		ControllbarPathwayTitleEntry contextGraphTitle = new ControllbarPathwayTitleEntry(pathway, view);// createContentText(BULLET_POINT
+		contextGraphTitle.setVisibility(EVisibility.PICKABLE); // +
+		// title);
+		contextGraphs.put(pathway.getTitle(), contextGraphTitle);
+		contextGraphElements.add(contextGraphTitle);
 	}
 
 	@Override

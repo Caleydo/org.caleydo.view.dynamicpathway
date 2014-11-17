@@ -2,10 +2,8 @@ package org.caleydo.view.dynamicpathway.ui;
 
 import gleem.linalg.Vec2f;
 
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.util.List;
 
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLElement;
@@ -60,7 +58,7 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		double xTarget = targetNode.getCenterX();
 		double yTarget = targetNode.getCenterY();
 
-
+		//TODO: sometimes null
 		centerToCenterLine.setLine(xSource, ySource, xTarget, yTarget);
 		
 		Point2D sourcePoint;

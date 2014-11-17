@@ -10,8 +10,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.caleydo.core.event.EventListenerManager;
+import org.caleydo.core.event.EventListenerManager.ListenTo;
 import org.caleydo.core.serialize.ASerializedView;
-import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.canvas.IGLCanvas;
 import org.caleydo.core.view.opengl.layout2.AGLElementView;
 import org.caleydo.core.view.opengl.layout2.GLElement;
@@ -21,7 +21,6 @@ import org.caleydo.core.view.opengl.layout2.basic.GLButton;
 import org.caleydo.core.view.opengl.layout2.basic.GLButton.ISelectionCallback;
 import org.caleydo.core.view.opengl.layout2.layout.GLPadding;
 import org.caleydo.core.view.opengl.layout2.layout.GLSizeRestrictiveFlowLayout;
-import org.caleydo.core.view.opengl.layout2.renderer.GLRenderers;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 import org.caleydo.view.dynamicpathway.internal.serial.SerializedDynamicPathwayView;
@@ -29,6 +28,7 @@ import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayout;
 import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayoutBuilder;
 import org.caleydo.view.dynamicpathway.ranking.RankingElement;
 import org.caleydo.view.dynamicpathway.ui.DynamicPathwayGraphRepresentation;
+import org.caleydo.view.dynamicpathway.ui.RemoveDisplayedPathwayEvent;
 import org.caleydo.view.entourage.SideWindow;
 import org.caleydo.view.entourage.SlideInElement;
 import org.caleydo.view.entourage.SlideInElement.ESlideInElementPosition;
@@ -127,8 +127,14 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 		currentPathwayElement.addPathwayRep(pathway, !addKontextPathway);
 	}
 	
-	public void addPathwayToControllBar(String pathwayTitle, boolean isFocusPathway) {
-		controllBar.addPathwayTitle(pathwayTitle, isFocusPathway);
+	public void addPathwayToControllBar(PathwayGraph pathwayToAdd, boolean isFocusPathway) {
+		try {
+			controllBar.addPathwayTitle(pathwayToAdd, isFocusPathway);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(-1);
+		}
 	}
 
 	/**
@@ -174,17 +180,21 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 			currentPathwayElement.addPathwayRep(currentPathwayElement.getFocusGraph(), true);
 	}
 	
+	@ListenTo
+	public void onRemovePathway(RemoveDisplayedPathwayEvent removePathwayEvent) {
+		removeGraph(removePathwayEvent.getPathway());
+	}
 	
-	public void removeGraph(String graphTitle) {
+	public void removeGraph(PathwayGraph pathwayToRemove) {
 		try {
-			PathwayGraph pathwayToRemove = currentPathwayElement.getDynamicPathway().getPathwayWithThisTitle(graphTitle);		
+//			PathwayGraph pathwayToRemove = currentPathwayElement.getDynamicPathway().getPathwayWithThisTitle(graphTitle);		
 			
 			// if the graph to remove is the focus graph, reset everything
 			if(currentPathwayElement.getDynamicPathway().isFocusGraph(pathwayToRemove)) {
 				currentPathwayElement.clearCanvasAndInfo();
-				controllBar.removeFocusPathwayTitle(graphTitle);
+				controllBar.removeFocusPathwayTitle(pathwayToRemove);
 			} else {
-				controllBar.removeKontextPathwayTitle(graphTitle);
+				controllBar.removeContextPathwayTitle(pathwayToRemove);
 				
 				List<PathwayGraph> presentKontextGraphs = new ArrayList<PathwayGraph>(currentPathwayElement.getKontextGraphs());
 				presentKontextGraphs.remove(pathwayToRemove);

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.caleydo.core.util.collection.Pair;
+import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
@@ -118,7 +119,7 @@ public class GraphMergeUtil {
 	 * @throws Exception
 	 */
 	public static void addEdgeToEdgeSet(DefaultEdge edge, PathwayGraph pathway,
-			Map<PathwayVertex, NodeElement> vertexNodeMap, Set<EdgeElement> edgeSetToAdd) throws Exception {
+			Map<PathwayVertex, NodeElement> vertexNodeMap, Set<EdgeElement> edgeSetToAdd, AnimatedGLElementContainer containterToAddElementTo) throws Exception {
 		PathwayVertexRep srcVrep = pathway.getEdgeSource(edge);
 		PathwayVertexRep targetVrep = pathway.getEdgeTarget(edge);
 
@@ -148,6 +149,7 @@ public class GraphMergeUtil {
 				EdgeElement edgeEl = new EdgeElement(edge, srcNode, targetNode);
 				edgeEl.setLayoutData(false);
 				edgeSetToAdd.add(edgeEl);
+				containterToAddElementTo.add(edgeEl);
 			}
 		}
 

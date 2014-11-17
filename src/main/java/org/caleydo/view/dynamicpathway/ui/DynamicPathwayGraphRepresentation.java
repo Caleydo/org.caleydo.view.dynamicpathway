@@ -113,6 +113,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		this.uniqueVertexMap = new HashMap<PathwayVertex, NodeElement>();
 
 		setLayout(layout);
+		
+		setDefaultDuration(1500);
 
 	}
 
@@ -141,7 +143,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		pathway.addFocusOrKontextPathway(graph, !isFocusPathway, currentSelectedNode);
 		
-		view.addPathwayToControllBar(graph.getTitle(), isFocusPathway);
+		view.addPathwayToControllBar(graph, isFocusPathway);
 
 		// if you want to add a new focus graph
 		if (isFocusPathway) {
@@ -179,7 +181,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				currentFilteringNode = uniqueVertexMap.get(oldFilteringVertex);
 			}
 			
-			clear();
+//			clear();
 			
 			//TODO: save old filtering node
 			if(currentFilteringNode != null)
@@ -239,17 +241,17 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		for (DefaultEdge edge : newGraph.edgeSet()) {
 			try {
-				GraphMergeUtil.addEdgeToEdgeSet(edge, newGraph, vertexNodeMap, edgeSet);
+				GraphMergeUtil.addEdgeToEdgeSet(edge, newGraph, vertexNodeMap, edgeSet, this);
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
 			}
 		}
 
-		for (NodeElement node : nodeSetToAdd)
-			add(node);
+//		for (NodeElement node : nodeSetToAdd)
+//			add(node);
 
-		for (EdgeElement edge : edgeSet)
-			add(edge);
+//		for (EdgeElement edge : edgeSet)
+//			add(edge);
 	}
 
 	/**
@@ -305,6 +307,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		if (nonDuplicateVertexList.size() > 0) {
 			NodeElement node = GraphMergeUtil.addNewNodeElement(pathwayVertexRepToCheck, nonDuplicateVertexList, null, this);
 			nodeSetToAdd.add(node);
+			add(node);
 
 			for (PathwayVertex vertex : nonDuplicateVertexList) {
 				vertexNodeMap.put(vertex, node);
@@ -314,7 +317,11 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		/**
 		 * merge with nodes that contain same vertices
 		 */
-		for (NodeElement nodeWithDuplicateVertices : nodesWithSameVerticesMap.keySet()) {
+//		for (NodeElement nodeWithDuplicateVertices : nodesWithSameVerticesMap.keySet()) {
+		for (Iterator<NodeElement> nodeWithDuplicateVerticesIter = nodesWithSameVerticesMap.keySet().iterator(); nodeWithDuplicateVerticesIter
+					.hasNext();) {
+			NodeElement nodeWithDuplicateVertices = nodeWithDuplicateVerticesIter.next();
+			
 			List<PathwayVertex> sameVerticesList = nodesWithSameVerticesMap.get(nodeWithDuplicateVertices);
 			PathwayVertexRep nodeVrep = nodeWithDuplicateVertices.getVertexRep();
 
@@ -343,6 +350,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				vreps.add(nodeWithDuplicateVertices.getVertexRep());
 				NodeElement mergedNode = GraphMergeUtil.addNewNodeElement(mergedVrep, sameVerticesList, vreps, this);
 				nodeSetToAdd.add(mergedNode);
+				add(mergedNode);
 
 				/**
 				 * if the duplicate vertices are all of the (not merged) node's vertices, it needs to be
@@ -351,6 +359,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				if (nodeWithDuplicateVertices.getVertices().size() == sameVerticesList.size()) {
 
 					boolean containedNode = nodeSetToAdd.remove(nodeWithDuplicateVertices);
+					if(containedNode)
+						remove(nodeWithDuplicateVertices);
 
 					List<Pair<EdgeElement, Boolean>> edgesContainingThisNode = GraphMergeUtil
 							.getEdgeWithThisNodeAsSourceOrTarget(edgeSet, nodeWithDuplicateVertices);
@@ -434,6 +444,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 					}
 
 					nodeSetToAdd.add(mergedNode);
+					add(mergedNode);
 
 				} else {
 

@@ -21,17 +21,21 @@ public class ControllbarPathwayTitleEntry extends GLElement {
 	private static final Color NORMAL_TEXT_COLOR = Color.BLACK;
 	private static final Color RIGHT_CLICKED_TEXT_COLOR = Color.ORANGE;
 	
-	//TODO: uncomment this again
-//	private PathwayGraph representedPathwayGraph;
+	private PathwayGraph representedPathway;
 	private String pathwayTitle;
 	private boolean rightClicked = false;
 	GenericContextMenuItem removePathwayMenuItem;
+	GenericContextMenuItem makeFocusGraphMenuItem;
 	
-	public ControllbarPathwayTitleEntry(String representedPathwayGraph, final DynamicPathwayView view) {
-//		this.representedPathwayGraph = representedPathwayGraph;
-		this.pathwayTitle = representedPathwayGraph;	
+	public ControllbarPathwayTitleEntry(PathwayGraph representedPathway, final DynamicPathwayView view) {
+		this.representedPathway = representedPathway;
+		if(representedPathway != null)
+			this.pathwayTitle = representedPathway.getTitle();	
+		else
+			this.pathwayTitle = "";
 		this.removePathwayMenuItem = new GenericContextMenuItem("Remove this pathway",
 				new RemoveDisplayedPathwayEvent(this));
+		
 		setSize(Float.NaN, TEXT_HEIGHT);
 
 		
@@ -53,10 +57,10 @@ public class ControllbarPathwayTitleEntry extends GLElement {
 					rightClicked = false;
 				}
 				
-				//TODO: change to strg + del key
-				if(p.isCtrlDown() && pick.getPickingMode() == PickingMode.CLICKED) {
-					view.removeGraph(pathwayTitle);
-				}
+//				//TODO: change to strg + del key
+//				if(p.isCtrlDown() && pick.getPickingMode() == PickingMode.CLICKED) {
+//					view.removeGraph(pathwayTitle);
+//				}
 				
 				repaint();
 				
@@ -89,9 +93,14 @@ public class ControllbarPathwayTitleEntry extends GLElement {
 		return pathwayTitle;
 	}
 
-	public void setPathwayTitle(String pathwayTitle) {
-		this.pathwayTitle = pathwayTitle;
+	public void setPathway(PathwayGraph pathway) {
+		this.representedPathway = pathway;
+		this.pathwayTitle = pathway.getTitle();
 		repaint();
+	}
+
+	public PathwayGraph getRepresentedPathway() {
+		return representedPathway;
 	}
 	
 }
