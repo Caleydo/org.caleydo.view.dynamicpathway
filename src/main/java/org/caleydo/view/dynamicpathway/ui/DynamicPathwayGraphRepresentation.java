@@ -514,7 +514,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		Map<PathwayVertexRep, NodeElement> vrepToNodeElementMap = new HashMap<PathwayVertexRep, NodeElement>();
 
 		for (PathwayVertexRep vrep : newGraph.vertexSet()) {
-			if (vrep.getType() == EPathwayVertexType.map || vrep.getPathwayVertices().size() == 0)
+			if (vrep.getType() == EPathwayVertexType.map /**|| vrep.getPathwayVertices().size() == 0**/)
 				continue;
 			
 			/**
@@ -588,9 +588,9 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		float[] rgbColor1 = color1.getRGB();
 		float[] rgbColor2 = color2.getRGB();
 		
-		float newR = (float) Math.floor(rgbColor1[0]/rgbColor2[0]);
-		float newG = (float) Math.floor(rgbColor1[1]/rgbColor2[1]);
-		float newB = (float) Math.floor(rgbColor1[2]/rgbColor2[2]);
+		float newR = (float) ((rgbColor1[0]+rgbColor2[0])/2.0);
+		float newG = (float) ((rgbColor1[1]+rgbColor2[1])/2.0);
+		float newB = (float) ((rgbColor1[2]+rgbColor2[2])/2.0);
 		
 		return (new Color(newR, newG, newB));
 	}

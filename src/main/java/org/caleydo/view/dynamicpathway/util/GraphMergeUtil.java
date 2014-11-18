@@ -52,11 +52,11 @@ public class GraphMergeUtil {
 			PathwayVertexGroupRep groupVrep = (PathwayVertexGroupRep) vrep;
 			
 			if(groupVrep.getGroupedVertexReps().size() > 0)
-				node = new NodeGroupElement(vrep, pathwayVertices, graphRepresenation);
+				node = new NodeGroupElement(vrep, pathwayVertices, graphRepresenation, nodeColor);
 			else
 				return null;
 		} else if (pathwayVertices.get(0).getType() == EPathwayVertexType.compound) {
-			node = new NodeCompoundElement(vrep, pathwayVertices, graphRepresenation);		
+			node = new NodeCompoundElement(vrep, pathwayVertices, graphRepresenation, nodeColor);		
 		}  else {		
 			node = new NodeGeneElement(vrep, pathwayVertices, graphRepresenation, nodeColor);	
 		} 

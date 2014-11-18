@@ -116,13 +116,13 @@ public class NodeGeneElement extends NodeElement {
 		/**
 		 * choose filling color according to which graph it belongs
 		 */
-		GLGraphics filling;
-		if(parentGraph.getDynamicPathway().getFocusGraph() == vertexRep.getPathway())
-			filling = g.color(nodeColor);
-		else if(parentGraph.getDynamicPathway().getCombinedGraph() == vertexRep.getPathway())
-			filling = g.color(COMBINED_FILLING_COLOR);
-		else
-			filling = g.color(nodeColor);
+		GLGraphics filling = g.color(nodeColor);
+//		if(parentGraph.getDynamicPathway().getFocusGraph() == vertexRep.getPathway())
+//			filling = g.color(nodeColor);
+//		else if(parentGraph.getDynamicPathway().getCombinedGraph() == vertexRep.getPathway())
+//			filling = g.color(nodeColor);
+//		else
+//			filling = g.color(nodeColor);
 			
 		filling.fillRoundedRect(OUTER_BOUNDS, OUTER_BOUNDS, width, height, ROUND_EDGE_RADIUS);
 

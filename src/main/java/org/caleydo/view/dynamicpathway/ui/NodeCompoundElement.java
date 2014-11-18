@@ -25,8 +25,8 @@ public class NodeCompoundElement extends NodeElement {
 	private static final float HIGHLIGHT_RIGHT_PADDING = INNER_PADDING + 1 + 0.5f;
 
 	public NodeCompoundElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
-			final DynamicPathwayGraphRepresentation parentGraph) {
-		super(vertexRep, pathwayVertices, parentGraph, Color.BLACK);
+			final DynamicPathwayGraphRepresentation parentGraph, Color nodeColor) {
+		super(vertexRep, pathwayVertices, parentGraph, nodeColor);
 
 		onPick(new IPickingListener() {
 
@@ -104,13 +104,13 @@ public class NodeCompoundElement extends NodeElement {
 		}
 
 		// filling
-		GLGraphics filling;
-		if (parentGraph.getDynamicPathway().getFocusGraph() == vertexRep.getPathway())
-			filling = g.color(FOCUS_FILLING_COLOR);
-		else if (parentGraph.getDynamicPathway().getCombinedGraph() == vertexRep.getPathway())
-			filling = g.color(COMBINED_FILLING_COLOR);
-		else
-			filling = g.color(KONTEXT_FILLING_COLOR);
+		GLGraphics filling = g.color(nodeColor);
+//		if (parentGraph.getDynamicPathway().getFocusGraph() == vertexRep.getPathway())
+//			filling = g.color(FOCUS_FILLING_COLOR);
+//		else if (parentGraph.getDynamicPathway().getCombinedGraph() == vertexRep.getPathway())
+//			filling = g.color(COMBINED_FILLING_COLOR);
+//		else
+//			filling = g.color(KONTEXT_FILLING_COLOR);
 
 		filling.fillCircle(0, 0, width);
 
