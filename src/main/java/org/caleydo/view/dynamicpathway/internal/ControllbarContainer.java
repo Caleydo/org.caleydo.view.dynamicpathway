@@ -47,18 +47,30 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 	/**
 	 * radio group for allowing/removing duplicate vertices
 	 */
+	private GLElement allowIgnoreDuplicateVerticesLabel1;
+	private GLElement allowIgnoreDuplicateVerticesLabel2;
 	private RadioController duplicateVerticesRadioController;
 	private GLButton allowDuplicateVerticesButton;
 	private GLButton removeDuplicateVerticesButton;
+	
+	private GLElement vertexEnvironmentSizeTitle;
+	private GLElement vertexEnvironmentSizeLineSeparator;
+	
 
+	/**
+	 * focus pathway
+	 */
 	private ControllbarPathwayTitleEntry focusGraphElement;
 	private PathwayGraph focusPathway = null;
 	private String focusGraphTitle = "";
 
+	/**
+	 * context pathways
+	 */
 	private GLElement focusContextLineSeparator;
 	private GLElement contextGraphsLabel;
-	private Map<String, GLElement> contextGraphs;
-	private AnimatedGLElementContainer contextGraphElements;
+	private Map<String, GLElement> contextPathways;
+	private AnimatedGLElementContainer contextPathwayElements;
 	private boolean isFocusGraphSet = false;
 
 	public ControllbarContainer(DynamicPathwayView view) {
@@ -66,7 +78,7 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		setLayout(GLLayouts.flowVertical(10));
 
 		this.view = view;
-		this.contextGraphs = new HashMap<String, GLElement>();
+		this.contextPathways = new HashMap<String, GLElement>();
 
 		/**
 		 * create header
@@ -101,8 +113,8 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		allowDuplicateVerticesButton = createRadioButton("Allow duplicate vertices",
 				"Only possible for unmerged graphs", duplicateVerticesRadioController);
 
-		GLElement allowIgnoreDuplicateVerticesLabel1 = createSubHeader("Allow/Remove");
-		GLElement allowIgnoreDuplicateVerticesLabel2 = createSubHeader("duplicate vertices");
+		allowIgnoreDuplicateVerticesLabel1 = createSubHeader("Allow/Remove duplicate");
+		allowIgnoreDuplicateVerticesLabel2 = createSubHeader("vertices");
 
 		add(allowIgnoreDuplicateVerticesLabel1);
 		add(allowIgnoreDuplicateVerticesLabel2);
@@ -123,65 +135,107 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		this.focusContextLineSeparator = createLineSeparator();
 		this.focusContextLineSeparator.setVisibility(EVisibility.HIDDEN);
 		add(focusContextLineSeparator);
-
+		
+		/**
+		 * vertex environment size
+		 */
+		this.vertexEnvironmentSizeTitle = createSubHeader("Vertex Environment Size");
+		this.vertexEnvironmentSizeTitle.setVisibility(EVisibility.HIDDEN);
+		add(vertexEnvironmentSizeTitle);
+		
+		this.vertexEnvironmentSizeLineSeparator = createLineSeparator();
+		this.vertexEnvironmentSizeLineSeparator.setVisibility(EVisibility.HIDDEN);
+		add(vertexEnvironmentSizeLineSeparator);
+		
+		/**
+		 * current context graphs
+		 */
 		this.contextGraphsLabel = createSubHeader("Current Context Pathways");
 		this.contextGraphsLabel.setVisibility(EVisibility.HIDDEN);
 		add(contextGraphsLabel);
 
-		this.contextGraphElements = new AnimatedGLElementContainer(GLLayouts.flowVertical(5));
-		add(contextGraphElements);
+		this.contextPathwayElements = new AnimatedGLElementContainer(GLLayouts.flowVertical(5));
+		add(contextPathwayElements);
 	}
 
-	public void addPathwayTitle(PathwayGraph pathwayToAdd, boolean isFocusPathway, Color titleColor) throws Exception {
+	public void addPathwayTitle(PathwayGraph pathwayToAdd, boolean isFocusPathway, Color titleColor)
+			throws Exception {
 		if (isFocusPathway)
 			addFocusPathwayTitle(pathwayToAdd, titleColor);
 		else
 			addContextPathwayTitle(pathwayToAdd, titleColor);
 	}
 
+	/**
+	 * remove the given context pathway from the listed pathway titles
+	 * 
+	 * @param pathwayToRemove
+	 * @throws Exception
+	 */
 	public void removeContextPathwayTitle(PathwayGraph pathwayToRemove) throws Exception {
 		String pathwayTitle = pathwayToRemove.getTitle();
-		
-		GLElement elementToRemove = contextGraphs.get(pathwayTitle);
+
+		GLElement elementToRemove = contextPathways.get(pathwayTitle);
 		if (elementToRemove == null)
 			throw new Exception(
 					"INTERNAL ERROR: Wanted to remove kontext pathway title from controllbar, but title to remove ("
 							+ pathwayTitle + ") wasn't equal to any of the kontext pathay titles ("
-							+ contextGraphs.keySet() + ")");
+							+ contextPathways.keySet() + ")");
 
-		contextGraphElements.remove(elementToRemove);
-		contextGraphs.remove(pathwayTitle);
+		contextPathwayElements.remove(elementToRemove);
+		contextPathways.remove(pathwayTitle);
+		
+		if(contextPathwayElements.size() < 1) {
+			allowDuplicateVerticesButton.setVisibility(EVisibility.PICKABLE);
+			removeDuplicateVerticesButton.setVisibility(EVisibility.PICKABLE);
+		}
+			
 	}
 
 	public void removeFocusPathwayTitle(PathwayGraph graphToRemove) throws Exception {
 		if (!focusPathway.equals(graphToRemove))
 			throw new Exception(
 					"INTERNAL ERROR: Wanted to remove focus pathway title from controllbar, but title to remove ("
-							+ graphToRemove.getTitle() + ") wasn't equal to the focus pathay title (" + focusGraphTitle + ")");
+							+ graphToRemove.getTitle() + ") wasn't equal to the focus pathay title ("
+							+ focusGraphTitle + ")");
 
 		this.focusPathway = null;
 		this.focusGraphTitle = "";
-		this.contextGraphElements.clear();
-		this.contextGraphs.clear();
+		this.contextPathwayElements.clear();
+		this.contextPathways.clear();
 		this.focusGraphElement.setVisibility(EVisibility.HIDDEN);
 		this.focusContextLineSeparator.setVisibility(EVisibility.HIDDEN);
+		this.vertexEnvironmentSizeTitle.setVisibility(EVisibility.HIDDEN);
+		this.vertexEnvironmentSizeLineSeparator.setVisibility(EVisibility.HIDDEN);
 		this.contextGraphsLabel.setVisibility(EVisibility.HIDDEN);
-		this.contextGraphElements.setVisibility(EVisibility.HIDDEN);
+		this.contextPathwayElements.setVisibility(EVisibility.HIDDEN);
+		this.allowDuplicateVerticesButton.setVisibility(EVisibility.PICKABLE);
+		this.removeDuplicateVerticesButton.setVisibility(EVisibility.PICKABLE);
 	}
 
+	/**
+	 * add the title of the focus pathway to the listed pathways
+	 * 
+	 * @param pathwayToAdd
+	 *            the new focus pathway
+	 * 
+	 * @param titleColor
+	 *            it's nodes color -> title will be underlined with the same color
+	 */
 	private void addFocusPathwayTitle(PathwayGraph pathwayToAdd, Color titleColor) {
-		this.contextGraphElements.clear();
-		this.contextGraphs.clear();
+		this.contextPathwayElements.clear();
+		this.contextPathways.clear();
 		this.focusPathway = pathwayToAdd;
 		this.focusGraphTitle = pathwayToAdd.getTitle();
-		
 
 		this.focusGraphElement.setPathway(pathwayToAdd);
 		this.focusGraphElement.setNormalTitleColor(titleColor);
 		this.focusGraphElement.setVisibility(EVisibility.PICKABLE);
 		this.focusContextLineSeparator.setVisibility(EVisibility.VISIBLE);
+		this.vertexEnvironmentSizeTitle.setVisibility(EVisibility.VISIBLE);
+		this.vertexEnvironmentSizeLineSeparator.setVisibility(EVisibility.VISIBLE);
 		this.contextGraphsLabel.setVisibility(EVisibility.VISIBLE);
-		this.contextGraphElements.setVisibility(EVisibility.VISIBLE);
+		this.contextPathwayElements.setVisibility(EVisibility.VISIBLE);
 	}
 
 	/**
@@ -196,14 +250,24 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		if (pathway == null)
 			throw new Exception("Context pathway was null");
 
-		if (contextGraphs.containsKey(pathway.getTitle()))
+		if (contextPathways.containsKey(pathway.getTitle()))
 			return;
 
-		ControllbarPathwayTitleEntry contextGraphTitle = new ControllbarPathwayTitleEntry(pathway,titleColor, false, view);// createContentText(BULLET_POINT
-		contextGraphTitle.setVisibility(EVisibility.PICKABLE); // +
-		// title);
-		contextGraphs.put(pathway.getTitle(), contextGraphTitle);
-		contextGraphElements.add(contextGraphTitle);
+		ControllbarPathwayTitleEntry contextGraphTitle = new ControllbarPathwayTitleEntry(pathway,
+				titleColor, false, view);// createContentText(BULLET_POINT
+		contextGraphTitle.setVisibility(EVisibility.PICKABLE);
+
+		/**
+		 * disallowed with context pathways
+		 */
+		// allowIgnoreDuplicateVerticesLabel1.setVisibility(EVisibility.VISIBLE);
+		allowIgnoreDuplicateVerticesLabel2 = createSubHeader("vertices (DISABLED)");
+		allowDuplicateVerticesButton.setVisibility(EVisibility.VISIBLE);
+		removeDuplicateVerticesButton.setVisibility(EVisibility.VISIBLE);
+
+		contextPathways.put(pathway.getTitle(), contextGraphTitle);
+		contextPathwayElements.add(contextGraphTitle);
+
 	}
 
 	@Override
@@ -316,9 +380,9 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 	@Override
 	public String toString() {
 		String toPrint = "Focus: " + focusGraphTitle + "; Context: [";
-		for(String contextTitles : contextGraphs.keySet())
+		for (String contextTitles : contextPathways.keySet())
 			toPrint += contextTitles + ", ";
-		
+
 		toPrint += "]";
 		return toPrint;
 	}

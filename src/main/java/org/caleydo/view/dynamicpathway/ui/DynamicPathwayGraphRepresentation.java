@@ -131,20 +131,12 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 * @param isFocusPathway
 	 *            true if a kontext pathway should be added, false if a focus pathway should be added, if
 	 *            null, it is defined later
+	 * @param vrepSetToAdd TODO
 	 * @param allowDuplicateVertices
 	 *            only allowed for unmerged focus pathways
 	 * 
 	 */
 	public void addPathwayRep(PathwayGraph graph, Boolean isFocusPathway) {
-		
-		/**
-		 * if a node is selected & another pathway was selected, this has to be a kontextpathway
-		 */
-//		Boolean addKontextPathway;
-////		if (isFocusPathway == null)
-////			addKontextPathway = (pathway.isFocusGraphSet() && (currentFilteringNode != null)) ? true : false;
-////		else
-//			addKontextPathway = !isFocusPathway;
 
 		pathway.addFocusOrKontextPathway(graph, !isFocusPathway, currentSelectedNode);
 		
@@ -169,8 +161,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				addGraphWithDuplicates(graph, nodeSet, edgeSet);
 			} else {
 				focusGraphWithDuplicateVertices = false;
-				addGraphWithoutDuplicates(graph, uniqueVertexMap, nodeSet, edgeSet, true,
-						pathway.getCombinedGraph(), nodeColor);
+				addGraphWithoutDuplicates(graph, uniqueVertexMap, nodeSet, edgeSet,
+						true, pathway.getCombinedGraph(), nodeColor);
 
 				try {
 					checkForDuplicateVertices(nodeSet);
@@ -196,8 +188,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			if(currentFilteringNode != null)
 				setOrResetFilteringNode(currentFilteringNode);
 
-			addGraphWithoutDuplicates(graph, uniqueVertexMap, nodeSet, edgeSet, false,
-					pathway.getCombinedGraph(), nodeColor);
+			addGraphWithoutDuplicates(graph, uniqueVertexMap, nodeSet, edgeSet,
+					false, pathway.getCombinedGraph(), nodeColor);
 
 		}
 
@@ -228,11 +220,13 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 * add this new graph, but remove all duplicate PathwayVertices
 	 * 
 	 * @param newGraph
+	 * @param vrepSetToAdd TODO
 	 */
 	private void addGraphWithoutDuplicates(PathwayGraph newGraph,
-			Map<PathwayVertex, NodeElement> vertexNodeMap, Set<NodeElement> nodeSetToAdd,
-			Set<EdgeElement> edgeSetToAdd, boolean addToSameGraph, PathwayGraph combinedGraph, Color nodeColor) {
+			Map<PathwayVertex, NodeElement> vertexNodeMap,
+			Set<NodeElement> nodeSetToAdd, Set<EdgeElement> edgeSetToAdd, boolean addToSameGraph, PathwayGraph combinedGraph, Color nodeColor) {
 
+		
 //		for (PathwayVertexRep vrep : newGraph.vertexSet()) {
 		for(Iterator<PathwayVertexRep> vRepIterator = newGraph.vertexSet().iterator(); vRepIterator.hasNext();) {	
 			PathwayVertexRep vrep = vRepIterator.next();
@@ -507,9 +501,10 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 * used when only one graph is displayed
 	 * 
 	 * @param newGraph
+	 * @param vrepSetToAdd TODO
 	 */
-	private void addGraphWithDuplicates(PathwayGraph newGraph, Set<NodeElement> nodeSet,
-			Set<EdgeElement> edgeSet) {
+	private void addGraphWithDuplicates(PathwayGraph newGraph, 
+			Set<NodeElement> nodeSet, Set<EdgeElement> edgeSet) {
 		
 		Map<PathwayVertexRep, NodeElement> vrepToNodeElementMap = new HashMap<PathwayVertexRep, NodeElement>();
 
