@@ -41,7 +41,7 @@ public class GraphMergeUtil {
 	 *            needed for callback method
 	 * @return the created node element
 	 */
-	public static NodeElement addNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
+	public static NodeElement createNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
 			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwayGraphRepresentation graphRepresenation, Color nodeColor) {
 		/**
 		 * create node of correct type to vertex rep -> different shapes
@@ -75,6 +75,7 @@ public class GraphMergeUtil {
 
 			if (vrepsWithThisNodesVertices != null) {
 				node.setVrepsWithThisNodesVerticesList(vrepsWithThisNodesVertices);
+//				mergedNodesList.add(node);
 				node.setIsMerged(true);
 			}
 		}

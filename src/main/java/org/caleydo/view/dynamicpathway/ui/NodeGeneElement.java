@@ -48,6 +48,8 @@ public class NodeGeneElement extends NodeElement {
 				 * if the user clicked on the node
 				 */
 				if (pick.getPickingMode() == PickingMode.CLICKED) {
+					
+					System.out.println("Node [" + label + "] pathway: " + vertexRep.getPathway().getLabel() + " isMerged: " + isMerged);
 
 					parentGraph.setOrResetSelectedNode(NodeGeneElement.this);
 
