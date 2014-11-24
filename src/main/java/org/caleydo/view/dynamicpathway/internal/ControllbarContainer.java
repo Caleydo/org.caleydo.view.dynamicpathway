@@ -29,6 +29,10 @@ import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.view.dynamicpathway.ui.ControllbarPathwayTitleEntry;
 import org.caleydo.vis.lineup.ui.RenderStyle;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Text;
 
 public class ControllbarContainer extends AnimatedGLElementContainer implements ISelectionCallback {
 
@@ -146,6 +150,10 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		this.vertexEnvironmentSizeLineSeparator = createLineSeparator();
 		this.vertexEnvironmentSizeLineSeparator.setVisibility(EVisibility.HIDDEN);
 		add(vertexEnvironmentSizeLineSeparator);
+		
+//		Composite comp = new Composite();
+//		final Text clusterNumberText = new Text(this, SWT.BORDER);
+//		clusterNumberText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		/**
 		 * current context graphs

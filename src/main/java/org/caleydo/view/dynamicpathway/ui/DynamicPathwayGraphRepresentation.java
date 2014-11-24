@@ -98,7 +98,12 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 */
 	private EventBasedSelectionManager vertexSelectionManager;
 
+	/**
+	 * needed for node merging & edge representation
+	 */
 	Map<PathwayVertex, NodeElement> uniqueVertexMap;
+	
+	Map<PathwayGraph, PathwayGraph> originalPathwaysOfSubpathwaysMap;
 
 	Logger mergeLogger = Logger.getLogger("MergeLog");
 
@@ -116,6 +121,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		this.vertexSelectionManager.registerEventListeners();
 
 		this.uniqueVertexMap = new HashMap<PathwayVertex, NodeElement>();
+		
+		this.originalPathwaysOfSubpathwaysMap = new HashMap<PathwayGraph, PathwayGraph>();
 
 		setLayout(layout);
 		
@@ -136,7 +143,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 *            only allowed for unmerged focus pathways
 	 * 
 	 */
-	public void addPathwayRep(PathwayGraph graph, Boolean isFocusPathway) {
+	public void addPathwayRep(PathwayGraph graph, Boolean isFocusPathway, Boolean clearOriginalSubwaysMap) {
 
 		pathway.addFocusOrKontextPathway(graph, !isFocusPathway, currentSelectedNode);
 		
@@ -150,7 +157,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		if (isFocusPathway) {
 			
 			// clears all from past selection
-			clearCanvasAndInfo();		
+			clearCanvasAndInfo(clearOriginalSubwaysMap);				
 			
 
 			/** 
@@ -177,7 +184,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				PathwayVertex oldFilteringVertex = currentFilteringNode.getDisplayedVertex();
 				
 				removeDuplicateVertices = true;
-				addPathwayRep(pathway.getFocusGraph(), true);
+				addPathwayRep(pathway.getFocusGraph(), true, true);
 				
 				currentFilteringNode = uniqueVertexMap.get(oldFilteringVertex);
 			}
@@ -198,7 +205,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	/**
 	 * clears all sets, view & maps, so it can be set again
 	 */
-	public void clearCanvasAndInfo() {
+	public void clearCanvasAndInfo(Boolean clearOriginalPathwaysMap) {
 		// clear all selection
 		currentSelectedNode = null;
 		currentFilteringNode = null;	
@@ -207,6 +214,9 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		nodeSet.clear();
 		edgeSet.clear();
 		uniqueVertexMap.clear();
+		
+		if(clearOriginalPathwaysMap)
+			originalPathwaysOfSubpathwaysMap.clear();
 
 		// clear the canvas
 		clear();	
@@ -806,4 +816,48 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	public List<PathwayGraph> getContextGraphs() {
 		return pathway.getContextGraphs();
 	}
+
+	/**
+	 * get the original pathway
+	 * 
+	 * @param subPathway
+	 * @return
+	 */
+	public PathwayGraph getOriginalPathwaysOfSubpathway(PathwayGraph subPathway) {
+		return originalPathwaysOfSubpathwaysMap.get(subPathway);
+	}
+
+
+	/**
+	 * add a new pathway set
+	 * 
+	 * @param subPathway
+	 * @param originalPathway
+	 */
+	public void addOriginalPathwayAndSubpathwayToMap(PathwayGraph subPathway, PathwayGraph originalPathway) {
+		this.originalPathwaysOfSubpathwaysMap.put(subPathway, originalPathway);
+	}
+	
+	/**
+	 * removes a pair from the map
+	 * 
+	 * @param subPathway
+	 */
+	public void removeOriginalPathwayAndSubpathwayOfMap(PathwayGraph subPathway) {
+		this.originalPathwaysOfSubpathwaysMap.remove(subPathway);
+	}
+	
+	/**
+	 * checks whether the given pathway is a sub pathway (limited to a certain node range) or a full pathway graph
+	 * 
+	 * @param subPathway the pathway to check
+	 * @return true if the given pathway is a sub pathway, false otherwise
+	 */
+	public boolean isSubPathway(PathwayGraph subPathway) {
+		return this.originalPathwaysOfSubpathwaysMap.containsKey(subPathway);
+	}
+	
+//	public void clearOriginalPathwaysOfSubpathwaysMap() {
+//		this.originalPathwaysOfSubpathwaysMap.clear();
+//	}
 }
