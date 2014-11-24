@@ -148,8 +148,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		pathway.addFocusOrKontextPathway(graph, !isFocusPathway, currentSelectedNode);
 		
 		Color nodeColor = isFocusPathway ? Color.LIGHT_BLUE : Color.LIGHT_GRAY;
-		if(!isFocusPathway && pathway.getContextGraphs().size() <= contextPathwaysColors.size())
-			nodeColor = contextPathwaysColors.get(pathway.getContextGraphs().indexOf(graph));
+		if(!isFocusPathway && pathway.getContextPathways().size() <= contextPathwaysColors.size())
+			nodeColor = contextPathwaysColors.get(pathway.getContextPathways().indexOf(graph));
 		
 		view.addPathwayToControllBar(graph, isFocusPathway, nodeColor);
 
@@ -184,7 +184,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				PathwayVertex oldFilteringVertex = currentFilteringNode.getDisplayedVertex();
 				
 				removeDuplicateVertices = true;
-				addPathwayRep(pathway.getFocusGraph(), true, true);
+				addPathwayRep(pathway.getFocusPathway(), true, true);
 				
 				currentFilteringNode = uniqueVertexMap.get(oldFilteringVertex);
 			}
@@ -199,6 +199,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 					false, pathway.getCombinedGraph(), nodeColor);
 
 		}
+		
+		view.unfilterPathwayList();
 
 	}
 	
@@ -206,6 +208,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 * clears all sets, view & maps, so it can be set again
 	 */
 	public void clearCanvasAndInfo(Boolean clearOriginalPathwaysMap) {
+
 		// clear all selection
 		currentSelectedNode = null;
 		currentFilteringNode = null;	
@@ -219,7 +222,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			originalPathwaysOfSubpathwaysMap.clear();
 
 		// clear the canvas
-		clear();	
+		clear();		
+		
 		
 		//TODO: doesn't work for removing the focus pathway
 		// unfilter the pathway list
@@ -810,11 +814,11 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	}
 	
 	public PathwayGraph getFocusGraph() {
-		return pathway.getFocusGraph();
+		return pathway.getFocusPathway();
 	}
 
 	public List<PathwayGraph> getContextGraphs() {
-		return pathway.getContextGraphs();
+		return pathway.getContextPathways();
 	}
 
 	/**

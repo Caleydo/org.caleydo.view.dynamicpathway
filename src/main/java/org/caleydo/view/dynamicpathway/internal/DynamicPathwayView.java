@@ -72,7 +72,7 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 	/**
 	 * if you want to add full pathways set to any value <= 0
 	 */
-	private static final int VERTEX_ENV_SIZE = 5;
+	private static final int VERTEX_ENV_SIZE = -1;
 
 
 	private PathwayFilters.CommonVertexFilter filter = null;
@@ -279,8 +279,10 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 			// if the graph to remove is the focus graph, reset everything
 			if (dynamicGraphRepresentation.getDynamicPathway().isFocusGraph(pathwayToRemove)) {
 				dynamicGraphRepresentation.clearCanvasAndInfo(true);
+				dynamicGraphRepresentation.getDynamicPathway().removeAllPathways();
 				controllBar.removeFocusPathwayTitle(pathwayToRemove);
 			} else {
+				dynamicGraphRepresentation.getDynamicPathway().removeContextPathway(pathwayToRemove);
 				controllBar.removeContextPathwayTitle(pathwayToRemove);
 
 				List<PathwayGraph> presentContextGraphs = new ArrayList<PathwayGraph>(
