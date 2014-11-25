@@ -168,7 +168,7 @@ public class DynamicPathwayGraph {
 		focusPathway = graph;
 		contextPathways.clear();
 
-		combinedGraph = new PathwayGraph(graph.getType(), graph.getName(), graph.getTitle(),
+		combinedGraph = new PathwayGraph(graph.getType(), "Combined Graph [Focus:" + graph.getName()+ "]", "Combined Graph [Focus:" + graph.getTitle()+ "]",
 				graph.getImage(), graph.getExternalLink());
 
 		for (PathwayVertexRep vrep : graph.vertexSet()) {

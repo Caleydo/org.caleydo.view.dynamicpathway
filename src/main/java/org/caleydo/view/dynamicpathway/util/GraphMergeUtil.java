@@ -42,7 +42,7 @@ public class GraphMergeUtil {
 	 * @return the created node element
 	 */
 	public static NodeElement createNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
-			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwayGraphRepresentation graphRepresenation, Color nodeColor) {
+			List<PathwayVertexRep> vrepsWithThisNodesVertices, List<NodeElement> mergedNodesList, DynamicPathwayGraphRepresentation graphRepresenation, Color nodeColor) {
 		/**
 		 * create node of correct type to vertex rep -> different shapes
 		 */
@@ -75,7 +75,7 @@ public class GraphMergeUtil {
 
 			if (vrepsWithThisNodesVertices != null) {
 				node.setVrepsWithThisNodesVerticesList(vrepsWithThisNodesVertices);
-//				mergedNodesList.add(node);
+				mergedNodesList.add(node);
 				node.setIsMerged(true);
 			}
 		}
@@ -132,19 +132,25 @@ public class GraphMergeUtil {
 			if (!vertexNodeMap.containsKey(srcVertex) || vertexNodeMap.get(srcVertex) == null)
 				throw new NodeMergingException("srcVertex(" + srcVertex + ") not in uniqueVertexMap");
 
-			srcNodes.add(vertexNodeMap.get(srcVertex));
+			NodeElement srcNode = vertexNodeMap.get(srcVertex);
+			if(!srcNodes.contains(srcNode) && srcNode != null)
+				srcNodes.add(srcNode);
 		}
 
 		for (PathwayVertex targetVertex : targetVrep.getPathwayVertices()) {
 			if (!vertexNodeMap.containsKey(targetVertex) || vertexNodeMap.get(targetVertex) == null)
 				throw new NodeMergingException("targetVertex(" + targetVertex + ") not in uniqueVertexMap");
 
-			targetNodes.add(vertexNodeMap.get(targetVertex));
+			NodeElement targetNode = vertexNodeMap.get(targetVertex);
+			if(!targetNodes.contains(targetNode) && targetNode != null)
+				targetNodes.add(targetNode);
+			
+//			targetNodes.add(vertexNodeMap.get(targetVertex));
 		}
 
 		for (NodeElement srcNode : srcNodes) {
 			for (NodeElement targetNode : targetNodes) {
-				if (srcNode == targetNode)
+				if (srcNode.equals(targetNode))
 					continue;
 				// throw new NodeMergingException("srcNode == targetNode");
 

@@ -103,7 +103,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 */
 	Map<PathwayVertex, NodeElement> uniqueVertexMap;
 	
-	List<NodeElement> mergedNodesList;
+	List<NodeElement> globallyMergedNodesList;
 
 	Map<PathwayGraph, PathwayGraph> originalPathwaysOfSubpathwaysMap;
 
@@ -125,6 +125,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		this.uniqueVertexMap = new HashMap<PathwayVertex, NodeElement>();
 
 		this.originalPathwaysOfSubpathwaysMap = new HashMap<PathwayGraph, PathwayGraph>();
+		
+		this.globallyMergedNodesList = new LinkedList<NodeElement>();
 
 		setLayout(layout);
 
@@ -169,9 +171,15 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				focusGraphWithDuplicateVertices = true;
 				addGraphWithDuplicates(graph, nodeSet, edgeSet);
 			} else {
+				
+				List<NodeElement> mergedNodesList = new LinkedList<NodeElement>();
 				focusGraphWithDuplicateVertices = false;
-				addPathwayWithoutDuplicates(graph, uniqueVertexMap, nodeSet, edgeSet, true,
+				addPathwayWithoutDuplicates(graph, uniqueVertexMap, mergedNodesList, nodeSet, edgeSet, true,
 						pathway.getCombinedGraph(), nodeColor);
+				
+				// TODO: find better solution
+				for(NodeElement node : nodeSet) 
+					node.setIsMerged(false);
 
 				try {
 					checkForDuplicateVertices(nodeSet);
@@ -195,7 +203,9 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			if (currentFilteringNode != null)
 				setOrResetFilteringNode(currentFilteringNode);
 
-			addPathwayWithoutDuplicates(graph, uniqueVertexMap, nodeSet, edgeSet, false,
+			List<NodeElement> mergedNodesList = new LinkedList<NodeElement>();
+			
+			addPathwayWithoutDuplicates(graph, uniqueVertexMap, mergedNodesList, nodeSet, edgeSet, false,
 					pathway.getCombinedGraph(), nodeColor);
 
 		}
@@ -252,7 +262,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 *            the color of the created nodes
 	 */
 	private void addPathwayWithoutDuplicates(PathwayGraph pathwayToAdd,
-			Map<PathwayVertex, NodeElement> vertexNodeMap, Set<NodeElement> nodeSetToAdd,
+			Map<PathwayVertex, NodeElement> vertexNodeMap, List<NodeElement> localMergedNodesList, Set<NodeElement> nodeSetToAdd,
 			Set<EdgeElement> edgeSetToAdd, boolean addMergedNodesToSamePathway, PathwayGraph combinedPathway,
 			Color nodeColor) {
 
@@ -265,7 +275,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				continue;
 
 			try {
-				checkAndMergeNodes(pathwayToAdd, vrep, vertexNodeMap, nodeSetToAdd,
+				checkAndMergeNodes(pathwayToAdd, vrep, vertexNodeMap, localMergedNodesList, nodeSetToAdd,
 						addMergedNodesToSamePathway, combinedPathway, nodeColor);
 				// GraphMergeUtil.checkAndMergeNodes(newGraph, vrep, vertexNodeMap, nodeSetToAdd,
 				// edgeSetToAdd, addToSameGraph, combinedGraph, this);
@@ -298,8 +308,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 *             internal error - tool didn't behave as expected
 	 */
 	private void checkAndMergeNodes(PathwayGraph pathwayToAdd, PathwayVertexRep vRepToCheck,
-			Map<PathwayVertex, NodeElement> vertexNodeMap, Set<NodeElement> nodeSetToAdd,
-			boolean addToSameGraph, PathwayGraph combinedGraph, Color nodeColor) throws NodeMergingException {
+			Map<PathwayVertex, NodeElement> vertexNodeMap, List<NodeElement> localMergedNodesList, Set<NodeElement> nodeSetToAdd,
+			boolean addToSameGraph, PathwayGraph combinedPathway, Color nodeColor) throws NodeMergingException {
 
 		if (displayOnlyVerticesWithEdges && (pathwayToAdd.inDegreeOf(vRepToCheck) < 1)
 				&& (pathwayToAdd.outDegreeOf(vRepToCheck) < 1))
@@ -342,7 +352,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		if (nonDuplicateVertexList.size() > 0) {
 			NodeElement node = GraphMergeUtil.createNewNodeElement(vRepToCheck,
-					nonDuplicateVertexList, null, this, nodeColor);
+					nonDuplicateVertexList, null, localMergedNodesList, this, nodeColor);
 			nodeSetToAdd.add(node);
 			add(node);
 
@@ -377,6 +387,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			 */
 			if (!nodeWithDuplicateVertices.isMerged()) {
 				
+				boolean mergeWithinSameGraph = (vRepToCheck.getPathway().equals(nodeVrep.getPathway())) ? true : false;
+				
 				/**
 				 * STEP 3.1a.1:
 				 * Create a merged node element & remove the duplicate vertices from the existing node 
@@ -391,19 +403,27 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				 */
 				for (PathwayVertex mergedVertex : sameVerticesList)
 					mergedVrep.addPathwayVertex(mergedVertex);
-
-				if (addToSameGraph)
+//				if (mergeWithinSameGraph)
+				if (addToSameGraph || mergeWithinSameGraph)
 					mergedVrep.setPathway(pathwayToAdd);
-				else
-					mergedVrep.setPathway(combinedGraph);
+				else 
+					mergedVrep.setPathway(combinedPathway);
 				
-				combinedGraph.addVertex(mergedVrep);
+				combinedPathway.addVertex(mergedVrep);
 				List<PathwayVertexRep> vreps = new LinkedList<PathwayVertexRep>();
 				vreps.add(vRepToCheck);
 				vreps.add(nodeWithDuplicateVertices.getVertexRep());
-				Color mergedNodeColor = determineMixedColor(nodeColor, nodeWithDuplicateVertices.getColor());
+				Color mergedNodeColor;
+				if(mergeWithinSameGraph)
+					mergedNodeColor = nodeColor;
+				else
+					mergedNodeColor = determineMixedColor(nodeColor, nodeWithDuplicateVertices.getColor());
+				
 				NodeElement mergedNode = GraphMergeUtil.createNewNodeElement(mergedVrep, sameVerticesList,
-						vreps, this, mergedNodeColor);
+						vreps, localMergedNodesList, this, mergedNodeColor);
+				if(!addToSameGraph && mergeWithinSameGraph)
+					mergedNode.setIsMerged(false);
+				
 				nodeSetToAdd.add(mergedNode);
 				add(mergedNode);
 
@@ -514,8 +534,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 					}
 //					Color mergedColor = determineMixedColor(nodeColor, nodeWithDuplicateVertices.getColor());
 					NodeElement newNodeForNonDuplicateVertices = GraphMergeUtil.createNewNodeElement(vrepOfNonDuplicateVertices,
-							nonDuplicateVerticesOfExistingNode, vrepsOfNode, this, nodeWithDuplicateVertices.getColor());
-
+							nonDuplicateVerticesOfExistingNode, vrepsOfNode,localMergedNodesList, this, nodeWithDuplicateVertices.getColor());
+					
 					for (PathwayVertex mergedVertex : nonDuplicateVerticesOfExistingNode) {
 						vrepOfNonDuplicateVertices.addPathwayVertex(mergedVertex);
 						vertexNodeMap.put(mergedVertex, newNodeForNonDuplicateVertices);
@@ -526,13 +546,14 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 					
 //					nodeWithDuplicateVertices.addVrepWithThisNodesVerticesList(pathwayVertexRepToCheck);
 
-				} 
+				}
 //				else {
 				
 					/**
-					 * new vrep is added the merged node
+					 * new vrep is added to the merged node
 					 */
 					nodeWithDuplicateVertices.addVrepWithThisNodesVerticesList(vRepToCheck);
+					nodeWithDuplicateVertices.getVertexRep().setPathway(combinedPathway);
 //				}
 
 			}
@@ -598,7 +619,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				continue;
 
 			NodeElement nodeElement = GraphMergeUtil.createNewNodeElement(vrep, vrep.getPathwayVertices(), null,
-					this, Color.LIGHT_BLUE);
+					globallyMergedNodesList, this, Color.LIGHT_BLUE);
 
 			if (nodeElement == null) {
 				System.err.println("Node creation of vrep " + vrep + "failed");
