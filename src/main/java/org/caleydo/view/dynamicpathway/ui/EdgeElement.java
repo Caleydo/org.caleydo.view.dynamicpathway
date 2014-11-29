@@ -35,21 +35,20 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 
 		this.centerToCenterLine = new Line2D.Double(xSource, ySource, xTarget, yTarget);
 		this.edgeToRender = new Line2D.Double();
-		
+
 	}
 
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {
 
 		calcDrawableEdge();
-
+		g.decZ();
 		g.drawLine((float) edgeToRender.getX1(), (float) edgeToRender.getY1(), (float) edgeToRender.getX2(),
 				(float) edgeToRender.getY2());
-
+		g.incZ();
 		drawArrowHead(g);
 
 	}
-	
 
 	private void calcDrawableEdge() {
 
@@ -58,48 +57,45 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		double xTarget = targetNode.getCenterX();
 		double yTarget = targetNode.getCenterY();
 
-		//TODO: sometimes null
+		// TODO: sometimes null
 		centerToCenterLine.setLine(xSource, ySource, xTarget, yTarget);
-		
+
 		Point2D sourcePoint;
 		Point2D targetPoint;
-		
+
 		/**
 		 * if the node shape is circle, the intersection points need to be calculated differently
 		 */
 		if (sourceNode.getVertexRep().getType() == EPathwayVertexType.compound) {
-			double radius = sourceNode.getWidth()-1.0;
-			
+			double radius = sourceNode.getWidth() - 1.0;
+
 			sourcePoint = CalculateIntersectionUtil.calcIntersectionPoint(centerToCenterLine, radius);
-			
-		}
-		else 
+
+		} else
 			sourcePoint = sourceNode.getIntersectionPointWithNodeBound(centerToCenterLine);
-		
+
 		if (targetNode.getVertexRep().getType() == EPathwayVertexType.compound) {
-			
+
 			Line2D reversedCenterToCenterLine = new Line2D.Double(xTarget, yTarget, xSource, ySource);
-			
+
 			double radius = targetNode.getWidth();
-			
+
 			targetPoint = CalculateIntersectionUtil.calcIntersectionPoint(reversedCenterToCenterLine, radius);
-			
-		}
-		else	
+
+		} else
 			targetPoint = targetNode.getIntersectionPointWithNodeBound(centerToCenterLine);
 
 		/**
 		 * check if a sourcePoint and/or a targetPoint was found
 		 */
-		if(sourcePoint == null && targetPoint == null) {
+		if (sourcePoint == null && targetPoint == null) {
 			edgeToRender.setLine(centerToCenterLine);
-		} else if (sourcePoint == null) {				
+		} else if (sourcePoint == null) {
 			edgeToRender.setLine(xSource, ySource, targetPoint.getX(), targetPoint.getY());
-			
-		} else if(targetPoint == null) {
+
+		} else if (targetPoint == null) {
 			edgeToRender.setLine(sourcePoint.getX(), sourcePoint.getY(), xTarget, yTarget);
-		}
-		else {
+		} else {
 			edgeToRender.setLine(sourcePoint, targetPoint);
 		}
 	}

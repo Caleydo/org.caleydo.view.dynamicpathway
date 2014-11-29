@@ -92,6 +92,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		this.parentGraph = parentGraph;
 		this.vertices = new CopyOnWriteArrayList<PathwayVertex>(pathwayVertices);
 		this.nodeColor = nodeColor;
+		this.vrepsWithThisNodesVerticesList = new LinkedList<PathwayVertexRep>();
 
 		if (vertices.size() > 0 && vertices.get(0).getType() != EPathwayVertexType.group) {
 			// this.vertices = vertexRep.getPathwayVertices();
@@ -301,10 +302,10 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	public List<PathwayVertexRep> getVrepsWithThisNodesVerticesList() {
 		return vrepsWithThisNodesVerticesList;
 	}
-
-	public void setVrepsWithThisNodesVerticesList(List<PathwayVertexRep> vrepsWithThisNodesVerticesList) {
-		this.vrepsWithThisNodesVerticesList = vrepsWithThisNodesVerticesList;
-	}
+//
+//	public void setVrepsWithThisNodesVerticesList(List<PathwayVertexRep> vrepsWithThisNodesVerticesList) {
+//		this.vrepsWithThisNodesVerticesList = vrepsWithThisNodesVerticesList;
+//	}
 
 	public void addVrepWithThisNodesVerticesList(PathwayVertexRep vrepWithThisNodesVertices) {
 		this.vrepsWithThisNodesVerticesList.add(vrepWithThisNodesVertices);

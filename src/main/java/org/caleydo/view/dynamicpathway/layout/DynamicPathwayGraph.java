@@ -164,14 +164,14 @@ public class DynamicPathwayGraph {
 		return false;
 	}
 
-	private void addFocusPathway(PathwayGraph graph) {
-		focusPathway = graph;
+	private void addFocusPathway(PathwayGraph newFocusPathway) {
+		focusPathway = newFocusPathway;
 		contextPathways.clear();
 
-		combinedGraph = new PathwayGraph(graph.getType(), "Combined Graph [Focus:" + graph.getName()+ "]", "Combined Graph [Focus:" + graph.getTitle()+ "]",
-				graph.getImage(), graph.getExternalLink());
+		combinedGraph = new PathwayGraph(newFocusPathway.getType(), "Combined Graph [Focus:" + newFocusPathway.getName()+ "]", "Combined Graph [Focus:" + newFocusPathway.getTitle()+ "]",
+				newFocusPathway.getImage(), newFocusPathway.getExternalLink());
 
-		for (PathwayVertexRep vrep : graph.vertexSet()) {
+		for (PathwayVertexRep vrep : newFocusPathway.vertexSet()) {
 			
 			/**
 			 * map is the type, which display the current pathway's name this should be layoutet
@@ -190,9 +190,9 @@ public class DynamicPathwayGraph {
 					
 //			}
 		}
-		for (DefaultEdge edge : graph.edgeSet()) {
+		for (DefaultEdge edge : newFocusPathway.edgeSet()) {
 			
-			combinedGraph.addEdge(graph.getEdgeSource(edge), graph.getEdgeTarget(edge), edge);
+			combinedGraph.addEdge(newFocusPathway.getEdgeSource(edge), newFocusPathway.getEdgeTarget(edge), edge);
 		}
 	}
 

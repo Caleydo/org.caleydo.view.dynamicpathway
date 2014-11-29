@@ -72,7 +72,7 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 	/**
 	 * if you want to add full pathways set to any value <= 0
 	 */
-	private static final int VERTEX_ENV_SIZE = -1;
+	private static final int VERTEX_ENV_SIZE = -1;//-1; //4;
 
 
 	private PathwayFilters.CommonVertexFilter filter = null;
@@ -430,7 +430,18 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 			/**
 			 * if the currentFilteringVRep isn't in the pathway -> find the vrep that is in the pathway & add
 			 * this to the limited version of the graph
+			 * 
 			 */
+			
+//			List<PathwayVertexRep> alternativeVreps = currentFilteringNode.getVrepsWithThisNodesVerticesList();
+//			for(PathwayVertexRep alternativeVrep : alternativeVreps) {
+//				if(pathwayToAdd.containsVertex(currentFilteringVRep)) {
+//					focusVertex = alternativeVrep.getPathwayVertices().get(0);
+//					edgesOfThisNode = pathwayToAdd.edgesOf(alternativeVrep);
+//					alternativeVrepFromPathway = alternativeVrep;
+//					break;
+//				}
+//			}
 
 			List<PathwayVertex> alternativeVertices = currentFilteringNode.getVertices();
 			if (alternativeVertices == null)

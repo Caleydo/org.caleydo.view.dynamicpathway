@@ -1,12 +1,11 @@
 package org.caleydo.view.dynamicpathway.util;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.caleydo.core.util.collection.MultiHashMap;
 import org.caleydo.core.util.collection.Pair;
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
@@ -74,7 +73,10 @@ public class GraphMergeUtil {
 			// node.setVertices(pathwayVertices);
 
 			if (vrepsWithThisNodesVertices != null) {
-				node.setVrepsWithThisNodesVerticesList(vrepsWithThisNodesVertices);
+				
+				for(PathwayVertexRep alternativeVrep : vrepsWithThisNodesVertices)
+					node.addVrepWithThisNodesVerticesList(alternativeVrep);
+				
 				mergedNodesList.add(node);
 				node.setIsMerged(true);
 			}
@@ -153,8 +155,10 @@ public class GraphMergeUtil {
 				if (srcNode.equals(targetNode))
 					continue;
 				// throw new NodeMergingException("srcNode == targetNode");
-
+				
 				EdgeElement edgeEl = new EdgeElement(edge, srcNode, targetNode);
+					
+				
 				edgeEl.setLayoutData(false);
 				edgeSetToAdd.add(edgeEl);
 				containterToAddElementTo.add(edgeEl);
