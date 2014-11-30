@@ -18,6 +18,8 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 	private static final float ARROW_SIZE = 5.0f;
 
 	private DefaultEdge edge;
+
+
 	private NodeElement sourceNode;
 	private NodeElement targetNode;
 	private Line2D centerToCenterLine;
@@ -153,6 +155,10 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 
 	public void setTargetNode(NodeElement targetNode) {
 		this.targetNode = targetNode;
+	}
+	
+	public DefaultEdge getDefaultEdge() {
+		return edge;
 	}
 
 }
