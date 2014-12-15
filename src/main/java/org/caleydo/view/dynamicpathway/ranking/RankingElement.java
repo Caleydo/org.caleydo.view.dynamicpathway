@@ -254,7 +254,7 @@ public class RankingElement extends GLElementContainer {
 		if (newValue == null)
 			return;
 
-		if (!view.isGraphPresent(newValue.getPathway()))
+		if (!view.isPathwayPresent(newValue.getPathway()))
 			view.addPathway(newValue.getPathway());
 
 		table.setSelectedRow(null);
@@ -289,7 +289,7 @@ public class RankingElement extends GLElementContainer {
 			IRow selected) {
 		PathwayRow pathwayRow = (PathwayRow) row;
 
-		if (view.isGraphPresent(pathwayRow.getPathway())) {
+		if (view.isPathwayPresent(pathwayRow.getPathway())) {
 			g.color(RenderStyle.COLOR_SELECTED_ROW);
 			g.incZ();
 			g.fillRect(x, y, w, h);

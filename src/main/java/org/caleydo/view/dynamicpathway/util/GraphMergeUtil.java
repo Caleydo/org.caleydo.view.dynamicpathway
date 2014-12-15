@@ -1,5 +1,6 @@
 package org.caleydo.view.dynamicpathway.util;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,20 @@ public class GraphMergeUtil {
 	
 	
 	/**
+	 * convenience method for creating a new node with just one pathway <br />
+	 * creates set with one pathway & calls {@link #createNewNodeElement(PathwayVertexRep, List, List, DynamicPathwayGraphRepresentation, Color, Set)}
+	 * @return
+	 */
+	public static NodeElement createNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
+			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwayGraphRepresentation graphRepresenation, Color nodeColor, PathwayGraph pathway) {
+		Set<PathwayGraph> pathways = new HashSet<PathwayGraph>();
+		pathways.add(pathway);
+		
+		return createNewNodeElement(vrep, pathwayVertices, vrepsWithThisNodesVertices, graphRepresenation, nodeColor, pathways);
+	}
+	
+	
+	/**
 	 * creates a new node element depending on it's vertices type -> either ground, gene or compound
 	 * 
 	 * @param vrep
@@ -41,7 +56,8 @@ public class GraphMergeUtil {
 	 * @return the created node element
 	 */
 	public static NodeElement createNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
-			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwayGraphRepresentation graphRepresenation, Color nodeColor) {
+			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwayGraphRepresentation graphRepresenation, Color nodeColor, Set<PathwayGraph> pathways) {
+		
 		/**
 		 * create node of correct type to vertex rep -> different shapes
 		 */
@@ -51,13 +67,13 @@ public class GraphMergeUtil {
 			PathwayVertexGroupRep groupVrep = (PathwayVertexGroupRep) vrep;
 			
 			if(groupVrep.getGroupedVertexReps().size() > 0)
-				node = new NodeGroupElement(vrep, pathwayVertices, graphRepresenation, nodeColor);
+				node = new NodeGroupElement(vrep, pathwayVertices, graphRepresenation, nodeColor, pathways);
 			else
 				return null;
 		} else if (pathwayVertices.get(0).getType() == EPathwayVertexType.compound) {
-			node = new NodeCompoundElement(vrep, pathwayVertices, graphRepresenation, nodeColor);		
+			node = new NodeCompoundElement(vrep, pathwayVertices, graphRepresenation, nodeColor,pathways);		
 		}  else {		
-			node = new NodeGeneElement(vrep, pathwayVertices, graphRepresenation, nodeColor);	
+			node = new NodeGeneElement(vrep, pathwayVertices, graphRepresenation, nodeColor, pathways);	
 		} 
 
 		/**

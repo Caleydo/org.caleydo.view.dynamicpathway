@@ -2,11 +2,11 @@ package org.caleydo.view.dynamicpathway.ui;
 
 import org.caleydo.core.event.AEvent;
 
-public class ChangeFocusNodeEvent extends AEvent {
-	
+public class FilterPathwayEvent extends AEvent {
+
 	NodeElement newFocusNode;
 
-	public ChangeFocusNodeEvent(NodeElement nodeElementToFilterBy) {	
+	public FilterPathwayEvent(NodeElement nodeElementToFilterBy) {	
 		this.newFocusNode = nodeElementToFilterBy;
 	}
 
@@ -14,7 +14,6 @@ public class ChangeFocusNodeEvent extends AEvent {
 
 	@Override
 	public boolean checkIntegrity() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 

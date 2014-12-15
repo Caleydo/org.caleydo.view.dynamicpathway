@@ -1,6 +1,7 @@
 package org.caleydo.view.dynamicpathway.ui;
 
 import java.util.List;
+import java.util.Set;
 
 import org.caleydo.core.event.EventPublisher;
 import org.caleydo.core.util.color.Color;
@@ -9,6 +10,7 @@ import org.caleydo.core.view.opengl.picking.AdvancedPick;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.core.view.opengl.picking.PickingMode;
+import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 
@@ -21,8 +23,8 @@ public class NodeGeneElement extends NodeElement {
 	private static final int ROUND_EDGE_RADIUS = 2;
 	
 	public NodeGeneElement(final PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
-			final DynamicPathwayGraphRepresentation parentGraph, Color nodeColor) {
-		super(vertexRep, pathwayVertices, parentGraph, nodeColor);
+			final DynamicPathwayGraphRepresentation parentGraph, Color nodeColor, Set<PathwayGraph> pathways) {
+		super(vertexRep, pathwayVertices, parentGraph, nodeColor, pathways);
 		
 		onPick(new IPickingListener() {
 
@@ -41,7 +43,7 @@ public class NodeGeneElement extends NodeElement {
 				if (pick.getPickingMode() == PickingMode.RIGHT_CLICKED) {
 //					parentGraph.setOrResetFilteringNode(NodeGeneElement.this);
 
-					context.getSWTLayer().showContextMenu(Lists.newArrayList(filterPathwayMenu));
+					context.getSWTLayer().showContextMenu(Lists.newArrayList(filterPathwayMenu, focusNodeMenu));
 					
 				}
 
@@ -50,13 +52,16 @@ public class NodeGeneElement extends NodeElement {
 				 */
 				if (pick.getPickingMode() == PickingMode.CLICKED) {
 					
-					System.out.println("Node [" + label + "] pathway: " + vertexRep.getPathway().getLabel() + " wasMerged: " + wasMerged);
+					System.out.println(NodeGeneElement.this.toString());
 
 					parentGraph.setOrResetSelectedNode(NodeGeneElement.this);
 
 					if (p.isCtrlDown()) {
-						System.out.println("CLICKED");
-						EventPublisher.trigger(filterEvent);
+//						parentGraph.setOrResetFilteringNode(NodeGeneElement.this);
+//						
+//						parentGraph.filterPathwayList();
+						
+						EventPublisher.trigger(focusNodeEvent);
 					}
 
 
@@ -141,7 +146,6 @@ public class NodeGeneElement extends NodeElement {
 		super.renderPickImpl(g, w, h);
 
 	}
-
 
 
 

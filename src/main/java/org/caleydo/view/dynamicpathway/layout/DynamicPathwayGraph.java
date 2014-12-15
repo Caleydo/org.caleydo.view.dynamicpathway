@@ -163,6 +163,16 @@ public class DynamicPathwayGraph {
 		}
 		return false;
 	}
+	
+	/**
+	 * 
+	 * @return list of all displayed pathways -> focus + context
+	 */
+	public List<PathwayGraph> getDisplayedPathways() {
+		List<PathwayGraph> displayedPathways = new LinkedList<PathwayGraph>(this.getContextPathways());
+		displayedPathways.add(focusPathway);
+		return displayedPathways;
+	}
 
 	private void addFocusPathway(PathwayGraph newFocusPathway) {
 		focusPathway = newFocusPathway;
@@ -195,6 +205,7 @@ public class DynamicPathwayGraph {
 			combinedGraph.addEdge(newFocusPathway.getEdgeSource(edge), newFocusPathway.getEdgeTarget(edge), edge);
 		}
 	}
+
 
 
 }

@@ -5,6 +5,7 @@ import java.awt.geom.Point2D;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.caleydo.core.view.contextmenu.GenericContextMenuItem;
 import org.caleydo.core.view.opengl.layout2.GLElementContainer;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.IGLElementContext;
+import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
@@ -43,6 +45,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	protected PathwayVertexRep vertexRep;
 	protected List<PathwayVertex> vertices;
 	protected List<PathwayVertexRep> vrepsWithThisNodesVerticesList;
+	private Set<PathwayGraph> representedPathways;
 
 	/**
 	 * the Vertex, which's name is displayed in the graph by default, this is the first vertex in
@@ -78,12 +81,14 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	/**
 	 * the context menu, which pops up, when a node is right clicked
 	 */
+	protected GenericContextMenuItem focusNodeMenu;
+	protected ChangeFocusNodeEvent focusNodeEvent;
 	protected GenericContextMenuItem filterPathwayMenu;
-	protected ChangeFocusNodeEvent filterEvent;
 	
 	protected Color nodeColor;
+	
 
-	public NodeElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices, final DynamicPathwayGraphRepresentation parentGraph, Color nodeColor) {
+	public NodeElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,final DynamicPathwayGraphRepresentation parentGraph, Color nodeColor, Set<PathwayGraph> pathways) {
 		this.uid = UUID.randomUUID().toString();
 		this.vertexRep = vertexRep;
 		this.centerX = vertexRep.getCenterX();
@@ -96,7 +101,8 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		this.vertices = new CopyOnWriteArrayList<PathwayVertex>(pathwayVertices);
 		this.nodeColor = nodeColor;
 		this.vrepsWithThisNodesVerticesList = new LinkedList<PathwayVertexRep>();
-		this.filterEvent = new ChangeFocusNodeEvent(this);
+		this.focusNodeEvent = new ChangeFocusNodeEvent(this);
+		this.representedPathways = new HashSet<PathwayGraph>(pathways);
 		
 		
 		if (vertices.size() > 0 && vertices.get(0).getType() != EPathwayVertexType.group) {
@@ -107,8 +113,9 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 			this.width = this.vertexRep.getWidth();
 		}
 
-		filterPathwayMenu = new GenericContextMenuItem("Choose as focus pathway",
-				filterEvent);
+		focusNodeMenu = new GenericContextMenuItem("Choose as focus pathway",
+				focusNodeEvent);
+		filterPathwayMenu = new GenericContextMenuItem("Filter pathway list by these node", new FilterPathwayEvent(this));
 		
 	setVisibility(EVisibility.PICKABLE);
 
@@ -286,17 +293,39 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	
 	
 	public void makeThisFocusNode() {
-		EventPublisher.trigger(filterEvent);
+		EventPublisher.trigger(focusNodeEvent);
+	}
+	
+	public List<PathwayGraph> getPathways() {
+		List<PathwayGraph> pathways = new ArrayList<PathwayGraph>(this.representedPathways);
+		return pathways;
+	}
+	
+	public void addPathways(Set<PathwayGraph> pathways) {
+		for(PathwayGraph pathway : pathways)
+			addPathway(pathway);
+	}
+	
+	public void addPathway(PathwayGraph pathway) {
+		this.representedPathways.add(pathway);
+	}
+	
+	
+	public boolean removePathway(PathwayGraph pathway) {
+		return this.representedPathways.remove(pathway);
 	}
 
 	@Override
 	public String toString() {
 		String outputString = uid + ": ";
 		outputString += "Label(" + label + ") ";
+		outputString += "wasMerged(" + wasMerged + ")";		
 		outputString += "VrepSize("
 				+ ((vrepsWithThisNodesVerticesList != null) ? Integer.toString(vrepsWithThisNodesVerticesList
 						.size()) : "1") + ") ";
+		outputString += "Color(" + nodeColor + ")";
 		outputString += "Vertices[" + vertices + "]";
+		outputString += "Pathways[" + getPathwaySetTitles() + "]";
 
 		return outputString;
 	}
@@ -307,6 +336,10 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	public void setIsMerged(boolean isMerged) {
 		this.isMerged = isMerged;
+	}
+	
+	public boolean wasMerged() {
+		return wasMerged;
 	}
 	
 	public void setWasMerged(boolean wasMerged) {
@@ -327,6 +360,17 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	public Color getColor() {
 		return nodeColor;
+	}
+	
+	private String getPathwaySetTitles() {
+		String pathwayListTitles = "";
+		
+		for(PathwayGraph pathway : this.representedPathways)
+			pathwayListTitles += pathway.getTitle() + ",";
+		
+		pathwayListTitles = pathwayListTitles.substring(0, pathwayListTitles.length()-1);
+	
+		return pathwayListTitles;
 	}
 
 }
