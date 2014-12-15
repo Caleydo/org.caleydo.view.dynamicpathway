@@ -2,11 +2,11 @@ package org.caleydo.view.dynamicpathway.ui;
 
 import org.caleydo.core.event.AEvent;
 
-public class FilterPathwayListByVertexEvent extends AEvent {
+public class ChangeFocusNodeEvent extends AEvent {
 	
 	NodeElement nodeElementToFilterBy;
 
-	public FilterPathwayListByVertexEvent(NodeElement nodeElementToFilterBy) {	
+	public ChangeFocusNodeEvent(NodeElement nodeElementToFilterBy) {	
 		this.nodeElementToFilterBy = nodeElementToFilterBy;
 	}
 

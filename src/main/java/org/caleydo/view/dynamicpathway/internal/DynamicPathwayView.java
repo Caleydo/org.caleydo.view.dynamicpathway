@@ -32,6 +32,7 @@ import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayout;
 import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayoutBuilder;
 import org.caleydo.view.dynamicpathway.ranking.RankingElement;
 import org.caleydo.view.dynamicpathway.ui.DynamicPathwayGraphRepresentation;
+import org.caleydo.view.dynamicpathway.ui.ChangeFocusNodeEvent;
 import org.caleydo.view.dynamicpathway.ui.LimitedPathwayGraph;
 import org.caleydo.view.dynamicpathway.ui.MakeFocusPathwayEvent;
 import org.caleydo.view.dynamicpathway.ui.NodeElement;
@@ -57,23 +58,21 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 
 	private RankingElement rankingElement;
 
-	private DynamicPathwayGraphRepresentation dynamicGraphRepresentation;
+	private DynamicPathwayGraphRepresentation dynamicGraphCanvas;
 	private GLFruchtermanReingoldLayout pathwayLayout;
 
-	private GLElementContainer root = new GLElementContainer(new GLSizeRestrictiveFlowLayout(true, 1,
-			GLPadding.ZERO));
+	private GLElementContainer root = new GLElementContainer(new GLSizeRestrictiveFlowLayout(true, 1, GLPadding.ZERO));
 
-	private AnimatedGLElementContainer baseContainer = new AnimatedGLElementContainer(
-			new GLSizeRestrictiveFlowLayout(true, 10, GLPadding.ZERO));
+	private AnimatedGLElementContainer baseContainer = new AnimatedGLElementContainer(new GLSizeRestrictiveFlowLayout(
+			true, 10, GLPadding.ZERO));
 
 	private ControllbarContainer controllBar;
-	
-	//TODO: replace with controllbar listen
+
+	// TODO: replace with controllbar listen
 	/**
 	 * if you want to add full pathways set to any value <= 0
 	 */
-	private static final int VERTEX_ENV_SIZE = -1;//-1; //4;
-
+	private static final int VERTEX_ENV_SIZE = 4;
 
 	private PathwayFilters.CommonVertexFilter filter = null;
 
@@ -84,22 +83,15 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 
 		createRankingSideBar();
 		baseContainer.setSize(200, Float.NaN);
-		// baseContainer.setRenderer(GLRenderers.fillRect(Color.RED));
-		// currentPathwayElement.setLayoutData(1.0f);
-		// currentPathwayElement.setRenderer(GLRenderers.fillRect(Color.GREEN));
 
 		root.add(baseContainer);
-		root.add(dynamicGraphRepresentation);
-		GLElementContainer cont = new GLElementContainer(new GLSizeRestrictiveFlowLayout(false, 3,
-				GLPadding.ZERO));
+		root.add(dynamicGraphCanvas);
+		GLElementContainer cont = new GLElementContainer(new GLSizeRestrictiveFlowLayout(false, 3, GLPadding.ZERO));
 		cont.setSize(200, Float.NaN);
 		this.controllBar = new ControllbarContainer(this);
 		cont.add(controllBar);
 		root.add(cont);
 
-		// vertexSelectionManager = new EventBasedSelectionManager(this,
-		// IDType.getIDType(EGeneIDTypes.PATHWAY_VERTEX_REP.name()));
-		// vertexSelectionManager.registerEventListeners();
 	}
 
 	public EventListenerManager getEventListenerManager() {
@@ -126,25 +118,32 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 	}
 
 	/**
-	 * if a pathway in the list was selected, it is added to the representation, so this pathway graph is
-	 * drawn on the right side
+	 * if a pathway in the list was selected, it is added to the representation, so this pathway graph is drawn on the
+	 * right side
 	 * 
 	 * @param pathwayToAdd
 	 *            the pathway which was selected
 	 */
 	public void addPathway(PathwayGraph pathwayToAdd) {
-		Boolean addContextPathway = (dynamicGraphRepresentation.getFocusGraph() != null && (dynamicGraphRepresentation
+		Boolean addContextPathway = (dynamicGraphCanvas.getFocusGraph() != null && (dynamicGraphCanvas
 				.getCurrentFilteringNode() != null)) ? true : false;
 		try {
 			if (addContextPathway && VERTEX_ENV_SIZE > 0) {
 				PathwayGraph subPathway = createPathwayWithFocusVertexAndHisEnvironment(pathwayToAdd, VERTEX_ENV_SIZE);
-				dynamicGraphRepresentation.addPathwayRep(subPathway, !addContextPathway, true);
+
+				if (subPathway != null)
+					dynamicGraphCanvas.addPathwayRep(subPathway, !addContextPathway, true, false);
+				else {
+					addPathwayToControllBar(pathwayToAdd, false, Color.LIGHT_GRAY);
+					dynamicGraphCanvas.getDynamicPathway().addFocusOrKontextPathway(pathwayToAdd, true, dynamicGraphCanvas
+							.getCurrentFilteringNode());
+					System.out.println("Pathway didn't contain the focus vrep");
+				}
 			} else {
-				dynamicGraphRepresentation.addPathwayRep(pathwayToAdd, !addContextPathway, false);
+				dynamicGraphCanvas.addPathwayRep(pathwayToAdd, !addContextPathway, false, false);
 			}
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			// System.exit(-1);
 		}
@@ -162,32 +161,30 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 	}
 
 	/**
-	 * if the option display nodes with or without 0 degree (doesn't have nodes) was selected, this method is
-	 * called
+	 * if the option display nodes with or without 0 degree (doesn't have nodes) was selected, this method is called
 	 * 
 	 * it repaint all displayed pathways, if the option has changed
 	 * 
 	 * @param addWithZeroDegreeVertices
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-	public void paintGraphWithOrWithoutZeroDegreeVertices(boolean addWithZeroDegreeVertices){
-		if (dynamicGraphRepresentation.isDisplayOnlyVerticesWithEdges() == addWithZeroDegreeVertices)
+	public void paintGraphWithOrWithoutZeroDegreeVertices(boolean addWithZeroDegreeVertices) {
+		if (dynamicGraphCanvas.isDisplayOnlyVerticesWithEdges() == addWithZeroDegreeVertices)
 			return;
 
-		dynamicGraphRepresentation.setDisplayOnlyVerticesWithEdges(addWithZeroDegreeVertices);
+		dynamicGraphCanvas.setDisplayOnlyVerticesWithEdges(addWithZeroDegreeVertices);
 
-		List<PathwayGraph> contextPathways = new LinkedList<PathwayGraph>(
-				dynamicGraphRepresentation.getContextGraphs());
-		
+		List<PathwayGraph> contextPathways = new LinkedList<PathwayGraph>(dynamicGraphCanvas.getContextGraphs());
+
 		Boolean hasContextPathways = (contextPathways.size() > 0) ? true : false;
 
-		if (dynamicGraphRepresentation.getFocusGraph() != null)
-			dynamicGraphRepresentation.addPathwayRep(dynamicGraphRepresentation.getFocusGraph(), true, !hasContextPathways);
+		if (dynamicGraphCanvas.getFocusGraph() != null)
+			dynamicGraphCanvas.addPathwayRep(dynamicGraphCanvas.getFocusGraph(), true, !hasContextPathways, true);
 
 		if (hasContextPathways) {
-			for (PathwayGraph contextGraph : contextPathways) 
+			for (PathwayGraph contextGraph : contextPathways)
 
-					dynamicGraphRepresentation.addPathwayRep(contextGraph, false, false);
+				dynamicGraphCanvas.addPathwayRep(contextGraph, false, false, false);
 
 		}
 
@@ -198,16 +195,79 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 		/**
 		 * can't be called, when context graphs are already displayed -> can't merge graphs with duplicates
 		 */
-		if (dynamicGraphRepresentation.getContextGraphs().size() > 0) {
+		if (dynamicGraphCanvas.getContextGraphs().size() > 0) {
 			System.out
 					.println("Can't change this option, when kontext graphs are displayed, because merging graphs with duplicates is not possible");
 			return;
 		}
 
-		dynamicGraphRepresentation.setRemoveDuplicateVertices(!addWithDuplicateVertices);
+		dynamicGraphCanvas.setRemoveDuplicateVertices(!addWithDuplicateVertices);
 
-		if (dynamicGraphRepresentation.getFocusGraph() != null)
-			dynamicGraphRepresentation.addPathwayRep(dynamicGraphRepresentation.getFocusGraph(), true, true);
+		if (dynamicGraphCanvas.getFocusGraph() != null)
+			dynamicGraphCanvas.addPathwayRep(dynamicGraphCanvas.getFocusGraph(), true, true, true);
+	}
+
+	/**
+	 * listens if the path should be filtered or not used for selecting a kontext pathway, which contains the requested
+	 * vertex
+	 * 
+	 * @param event
+	 */
+	@ListenTo
+	public void onChangeFocusNode(ChangeFocusNodeEvent event) {
+		NodeElement newFocusNode = event.getNodeElementToFilterBy();
+		System.out.println("WHATT??? " + newFocusNode);
+
+	
+		boolean focusNodeChanged = dynamicGraphCanvas.setOrResetFilteringNode(newFocusNode);
+//		newFocusNode.makeThisFocusNode();
+
+		if (newFocusNode != null) {
+			System.out.println("newFocus != null");
+			
+			System.out.println("newFocus: " +newFocusNode.getVertexRep());
+//			filterPathwayList(newFocusNode.getVertexRep());
+//			List<PathwayVertexRep> representedVreps = newFocusNode.getVrepsWithThisNodesVerticesList();
+//			if (representedVreps != null) {
+//				for (PathwayVertexRep vrep : representedVreps) {
+//					filterPathwayList(vrep);
+//				}
+//			}
+//
+//			if (newFocusNode.getVertexRep() != null)
+				filterPathwayList(newFocusNode.getVertexRep());
+		}
+
+		/**
+		 * if the focus node has changed, the pathways need to be re-added, since the context pathways were "built"
+		 * around the focus node, unless the full pathways (not just a subset) were added
+		 */
+		if (focusNodeChanged && dynamicGraphCanvas.getContextGraphs().size() > 0 && VERTEX_ENV_SIZE > 0) {
+			System.out.println("CHANGING");
+
+			List<PathwayGraph> contextGraphs = new LinkedList<PathwayGraph>(dynamicGraphCanvas.getContextGraphs());
+
+			dynamicGraphCanvas.addPathwayRep(dynamicGraphCanvas.getFocusGraph(), true, false, true);
+
+			for (PathwayGraph contextGraph : contextGraphs) {
+				try {
+					PathwayGraph subsetPathway = createPathwayWithFocusVertexAndHisEnvironment(contextGraph,
+							VERTEX_ENV_SIZE);
+
+					if (subsetPathway != null) {
+						dynamicGraphCanvas.addPathwayRep(subsetPathway, false, false, false);
+					} else {
+						addPathwayToControllBar(contextGraph, false, Color.LIGHT_GRAY);
+						dynamicGraphCanvas.getDynamicPathway().addFocusOrKontextPathway(contextGraph, true, newFocusNode);
+						System.out.println("Pathway didn't contain focus node");
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+
+			}
+		}
 	}
 
 	@ListenTo
@@ -218,50 +278,46 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 	@ListenTo
 	public void onMakeThisPathwayFocus(MakeFocusPathwayEvent makeFocusPathwayEvent) throws Exception {
 
-
 		PathwayGraph newFocusPathwayGraph = makeFocusPathwayEvent.getPathway();
-		
-		PathwayGraph pathwayToAdd= null;
-		if (newFocusPathwayGraph == null
-				|| dynamicGraphRepresentation.getDynamicPathway().isFocusGraph(newFocusPathwayGraph))
+
+		PathwayGraph pathwayToAdd = null;
+		if (newFocusPathwayGraph == null || dynamicGraphCanvas.getDynamicPathway().isFocusGraph(newFocusPathwayGraph))
 			return;
-		
+
 		// if the context pathway was a sub pathway, get it's original full version & make this the new focus pathway
-		if(dynamicGraphRepresentation.isSubPathway(newFocusPathwayGraph) == true) {
-//			removePathway(newFocusPathwayGraph);
-			pathwayToAdd = dynamicGraphRepresentation.getOriginalPathwaysOfSubpathway(newFocusPathwayGraph);
-			dynamicGraphRepresentation.removeOriginalPathwayAndSubpathwayOfMap(newFocusPathwayGraph);
-		}
-		else
+		if (dynamicGraphCanvas.isSubPathway(newFocusPathwayGraph) == true) {
+			// removePathway(newFocusPathwayGraph);
+			pathwayToAdd = dynamicGraphCanvas.getOriginalPathwaysOfSubpathway(newFocusPathwayGraph);
+			dynamicGraphCanvas.removeOriginalPathwayAndSubpathwayOfMap(newFocusPathwayGraph);
+		} else
 			pathwayToAdd = newFocusPathwayGraph;
-		
-		System.out.println("Is sub pathway? " + dynamicGraphRepresentation.isSubPathway(newFocusPathwayGraph));
+
+		System.out.println("Is sub pathway? " + dynamicGraphCanvas.isSubPathway(newFocusPathwayGraph));
 
 		/**
 		 * get the old focus pathway & add it to the new context graphs
 		 * 
 		 * remove new focus pathway from old context pathways
 		 */
-		PathwayGraph oldFocusPathway = dynamicGraphRepresentation.getFocusGraph();
+		PathwayGraph oldFocusPathway = dynamicGraphCanvas.getFocusGraph();
 		System.out.println("Old Title: " + oldFocusPathway.getTitle());
-		List<PathwayGraph> newContextGraphs = new ArrayList<PathwayGraph>(
-				dynamicGraphRepresentation.getContextGraphs());
+		List<PathwayGraph> newContextGraphs = new ArrayList<PathwayGraph>(dynamicGraphCanvas.getContextGraphs());
 		newContextGraphs.remove(newFocusPathwayGraph);
-		newContextGraphs.add(oldFocusPathway);
 
-		dynamicGraphRepresentation.addPathwayRep(pathwayToAdd, true, false);
-		System.out.println("New Title: " + dynamicGraphRepresentation.getFocusGraph() + ", old Title: "
+		// TODO: add when focus node thing was fixed
+		// if(VERTEX_ENV_SIZE > 0) {
+		// PathwayGraph subPathway = createPathwayWithFocusVertexAndHisEnvironment(oldFocusPathway, VERTEX_ENV_SIZE);
+		// newContextGraphs.add(subPathway);
+		// }else {
+		newContextGraphs.add(oldFocusPathway);
+		// }
+
+		dynamicGraphCanvas.addPathwayRep(pathwayToAdd, true, false, true);
+		System.out.println("New Title: " + dynamicGraphCanvas.getFocusGraph() + ", old Title: "
 				+ oldFocusPathway.getTitle());
 
 		for (PathwayGraph contextGraph : newContextGraphs) {
-//			TODO: change?
-//			// if only sub pathways should be added
-//			if(VERTEX_ENV_SIZE > 0) {
-//				PathwayGraph subPathway = createPathwayWithFocusVertexAndHisEnvironment(contextGraph, VERTEX_ENV_SIZE);
-//				dynamicGraphRepresentation.addPathwayRep(subPathway, false);
-//			} // or full pathways 
-//			else 
-				dynamicGraphRepresentation.addPathwayRep(contextGraph, false, false);
+			dynamicGraphCanvas.addPathwayRep(contextGraph, false, false, false);
 		}
 
 	}
@@ -277,25 +333,25 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 			// currentPathwayElement.getDynamicPathway().getPathwayWithThisTitle(graphTitle);
 
 			// if the graph to remove is the focus graph, reset everything
-			if (dynamicGraphRepresentation.getDynamicPathway().isFocusGraph(pathwayToRemove)) {
-				dynamicGraphRepresentation.clearCanvasAndInfo(true);
-				dynamicGraphRepresentation.getDynamicPathway().removeAllPathways();
+			if (dynamicGraphCanvas.getDynamicPathway().isFocusGraph(pathwayToRemove)) {
+				dynamicGraphCanvas.clearCanvasAndInfo(true);
+				dynamicGraphCanvas.getDynamicPathway().removeAllPathways();
 				controllBar.removeFocusPathwayTitle(pathwayToRemove);
 			} else {
-				dynamicGraphRepresentation.getDynamicPathway().removeContextPathway(pathwayToRemove);
+				dynamicGraphCanvas.getDynamicPathway().removeContextPathway(pathwayToRemove);
 				controllBar.removeContextPathwayTitle(pathwayToRemove);
 
 				List<PathwayGraph> presentContextGraphs = new ArrayList<PathwayGraph>(
-						dynamicGraphRepresentation.getContextGraphs());
+						dynamicGraphCanvas.getContextGraphs());
 				presentContextGraphs.remove(pathwayToRemove);
-				
-				if(dynamicGraphRepresentation.isSubPathway(pathwayToRemove))
-					dynamicGraphRepresentation.removeOriginalPathwayAndSubpathwayOfMap(pathwayToRemove);
 
-				dynamicGraphRepresentation.addPathwayRep(dynamicGraphRepresentation.getFocusGraph(), true, false);
+				if (dynamicGraphCanvas.isSubPathway(pathwayToRemove))
+					dynamicGraphCanvas.removeOriginalPathwayAndSubpathwayOfMap(pathwayToRemove);
+
+				dynamicGraphCanvas.addPathwayRep(dynamicGraphCanvas.getFocusGraph(), true, false, true);
 
 				for (PathwayGraph contextGraph : presentContextGraphs) {
-					dynamicGraphRepresentation.addPathwayRep(contextGraph, false, false);
+					dynamicGraphCanvas.addPathwayRep(contextGraph, false, false, false);
 				}
 			}
 
@@ -314,7 +370,7 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 	 * @return true if it's the same, that is already drawn, false otherwise
 	 */
 	public boolean isGraphPresent(PathwayGraph pathway) {
-		if (dynamicGraphRepresentation.getDynamicPathway().isPathwayPresent(pathway))
+		if (dynamicGraphCanvas.getDynamicPathway().isPathwayPresent(pathway))
 			return true;
 		return false;
 	}
@@ -322,8 +378,7 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 	/**
 	 * filter the pathway list on the left leaves pathways which contain the given PathwayVertexRep
 	 * 
-	 * called when a vertex is selected @see
-	 * org.caleydo.view.dynamicpathway.ui.DynamicPathwayGraphRepresentation
+	 * called when a vertex is selected @see org.caleydo.view.dynamicpathway.ui.DynamicPathwayGraphRepresentation
 	 * #setOrResetSelectedNode(org.caleydo.view.dynamicpathway.ui.NodeElement)
 	 * 
 	 * @param currentContextVertexRep
@@ -342,17 +397,17 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 	}
 
 	public PathwayGraph getCurrentFocusPathway() {
-		return dynamicGraphRepresentation.getFocusGraph();
+		return dynamicGraphCanvas.getFocusGraph();
 	}
 
 	/**
 	 * view for representing pathway graphs
 	 */
 	private void createPathwayGraphView() {
-		pathwayLayout = new GLFruchtermanReingoldLayoutBuilder().repulsionMultiplier(-1.0)
-				.attractionMultiplier(18.0).nodeBoundsExtension(4.0).buildLayout();
+		pathwayLayout = new GLFruchtermanReingoldLayoutBuilder().repulsionMultiplier(-1.0).attractionMultiplier(18.0)
+				.nodeBoundsExtension(4.0).buildLayout();
 
-		dynamicGraphRepresentation = new DynamicPathwayGraphRepresentation(pathwayLayout, this);
+		dynamicGraphCanvas = new DynamicPathwayGraphRepresentation(pathwayLayout, this);
 		// currentPathwayElement.setLocation(200, 0);
 	}
 
@@ -360,8 +415,8 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 	 * view for side bar, which contains a list of representable pathways
 	 */
 	private void createRankingSideBar() {
-		AnimatedGLElementContainer column = new AnimatedGLElementContainer(new GLSizeRestrictiveFlowLayout(
-				false, 10, GLPadding.ZERO));
+		AnimatedGLElementContainer column = new AnimatedGLElementContainer(new GLSizeRestrictiveFlowLayout(false, 10,
+				GLPadding.ZERO));
 
 		column.add(baseContainer);
 
@@ -397,19 +452,23 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 	 * @return
 	 * @throws Exception
 	 */
-	private PathwayGraph createPathwayWithFocusVertexAndHisEnvironment(PathwayGraph pathwayToAdd, int vertexEnvironmentSize)
-			throws Exception {
+	private PathwayGraph createPathwayWithFocusVertexAndHisEnvironment(PathwayGraph pathwayToAdd,
+			int vertexEnvironmentSize) throws Exception {
 
 		/**
 		 * ----------------------------------------------------------------------- <br/>
 		 * STEP 1: find the FOCUS VERTEX REPRESENATION
 		 * -----------------------------------------------------------------------
 		 */
-		NodeElement currentFilteringNode = dynamicGraphRepresentation.getCurrentFilteringNode();
+		NodeElement currentFilteringNode = dynamicGraphCanvas.getCurrentFilteringNode();
+		System.out.println("Current filtering node: " + currentFilteringNode);
+		if(currentFilteringNode == null)
+			return null;
+		
 		PathwayVertexRep currentFilteringVRep = currentFilteringNode.getVertexRep();
 
-		String limitedGraphNameExtension = "Focus: " + currentFilteringNode.getLabel()
-				+ "; vertex environment size: " + vertexEnvironmentSize;
+		String limitedGraphNameExtension = "Focus: " + currentFilteringNode.getLabel() + "; vertex environment size: "
+				+ vertexEnvironmentSize;
 
 		if (currentFilteringVRep == null) {
 			throw new Exception("currentFilteringVRep was null");
@@ -428,20 +487,20 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 			focusVertex = currentFilteringNode.getVertices().get(0);
 		} else {
 			/**
-			 * if the currentFilteringVRep isn't in the pathway -> find the vrep that is in the pathway & add
-			 * this to the limited version of the graph
+			 * if the currentFilteringVRep isn't in the pathway -> find the vrep that is in the pathway & add this to
+			 * the limited version of the graph
 			 * 
 			 */
-			
-//			List<PathwayVertexRep> alternativeVreps = currentFilteringNode.getVrepsWithThisNodesVerticesList();
-//			for(PathwayVertexRep alternativeVrep : alternativeVreps) {
-//				if(pathwayToAdd.containsVertex(currentFilteringVRep)) {
-//					focusVertex = alternativeVrep.getPathwayVertices().get(0);
-//					edgesOfThisNode = pathwayToAdd.edgesOf(alternativeVrep);
-//					alternativeVrepFromPathway = alternativeVrep;
-//					break;
-//				}
-//			}
+
+//			 List<PathwayVertexRep> alternativeVreps = currentFilteringNode.getVrepsWithThisNodesVerticesList();
+//			 for(PathwayVertexRep alternativeVrep : alternativeVreps) {
+//				 if(pathwayToAdd.containsVertex(alternativeVrep)) {
+//					 focusVertex = alternativeVrep.getPathwayVertices().get(0);
+//					 edgesOfThisNode = pathwayToAdd.edgesOf(alternativeVrep);
+//					 alternativeVrepFromPathway = alternativeVrep;
+//					 break;
+//				 }
+//			 }
 
 			List<PathwayVertex> alternativeVertices = currentFilteringNode.getVertices();
 			if (alternativeVertices == null)
@@ -462,18 +521,11 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 		}
 
 		if (edgesOfThisNode == null || focusVertex == null)
-			throw new Exception(
-					"pathway did neither contain main vrep of filtering node nor additional vreps. CurrentFilterNode was merged: " + currentFilteringNode.isMerged());
+			return null;
 
-//		LimitedPathwayGraph limitedGraph = new LimitedPathwayGraph(pathwayToAdd, focusVertex, pathwayToAdd.getType(),
-//				pathwayToAdd.getName() + limitedGraphNameExtension, pathwayToAdd.getTitle() + "["
-//						+ currentFilteringNode.getLabel() + "," + vertexEnvironmentSize + "]",
-//				pathwayToAdd.getImage(), pathwayToAdd.getExternalLink());
-		
-		PathwayGraph subPathway = new PathwayGraph(pathwayToAdd.getType(),
-				pathwayToAdd.getName() + limitedGraphNameExtension, pathwayToAdd.getTitle() + "["
-						+ currentFilteringNode.getLabel() + "," + vertexEnvironmentSize + "]",
-				pathwayToAdd.getImage(), pathwayToAdd.getExternalLink());
+		PathwayGraph subPathway = new PathwayGraph(pathwayToAdd.getType(), pathwayToAdd.getName()
+				+ limitedGraphNameExtension, pathwayToAdd.getTitle() + "[" + currentFilteringNode.getLabel() + ","
+				+ vertexEnvironmentSize + "]", pathwayToAdd.getImage(), pathwayToAdd.getExternalLink());
 
 		subPathway.addVertex(currentFilteringVRep);
 
@@ -508,26 +560,26 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 				throw new Exception("getVertexEnvironment: vrepToCheckWith was neither source nor target");
 
 		}
-		
-		for(int i = 1; i < vertexEnvironmentSize; i++) {
+
+		for (int i = 1; i < (vertexEnvironmentSize-1); i++) {
 			vrepsOfCurrentLevel.clear();
 			vrepsOfCurrentLevel.addAll(vrepsOfNextLevel);
 			vrepsOfNextLevel.clear();
-			
-			for(PathwayVertexRep vrepOfCurrentLevel : vrepsOfCurrentLevel) {
+
+			for (PathwayVertexRep vrepOfCurrentLevel : vrepsOfCurrentLevel) {
 				// get the edges of the node
 				edgesOfThisNode = pathwayToAdd.edgesOf(vrepOfCurrentLevel);
-				
+
 				// go throw all edges
 				for (DefaultEdge edgeOfCurrentFilteringVrep : edgesOfThisNode) {
-				
+
 					// if the edge was already added, go on with the next edge
-					if(subPathway.containsEdge(edgeOfCurrentFilteringVrep))
+					if (subPathway.containsEdge(edgeOfCurrentFilteringVrep))
 						continue;
-					
+
 					PathwayVertexRep sourceVrep = pathwayToAdd.getEdgeSource(edgeOfCurrentFilteringVrep);
 					PathwayVertexRep targetVrep = pathwayToAdd.getEdgeTarget(edgeOfCurrentFilteringVrep);
-					
+
 					// if the main node is the target node, the other node is the source node and vice versa
 					if (vrepOfCurrentLevel.equals(targetVrep)) {
 						subPathway.addVertex(sourceVrep);
@@ -541,11 +593,11 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 						throw new Exception("getVertexEnvironment: vrepToCheckWith was neither source nor target");
 				}
 			}
-			
+
 		}
 
-		dynamicGraphRepresentation.addOriginalPathwayAndSubpathwayToMap(subPathway, pathwayToAdd);
-		
+		dynamicGraphCanvas.addOriginalPathwayAndSubpathwayToMap(subPathway, pathwayToAdd);
+
 		return subPathway;
 	}
 

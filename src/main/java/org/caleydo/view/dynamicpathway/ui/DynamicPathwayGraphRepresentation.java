@@ -102,8 +102,6 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 */
 	Map<PathwayVertex, NodeElement> uniqueVertexMap;
 
-	List<NodeElement> globallyMergedNodesList;
-
 	Map<PathwayGraph, PathwayGraph> originalPathwaysOfSubpathwaysMap;
 
 	Logger mergeLogger = Logger.getLogger("MergeLog");
@@ -125,8 +123,6 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		this.originalPathwaysOfSubpathwaysMap = new HashMap<PathwayGraph, PathwayGraph>();
 
-		this.globallyMergedNodesList = new LinkedList<NodeElement>();
-
 		setLayout(layout);
 
 		setDefaultDuration(1500);
@@ -138,15 +134,15 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 * @param graph
 	 *            if a new pathway was added, a new combined (focus + parts of kontext pathways) pathway is created
 	 * @param isFocusPathway
-	 *            true if a kontext pathway should be added, false if a focus pathway should be added, if null, it is
+	 *            true if a context pathway should be added, false if a focus pathway should be added, if null, it is
 	 *            defined later
-	 * @param vrepSetToAdd
-	 *            TODO
-	 * @param allowDuplicateVertices
-	 *            only allowed for unmerged focus pathways
-	 * 
+	 * @param clearOriginalSubwaysMap
+	 *            true if a focus pathway is added & the nothing should be kept (false for switching roles)
+	 * @param keepFocusVertex
+	 *            true if a focus pathway is added, but the focus node should be preserved
 	 */
-	public void addPathwayRep(PathwayGraph graph, Boolean isFocusPathway, Boolean clearOriginalSubwaysMap) {
+	public void addPathwayRep(PathwayGraph graph, Boolean isFocusPathway, Boolean clearOriginalSubwaysMap,
+			Boolean keepFocusVertex) {
 
 		pathway.addFocusOrKontextPathway(graph, !isFocusPathway, currentSelectedNode);
 
@@ -155,6 +151,12 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			nodeColor = contextPathwaysColors.get(pathway.getContextPathways().indexOf(graph));
 
 		view.addPathwayToControllBar(graph, isFocusPathway, nodeColor);
+
+		PathwayVertex oldFilteringVertex = null;
+		if (currentFilteringNode != null)
+			oldFilteringVertex = currentFilteringNode.getDisplayedVertex();
+		else
+			System.out.println("Filtering node was null");
 
 		// if you want to add a new focus graph
 		if (isFocusPathway) {
@@ -169,11 +171,19 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				focusGraphWithDuplicateVertices = true;
 				addGraphWithDuplicates(graph, nodeSet, edgeSet);
 			} else {
-
-				List<NodeElement> mergedNodesList = new LinkedList<NodeElement>();
 				focusGraphWithDuplicateVertices = false;
-				addPathwayWithoutDuplicates(graph, uniqueVertexMap, mergedNodesList, nodeSet, edgeSet, true,
-						pathway.getCombinedGraph(), nodeColor);
+				addPathwayWithoutDuplicates(graph, uniqueVertexMap, true, pathway.getCombinedGraph(), nodeColor);
+
+				if (oldFilteringVertex != null) {
+
+					NodeElement newFilteringNode = uniqueVertexMap.get(oldFilteringVertex);
+					System.out.println("Resetting focus vertex: " + oldFilteringVertex + " to node: "
+							+ newFilteringNode);
+					
+					makeFocusNode(newFilteringNode);
+
+					// newFilteringNode.makeThisFocusNode();
+				}
 
 				try {
 					checkForDuplicateVertices(nodeSet);
@@ -186,22 +196,27 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			// if the focus graph was added with duplicates, it needs to be
 			// added without them
 			if (focusGraphWithDuplicateVertices) {
-				PathwayVertex oldFilteringVertex = currentFilteringNode.getDisplayedVertex();
 
 				removeDuplicateVertices = true;
-				addPathwayRep(pathway.getFocusPathway(), true, true);
+				addPathwayRep(pathway.getFocusPathway(), true, true, true);
 
-				currentFilteringNode = uniqueVertexMap.get(oldFilteringVertex);
+				if (oldFilteringVertex != null)
+					currentFilteringNode = uniqueVertexMap.get(oldFilteringVertex);
 			}
 
+			System.out.println("old current filtering node: " + currentFilteringNode);
 			// TODO: save old filtering node
-			if (currentFilteringNode != null)
-				setOrResetFilteringNode(currentFilteringNode);
+			// if (currentFilteringNode != null)
+			// setOrResetFilteringNode(currentFilteringNode);
 
-			List<NodeElement> mergedNodesList = new LinkedList<NodeElement>();
+			addPathwayWithoutDuplicates(graph, uniqueVertexMap, false, pathway.getCombinedGraph(), nodeColor);
 
-			addPathwayWithoutDuplicates(graph, uniqueVertexMap, mergedNodesList, nodeSet, edgeSet, false,
-					pathway.getCombinedGraph(), nodeColor);
+			if (oldFilteringVertex != null) {
+				NodeElement newFilteringNode = uniqueVertexMap.get(oldFilteringVertex);
+				// setOrResetFilteringNode(newFilteringNode);
+//				newFilteringNode.makeThisFocusNode();
+				makeFocusNode(newFilteringNode);
+			}
 
 		}
 
@@ -211,6 +226,16 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		view.unfilterPathwayList();
 
+	}
+	
+	private void makeFocusNode(NodeElement newFocusgNode) {
+
+		if (newFocusgNode != null) {
+			setOrResetFilteringNode(newFocusgNode);
+			
+			view.filterPathwayList(newFocusgNode.getVertexRep());
+
+		}
 	}
 
 	/**
@@ -246,7 +271,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 *            the new pathway to add
 	 * @param vertexNodeMap
 	 *            needed to check the uniqueness of the vertices within all the displayed pathways
-	 * @param nodeSetToAdd
+	 * @param nodeSet
 	 *            all displayed nodes are add to this set -> needed for layout algorithm
 	 * @param edgeSetToAdd
 	 *            all displayed edges are add to this set -> needed for layout algorithm
@@ -261,7 +286,6 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 *            the color of the created nodes
 	 */
 	private void addPathwayWithoutDuplicates(PathwayGraph pathwayToAdd, Map<PathwayVertex, NodeElement> vertexNodeMap,
-			List<NodeElement> localMergedNodesList, Set<NodeElement> nodeSetToAdd, Set<EdgeElement> edgeSetToAdd,
 			boolean addMergedNodesToSamePathway, PathwayGraph combinedPathway, Color nodeColor) {
 
 		// for (PathwayVertexRep vrep : newGraph.vertexSet()) {
@@ -272,8 +296,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				continue;
 
 			try {
-				checkAndMergeNodes(pathwayToAdd, vrep, vertexNodeMap, localMergedNodesList, nodeSetToAdd,
-						addMergedNodesToSamePathway, combinedPathway, nodeColor);
+				checkAndMergeNodes(pathwayToAdd, vrep, vertexNodeMap, addMergedNodesToSamePathway, combinedPathway,
+						nodeColor);
 			} catch (NodeMergingException e) {
 				System.err.println(e.getMessage());
 				System.exit(-1);
@@ -304,9 +328,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 *             internal error - tool didn't behave as expected
 	 */
 	private void checkAndMergeNodes(PathwayGraph pathwayToAdd, PathwayVertexRep vRepToCheck,
-			Map<PathwayVertex, NodeElement> vertexNodeMap, List<NodeElement> localMergedNodesList,
-			Set<NodeElement> nodeSetToAdd, boolean addToSameGraph, PathwayGraph combinedPathway, Color nodeColor)
-			throws NodeMergingException {
+			Map<PathwayVertex, NodeElement> vertexNodeMap, boolean addToSameGraph, PathwayGraph combinedPathway,
+			Color nodeColor) throws NodeMergingException {
 
 		if (displayOnlyVerticesWithEdges && (pathwayToAdd.inDegreeOf(vRepToCheck) < 1)
 				&& (pathwayToAdd.outDegreeOf(vRepToCheck) < 1))
@@ -341,9 +364,9 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		nonDuplicateVertexList.removeAll(alreadyExistingPathwayVertexList);
 
 		if (nonDuplicateVertexList.size() > 0) {
-			NodeElement node = GraphMergeUtil.createNewNodeElement(vRepToCheck, nonDuplicateVertexList, null,
-					localMergedNodesList, this, nodeColor);
-			nodeSetToAdd.add(node);
+			NodeElement node = GraphMergeUtil.createNewNodeElement(vRepToCheck, nonDuplicateVertexList, null, this,
+					nodeColor);
+			nodeSet.add(node);
 			add(node);
 
 			for (PathwayVertex vertex : nonDuplicateVertexList) {
@@ -415,12 +438,12 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				else
 					mergedNodeColor = determineMixedColor(nodeColor, nodeWithDuplicateVertices.getColor());
 
-				NodeElement mergedNode = GraphMergeUtil.createNewNodeElement(mergedVrep, sameVerticesList, vreps,
-						localMergedNodesList, this, mergedNodeColor);
+				NodeElement mergedNode = GraphMergeUtil.createNewNodeElement(mergedVrep, sameVerticesList, vreps, this,
+						mergedNodeColor);
 				if (!addToSameGraph && mergeWithinSameGraph)
 					mergedNode.setIsMerged(false);
 
-				nodeSetToAdd.add(mergedNode);
+				nodeSet.add(mergedNode);
 				add(mergedNode);
 
 				/**
@@ -430,7 +453,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				 */
 				if (nodeWithDuplicateVertices.getVertices().size() == sameVerticesList.size()) {
 
-					boolean containedNode = nodeSetToAdd.remove(nodeWithDuplicateVertices);
+					boolean containedNode = nodeSet.remove(nodeWithDuplicateVertices);
 					if (containedNode)
 						remove(nodeWithDuplicateVertices);
 
@@ -555,15 +578,15 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 					// Color mergedColor = determineMixedColor(nodeColor,
 					// nodeWithDuplicateVertices.getColor());
 					NodeElement newNodeForNonDuplicateVertices = GraphMergeUtil.createNewNodeElement(
-							vrepOfNonDuplicateVertices, nonDuplicateVerticesOfExistingNode, vrepsOfNode,
-							localMergedNodesList, this, nodeWithDuplicateVertices.getColor());
+							vrepOfNonDuplicateVertices, nonDuplicateVerticesOfExistingNode, vrepsOfNode, this,
+							nodeWithDuplicateVertices.getColor());
 
 					for (PathwayVertex mergedVertex : nonDuplicateVerticesOfExistingNode) {
 						vrepOfNonDuplicateVertices.addPathwayVertex(mergedVertex);
 						vertexNodeMap.put(mergedVertex, newNodeForNonDuplicateVertices);
 					}
 
-					nodeSetToAdd.add(newNodeForNonDuplicateVertices);
+					nodeSet.add(newNodeForNonDuplicateVertices);
 					add(newNodeForNonDuplicateVertices);
 
 					// nodeWithDuplicateVertices.addVrepWithThisNodesVerticesList(pathwayVertexRepToCheck);
@@ -641,8 +664,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			if (displayOnlyVerticesWithEdges && (newGraph.inDegreeOf(vrep) < 1) && (newGraph.outDegreeOf(vrep) < 1))
 				continue;
 
-			NodeElement nodeElement = GraphMergeUtil.createNewNodeElement(vrep, vrep.getPathwayVertices(), null,
-					globallyMergedNodesList, this, Color.LIGHT_BLUE);
+			NodeElement nodeElement = GraphMergeUtil.createNewNodeElement(vrep, vrep.getPathwayVertices(), null, this,
+					Color.LIGHT_BLUE);
 
 			if (nodeElement == null) {
 				System.err.println("Node creation of vrep " + vrep + "failed");
@@ -784,29 +807,47 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 * @param newFilteringNode
 	 *            the node, which the pathway list should be filtered with
 	 */
-	public void setOrResetFilteringNode(NodeElement newFilteringNode) {
+	public boolean setOrResetFilteringNode(NodeElement newFilteringNode) {
+
+		boolean focusNodeChanged = false;
+
 		/**
 		 * if nothing was selected, just set the new node
 		 */
 		if (currentFilteringNode == null) {
+			System.out.println("Setting new filtering node without old: " + newFilteringNode);
 			currentFilteringNode = newFilteringNode;
 			currentFilteringNode.setIsThisNodeUsedForFiltering(true);
+			focusNodeChanged = false;
+
 		}
 
-		else if (currentFilteringNode == newFilteringNode) {
+		else if (currentFilteringNode.equals(newFilteringNode)) {
+			System.out.println("Removing filtering node: " + currentFilteringNode);
 			currentFilteringNode.setIsThisNodeUsedForFiltering(false);
 			currentFilteringNode = null;
+			focusNodeChanged = false;
 		}
 
 		/**
 		 * if another node was selected before, deselect it and selected the new node
 		 */
-		else {
+		else if (newFilteringNode != null) {
+			System.out.println("Changing filtering node from  " + currentFilteringNode + " to " + newFilteringNode);
 			currentFilteringNode.setIsThisNodeUsedForFiltering(false);
 			currentFilteringNode = newFilteringNode;
 			currentFilteringNode.setIsThisNodeUsedForFiltering(true);
+			focusNodeChanged = true;
 
-		}
+		} else
+			try {
+				throw new Exception("new filtering node was null");
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.exit(-1);
+			}
+
+		return focusNodeChanged;
 
 	}
 
@@ -822,17 +863,6 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		// currentFilteringNode = null;
 		// }
 
-	}
-
-	/**
-	 * listens if the path should be filtered or not used for selecting a kontext pathway, which contains the requested
-	 * vertex
-	 * 
-	 * @param event
-	 */
-	@ListenTo
-	public void onFilterPathwayListByNodeElement(FilterPathwayListByVertexEvent event) {
-		filterPathwayList();
 	}
 
 	public DynamicPathwayView getView() {
@@ -900,10 +930,6 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 	public NodeElement getCurrentFilteringNode() {
 		return currentFilteringNode;
-	}
-
-	public void setCurrentFilteringNode(NodeElement currentFilteringNode) {
-		this.currentFilteringNode = currentFilteringNode;
 	}
 
 	public boolean isDisplayOnlyVerticesWithEdges() {

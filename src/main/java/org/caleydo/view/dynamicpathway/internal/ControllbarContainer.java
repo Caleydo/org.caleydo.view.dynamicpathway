@@ -150,6 +150,8 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		this.vertexEnvironmentSizeLineSeparator = createLineSeparator();
 		this.vertexEnvironmentSizeLineSeparator.setVisibility(EVisibility.HIDDEN);
 		add(vertexEnvironmentSizeLineSeparator);
+			
+		
 		
 //		Composite comp = new Composite();
 //		final Text clusterNumberText = new Text(this, SWT.BORDER);

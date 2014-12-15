@@ -41,7 +41,7 @@ public class GraphMergeUtil {
 	 * @return the created node element
 	 */
 	public static NodeElement createNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
-			List<PathwayVertexRep> vrepsWithThisNodesVertices, List<NodeElement> mergedNodesList, DynamicPathwayGraphRepresentation graphRepresenation, Color nodeColor) {
+			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwayGraphRepresentation graphRepresenation, Color nodeColor) {
 		/**
 		 * create node of correct type to vertex rep -> different shapes
 		 */
@@ -76,9 +76,9 @@ public class GraphMergeUtil {
 				
 				for(PathwayVertexRep alternativeVrep : vrepsWithThisNodesVertices)
 					node.addVrepWithThisNodesVerticesList(alternativeVrep);
-				
-				mergedNodesList.add(node);
+			
 				node.setIsMerged(true);
+				node.setWasMerged(true);
 			}
 		}
 
@@ -131,8 +131,12 @@ public class GraphMergeUtil {
 		List<NodeElement> targetNodes = new LinkedList<NodeElement>();
 
 		for (PathwayVertex srcVertex : srcVrep.getPathwayVertices()) {
-			if (!vertexNodeMap.containsKey(srcVertex) || vertexNodeMap.get(srcVertex) == null)
-				throw new NodeMergingException("srcVertex(" + srcVertex + ") not in uniqueVertexMap");
+			if (!vertexNodeMap.containsKey(srcVertex) || vertexNodeMap.get(srcVertex) == null) {
+//				throw new NodeMergingException("srcVertex(" + srcVertex + ") not in uniqueVertexMap");
+				System.out.println("VertexNodeMap didn't contain srcVertex:" + srcVertex);
+				continue;
+			}
+			
 
 			NodeElement srcNode = vertexNodeMap.get(srcVertex);
 			if(!srcNodes.contains(srcNode) && srcNode != null)
@@ -140,8 +144,11 @@ public class GraphMergeUtil {
 		}
 
 		for (PathwayVertex targetVertex : targetVrep.getPathwayVertices()) {
-			if (!vertexNodeMap.containsKey(targetVertex) || vertexNodeMap.get(targetVertex) == null)
-				throw new NodeMergingException("targetVertex(" + targetVertex + ") not in uniqueVertexMap");
+			if (!vertexNodeMap.containsKey(targetVertex) || vertexNodeMap.get(targetVertex) == null) {
+//				throw new NodeMergingException("targetVertex(" + targetVertex + ") not in uniqueVertexMap");
+				System.out.println("VertexNodeMap didn't contain targetVertex:" + targetVertex);
+				continue;
+			}
 
 			NodeElement targetNode = vertexNodeMap.get(targetVertex);
 			if(!targetNodes.contains(targetNode) && targetNode != null)

@@ -13,6 +13,7 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.caleydo.core.data.selection.SelectionType;
+import org.caleydo.core.event.EventPublisher;
 import org.caleydo.core.util.base.ILabeled;
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.contextmenu.GenericContextMenuItem;
@@ -72,11 +73,13 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	 * default
 	 */
 	protected boolean isMerged = false;
+	protected boolean wasMerged = false;
 
 	/**
 	 * the context menu, which pops up, when a node is right clicked
 	 */
-	GenericContextMenuItem filterPathwayMenu;
+	protected GenericContextMenuItem filterPathwayMenu;
+	protected ChangeFocusNodeEvent filterEvent;
 	
 	protected Color nodeColor;
 
@@ -93,7 +96,9 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		this.vertices = new CopyOnWriteArrayList<PathwayVertex>(pathwayVertices);
 		this.nodeColor = nodeColor;
 		this.vrepsWithThisNodesVerticesList = new LinkedList<PathwayVertexRep>();
-
+		this.filterEvent = new ChangeFocusNodeEvent(this);
+		
+		
 		if (vertices.size() > 0 && vertices.get(0).getType() != EPathwayVertexType.group) {
 			// this.vertices = vertexRep.getPathwayVertices();
 			this.displayedVertex = vertices.get(0);
@@ -102,10 +107,10 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 			this.width = this.vertexRep.getWidth();
 		}
 
-		filterPathwayMenu = new GenericContextMenuItem("Filter pathway list by this node",
-				new FilterPathwayListByVertexEvent(NodeElement.this));
-
-		setVisibility(EVisibility.PICKABLE);
+		filterPathwayMenu = new GenericContextMenuItem("Choose as focus pathway",
+				filterEvent);
+		
+	setVisibility(EVisibility.PICKABLE);
 
 	}
 
@@ -278,6 +283,11 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 		return success;
 	}
+	
+	
+	public void makeThisFocusNode() {
+		EventPublisher.trigger(filterEvent);
+	}
 
 	@Override
 	public String toString() {
@@ -297,6 +307,10 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	public void setIsMerged(boolean isMerged) {
 		this.isMerged = isMerged;
+	}
+	
+	public void setWasMerged(boolean wasMerged) {
+		this.wasMerged = wasMerged;
 	}
 
 	public List<PathwayVertexRep> getVrepsWithThisNodesVerticesList() {

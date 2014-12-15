@@ -9,21 +9,6 @@ import java.awt.geom.Point2D;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 
 public class CalculateIntersectionUtil {
-	/*
-	 * calculate intersection if the node shape is rectangular used in
-	 * {@link org.caleydo.view.dynamicpathway.ui.EdgeElement#renderImpl(GLGraphics, float, float)} for drawing
-	 * the edges between 2 nodes
-	 * 
-	 * general idea of implementation  
-	 * See <a
-	 * href="http://stackoverflow.com/questions/13053061/circle-line-intersection-points">stackoverflow.
-	 * com/circle-line-intersection-point</a>
-	 * 
-	 * @param intersectingLine
-	 *            the line from the center of the source node to the target node
-	 * @return either point at which the line intersects with one of the bounds or null, if none exists
-	 * 
-	 */
 	
 	/**
 	 * calculate the intersection point between 2 lines, if it exists

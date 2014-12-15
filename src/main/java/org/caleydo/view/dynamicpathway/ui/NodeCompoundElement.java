@@ -43,7 +43,7 @@ public class NodeCompoundElement extends NodeElement {
 				 * if the user right clicked - show context menu
 				 */
 				if (pick.getPickingMode() == PickingMode.RIGHT_CLICKED) {
-					parentGraph.setOrResetFilteringNode(NodeCompoundElement.this);
+//					parentGraph.setOrResetFilteringNode(NodeCompoundElement.this);
 
 					context.getSWTLayer().showContextMenu(Lists.newArrayList(filterPathwayMenu));
 				}
@@ -56,8 +56,9 @@ public class NodeCompoundElement extends NodeElement {
 					parentGraph.setOrResetSelectedNode(NodeCompoundElement.this);
 
 					if (p.isCtrlDown()) {
-						parentGraph.setOrResetFilteringNode(NodeCompoundElement.this);
-						parentGraph.filterPathwayList();
+//						parentGraph.setOrResetFilteringNode(NodeCompoundElement.this);
+//						parentGraph.filterPathwayList();
+						makeThisFocusNode();
 					}
 
 				}

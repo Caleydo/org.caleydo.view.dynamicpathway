@@ -2,6 +2,7 @@ package org.caleydo.view.dynamicpathway.ui;
 
 import java.util.List;
 
+import org.caleydo.core.event.EventPublisher;
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.picking.AdvancedPick;
@@ -38,7 +39,7 @@ public class NodeGeneElement extends NodeElement {
 				 * if the user right clicked - show context menu
 				 */
 				if (pick.getPickingMode() == PickingMode.RIGHT_CLICKED) {
-					parentGraph.setOrResetFilteringNode(NodeGeneElement.this);
+//					parentGraph.setOrResetFilteringNode(NodeGeneElement.this);
 
 					context.getSWTLayer().showContextMenu(Lists.newArrayList(filterPathwayMenu));
 					
@@ -49,14 +50,13 @@ public class NodeGeneElement extends NodeElement {
 				 */
 				if (pick.getPickingMode() == PickingMode.CLICKED) {
 					
-					System.out.println("Node [" + label + "] pathway: " + vertexRep.getPathway().getLabel() + " isMerged: " + isMerged);
+					System.out.println("Node [" + label + "] pathway: " + vertexRep.getPathway().getLabel() + " wasMerged: " + wasMerged);
 
 					parentGraph.setOrResetSelectedNode(NodeGeneElement.this);
 
 					if (p.isCtrlDown()) {
-						parentGraph.setOrResetFilteringNode(NodeGeneElement.this);
-						
-						parentGraph.filterPathwayList();
+						System.out.println("CLICKED");
+						EventPublisher.trigger(filterEvent);
 					}
 
 
@@ -141,6 +141,7 @@ public class NodeGeneElement extends NodeElement {
 		super.renderPickImpl(g, w, h);
 
 	}
+
 
 
 
