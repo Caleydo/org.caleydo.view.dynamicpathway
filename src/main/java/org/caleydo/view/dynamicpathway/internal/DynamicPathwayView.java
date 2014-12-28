@@ -21,9 +21,13 @@ import org.caleydo.core.view.opengl.layout2.GLElement;
 import org.caleydo.core.view.opengl.layout2.GLElementContainer;
 import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
 import org.caleydo.core.view.opengl.layout2.basic.GLButton;
+import org.caleydo.core.view.opengl.layout2.basic.GLButton.EButtonMode;
 import org.caleydo.core.view.opengl.layout2.basic.GLButton.ISelectionCallback;
 import org.caleydo.core.view.opengl.layout2.layout.GLPadding;
 import org.caleydo.core.view.opengl.layout2.layout.GLSizeRestrictiveFlowLayout;
+import org.caleydo.core.view.opengl.layout2.renderer.GLRenderers;
+import org.caleydo.core.view.opengl.picking.APickingListener;
+import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
@@ -42,6 +46,7 @@ import org.caleydo.view.entourage.SideWindow;
 import org.caleydo.view.entourage.SlideInElement;
 import org.caleydo.view.entourage.SlideInElement.ESlideInElementPosition;
 import org.caleydo.view.entourage.ranking.IPathwayFilter;
+import org.caleydo.view.entourage.ranking.PathwayFilters;
 import org.jgrapht.graph.DefaultEdge;
 
 /**
@@ -536,6 +541,25 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 
 		rankingWindow.addSlideInElement(slideInElement);
 		rankingWindow.setShowCloseButton(false);
+		
+		// add reset button
+		GLButton clearPathwayFiltersButton = new GLButton(EButtonMode.BUTTON);
+		rankingWindow.getTitleBar().add(rankingWindow.getTitleBar().size() - 1, clearPathwayFiltersButton);
+		clearPathwayFiltersButton.setSize(16, 16);
+		clearPathwayFiltersButton.setRenderer(GLRenderers.fillImage("resources/icons/filter_clear.png"));
+
+		clearPathwayFiltersButton.onPick(new APickingListener() {
+			@Override
+			protected void clicked(Pick pick) {
+//				rankingElement.setFilter(PathwayFilters.NONE);
+//				rankingElement.setRanking(null);
+				dynamicGraphCanvas.resetFocusNode();
+				unfilterPathwayList();
+			}
+		});
+		clearPathwayFiltersButton.setTooltip("Clear Filters from Pathway List and Reset Focus Node");
+		
+		
 		rankingElement.setWindow(rankingWindow);
 
 		pathwayListBaseContainer.add(rankingWindow);

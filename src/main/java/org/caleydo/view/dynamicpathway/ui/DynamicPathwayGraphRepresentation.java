@@ -123,7 +123,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		setDefaultDuration(1500);
 
-		setDefaultInTransition(new InOutTransitions.InOutTransitionBase(InOutInitializers.APPEAR,MoveTransitions.GROW_LINEAR));
+		setDefaultInTransition(new InOutTransitions.InOutTransitionBase(InOutInitializers.APPEAR,
+				MoveTransitions.GROW_LINEAR));
 	}
 
 	/**
@@ -146,12 +147,17 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		if (!isFocusPathway && pathway.getContextPathways().size() <= contextPathwaysColors.size())
 			nodeColor = contextPathwaysColors.get(pathway.getContextPathways().indexOf(graph));
 		String nodeType = isFocusPathway ? "Focus" : "Context";
-		
-		System.out.println("\n-----------------------------------------------------------------------------------------------------------------------------------------");
-		System.out.println("=========================================================================================================================================");
-		System.out.println("Adding new " + nodeType + " Pathway; clearOriginalSubpathwaysMap: " + clearOriginalSubwaysMap +"; currentFilteringNode: " + focusNode);
-		System.out.println("=========================================================================================================================================");
-		System.out.println("-----------------------------------------------------------------------------------------------------------------------------------------\n");
+
+		System.out
+				.println("\n-----------------------------------------------------------------------------------------------------------------------------------------");
+		System.out
+				.println("=========================================================================================================================================");
+		System.out.println("Adding new " + nodeType + " Pathway; clearOriginalSubpathwaysMap: "
+				+ clearOriginalSubwaysMap + "; currentFilteringNode: " + focusNode);
+		System.out
+				.println("=========================================================================================================================================");
+		System.out
+				.println("-----------------------------------------------------------------------------------------------------------------------------------------\n");
 
 		view.addPathwayToControllBar(graph, isFocusPathway, nodeColor);
 
@@ -375,7 +381,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			NodeElement node = GraphMergeUtil.createNewNodeElement(vRepToCheck, nonDuplicateVertexList, null, this,
 					nodeColor, pathwayToAdd);
 			nodeSet.add(node);
-//			add(node);
+			// add(node);
 			add(node, 1500);
 
 			for (PathwayVertex vertex : nonDuplicateVertexList) {
@@ -459,17 +465,15 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 				if (!addToSameGraph && mergeWithinSameGraph)
 					mergedNode.setIsMerged(false);
-				
+
 				mergedNode.setCenter(nodeWithDuplicateVertices.getCenterX(), nodeWithDuplicateVertices.getCenterY());
 
 				nodeSet.add(mergedNode);
-//				add(mergedNode);
+				// add(mergedNode);
 				add(mergedNode, 1500);
-				
-				
-				//TODO use this for merged
-//				add(index, child, duration, animation);
 
+				// TODO use this for merged
+				// add(index, child, duration, animation);
 
 				/**
 				 * STEP 3.1a.2a: if the duplicate vertices are all of the (not merged) node's vertices, it needs to be
@@ -619,9 +623,10 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 						vertexNodeMap.put(mergedVertex, newNodeForNonDuplicateVertices);
 					}
 
-					newNodeForNonDuplicateVertices.setCenter(nodeWithDuplicateVertices.getCenterX(), nodeWithDuplicateVertices.getCenterY());
+					newNodeForNonDuplicateVertices.setCenter(nodeWithDuplicateVertices.getCenterX(),
+							nodeWithDuplicateVertices.getCenterY());
 					nodeSet.add(newNodeForNonDuplicateVertices);
-//					add(newNodeForNonDuplicateVertices);
+					// add(newNodeForNonDuplicateVertices);
 					add(newNodeForNonDuplicateVertices, 1500);
 
 					// nodeWithDuplicateVertices.addVrepWithThisNodesVerticesList(pathwayVertexRepToCheck);
@@ -850,25 +855,25 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		 * if nothing was selected, just set the new node
 		 */
 		if (focusNode == null) {
-//			System.out.println("Setting new filtering node without old: " + newFilteringNode);
+			// System.out.println("Setting new filtering node without old: " + newFilteringNode);
 			focusNode = newFilteringNode;
 			focusNode.setIsThisNodeUsedForFiltering(true);
 			focusNodeChanged = false;
 
 		}
 
-//		else if (currentFilteringNode.equals(newFilteringNode)) {
-////			System.out.println("Removing filtering node: " + currentFilteringNode);
-//			currentFilteringNode.setIsThisNodeUsedForFiltering(false);
-//			currentFilteringNode = null;
-//			focusNodeChanged = false;
-//		}
+		// else if (currentFilteringNode.equals(newFilteringNode)) {
+		// // System.out.println("Removing filtering node: " + currentFilteringNode);
+		// currentFilteringNode.setIsThisNodeUsedForFiltering(false);
+		// currentFilteringNode = null;
+		// focusNodeChanged = false;
+		// }
 
 		/**
 		 * if another node was selected before, deselect it and selected the new node
 		 */
 		else if (newFilteringNode != null) {
-//			System.out.println("Changing filtering node from  " + currentFilteringNode + " to " + newFilteringNode);
+			// System.out.println("Changing filtering node from  " + currentFilteringNode + " to " + newFilteringNode);
 			focusNode.setIsThisNodeUsedForFiltering(false);
 			focusNode = newFilteringNode;
 			focusNode.setIsThisNodeUsedForFiltering(true);
@@ -884,6 +889,14 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		return focusNodeChanged;
 
+	}
+
+	public void resetFocusNode() {
+		if (focusNode != null) {
+			// System.out.println("Removing filtering node: " + currentFilteringNode);
+			focusNode.setIsThisNodeUsedForFiltering(false);
+			focusNode = null;
+		}
 	}
 
 	// public void filterPathwayList() {
@@ -1039,13 +1052,13 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		if (this.pathway.isFocusGraph(pathway)) {
 			return true;
 		}
-		if(this.pathway.isContextGraph(pathway)) {
+		if (this.pathway.isContextGraph(pathway)) {
 			return true;
 		}
-		if( this.originalPathwaysOfSubpathwaysMap.containsValue(pathway)) {
+		if (this.originalPathwaysOfSubpathwaysMap.containsValue(pathway)) {
 			return true;
 		}
-		
+
 		return false;
 	}
 
