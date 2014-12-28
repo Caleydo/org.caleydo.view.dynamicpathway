@@ -81,7 +81,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	/**
 	 * is null if no node was selected, otherwise it is a reference to the currently selected node -> needed for merging
 	 */
-	private NodeElement currentFilteringNode;
+	private NodeElement focusNode;
 
 	/**
 	 * the view that hold the pathway list & the pathway representation
@@ -138,20 +138,26 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 * @param keepFocusVertex
 	 *            true if a focus pathway is added, but the focus node should be preserved
 	 */
-	public void addPathwayRep(PathwayGraph graph, Boolean isFocusPathway, Boolean clearOriginalSubwaysMap,
-			Boolean keepFocusVertex) {
+	public void addPathwayRep(PathwayGraph graph, Boolean isFocusPathway, Boolean clearOriginalSubwaysMap) {
 
 		pathway.addFocusOrKontextPathway(graph, !isFocusPathway);
 
 		Color nodeColor = isFocusPathway ? Color.LIGHT_BLUE : Color.LIGHT_GRAY;
 		if (!isFocusPathway && pathway.getContextPathways().size() <= contextPathwaysColors.size())
 			nodeColor = contextPathwaysColors.get(pathway.getContextPathways().indexOf(graph));
+		String nodeType = isFocusPathway ? "Focus" : "Context";
+		
+		System.out.println("\n-----------------------------------------------------------------------------------------------------------------------------------------");
+		System.out.println("=========================================================================================================================================");
+		System.out.println("Adding new " + nodeType + " Pathway; clearOriginalSubpathwaysMap: " + clearOriginalSubwaysMap +"; currentFilteringNode: " + focusNode);
+		System.out.println("=========================================================================================================================================");
+		System.out.println("-----------------------------------------------------------------------------------------------------------------------------------------\n");
 
 		view.addPathwayToControllBar(graph, isFocusPathway, nodeColor);
 
 		PathwayVertex oldFilteringVertex = null;
-		if (currentFilteringNode != null)
-			oldFilteringVertex = currentFilteringNode.getDisplayedVertex();
+		if (focusNode != null)
+			oldFilteringVertex = focusNode.getDisplayedVertex();
 		else
 			System.out.println("Filtering node was null");
 
@@ -197,13 +203,13 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			if (focusGraphWithDuplicateVertices) {
 
 				removeDuplicateVertices = true;
-				addPathwayRep(pathway.getFocusPathway(), true, true, true);
+				addPathwayRep(pathway.getFocusPathway(), true, true);
 
 				if (oldFilteringVertex != null)
-					currentFilteringNode = uniqueVertexMap.get(oldFilteringVertex);
+					focusNode = uniqueVertexMap.get(oldFilteringVertex);
 			}
 
-			System.out.println("old current filtering node: " + currentFilteringNode);
+			System.out.println("old current filtering node: " + focusNode);
 			// TODO: save old filtering node
 			// if (currentFilteringNode != null)
 			// setOrResetFilteringNode(currentFilteringNode);
@@ -233,7 +239,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		System.out.println("Setting new focus node: " + newFocusgNode + "\n=========================================");
 
 		if (newFocusgNode != null) {
-			setOrResetFilteringNode(newFocusgNode);
+			setFocusNode(newFocusgNode);
 
 			view.filterPathwayList(newFocusgNode.getVertices(), getDisplayedPathways());
 
@@ -250,7 +256,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		// clear all selection
 		currentSelectedNode = null;
-		currentFilteringNode = null;
+		focusNode = null;
 
 		// clear all sets -> might be reset again
 		nodeSet.clear();
@@ -836,36 +842,36 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 * @param newFilteringNode
 	 *            the node, which the pathway list should be filtered with
 	 */
-	public boolean setOrResetFilteringNode(NodeElement newFilteringNode) {
+	public boolean setFocusNode(NodeElement newFilteringNode) {
 
 		boolean focusNodeChanged = false;
 
 		/**
 		 * if nothing was selected, just set the new node
 		 */
-		if (currentFilteringNode == null) {
+		if (focusNode == null) {
 //			System.out.println("Setting new filtering node without old: " + newFilteringNode);
-			currentFilteringNode = newFilteringNode;
-			currentFilteringNode.setIsThisNodeUsedForFiltering(true);
+			focusNode = newFilteringNode;
+			focusNode.setIsThisNodeUsedForFiltering(true);
 			focusNodeChanged = false;
 
 		}
 
-		else if (currentFilteringNode.equals(newFilteringNode)) {
-//			System.out.println("Removing filtering node: " + currentFilteringNode);
-			currentFilteringNode.setIsThisNodeUsedForFiltering(false);
-			currentFilteringNode = null;
-			focusNodeChanged = false;
-		}
+//		else if (currentFilteringNode.equals(newFilteringNode)) {
+////			System.out.println("Removing filtering node: " + currentFilteringNode);
+//			currentFilteringNode.setIsThisNodeUsedForFiltering(false);
+//			currentFilteringNode = null;
+//			focusNodeChanged = false;
+//		}
 
 		/**
 		 * if another node was selected before, deselect it and selected the new node
 		 */
 		else if (newFilteringNode != null) {
 //			System.out.println("Changing filtering node from  " + currentFilteringNode + " to " + newFilteringNode);
-			currentFilteringNode.setIsThisNodeUsedForFiltering(false);
-			currentFilteringNode = newFilteringNode;
-			currentFilteringNode.setIsThisNodeUsedForFiltering(true);
+			focusNode.setIsThisNodeUsedForFiltering(false);
+			focusNode = newFilteringNode;
+			focusNode.setIsThisNodeUsedForFiltering(true);
 			focusNodeChanged = true;
 
 		} else
@@ -957,8 +963,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		super.takeDown();
 	}
 
-	public NodeElement getCurrentFilteringNode() {
-		return currentFilteringNode;
+	public NodeElement getFocusNode() {
+		return focusNode;
 	}
 
 	public boolean isDisplayOnlyVerticesWithEdges() {
