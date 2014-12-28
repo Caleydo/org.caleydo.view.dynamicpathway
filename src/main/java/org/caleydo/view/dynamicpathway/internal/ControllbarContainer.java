@@ -1,38 +1,33 @@
 package org.caleydo.view.dynamicpathway.internal;
 
-import java.awt.Checkbox;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.media.opengl.GL;
-
+import org.caleydo.core.event.EventPublisher;
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLElement;
 import org.caleydo.core.view.opengl.layout2.GLElementContainer;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
-import org.caleydo.core.view.opengl.layout2.GLElement.EVisibility;
 import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
 import org.caleydo.core.view.opengl.layout2.basic.EButtonIcon;
 import org.caleydo.core.view.opengl.layout2.basic.GLButton;
 import org.caleydo.core.view.opengl.layout2.basic.GLButton.EButtonMode;
 import org.caleydo.core.view.opengl.layout2.basic.GLButton.ISelectionCallback;
-import org.caleydo.core.view.opengl.layout2.basic.GLButton.IconLabelRenderer;
 import org.caleydo.core.view.opengl.layout2.basic.RadioController;
 import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
-import org.caleydo.core.view.opengl.layout2.layout.IGLLayout;
-import org.caleydo.core.view.opengl.layout2.layout.IGLLayout2;
+import org.caleydo.core.view.opengl.layout2.layout.GLPadding;
+import org.caleydo.core.view.opengl.layout2.layout.GLSizeRestrictiveFlowLayout;
 import org.caleydo.core.view.opengl.layout2.renderer.GLRenderers;
 import org.caleydo.core.view.opengl.layout2.renderer.IGLRenderer;
 import org.caleydo.core.view.opengl.picking.APickingListener;
-import org.caleydo.core.view.opengl.picking.IPickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
+import org.caleydo.view.dynamicpathway.ui.ChangeVertexEnvironmentEvent;
 import org.caleydo.view.dynamicpathway.ui.ControllbarPathwayTitleEntry;
+import org.caleydo.view.dynamicpathway.ui.VertexEnvironmentDialog;
 import org.caleydo.vis.lineup.ui.RenderStyle;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
 
 public class ControllbarContainer extends AnimatedGLElementContainer implements ISelectionCallback {
 
@@ -56,10 +51,13 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 	private RadioController duplicateVerticesRadioController;
 	private GLButton allowDuplicateVerticesButton;
 	private GLButton removeDuplicateVerticesButton;
-	
-	private GLElement vertexEnvironmentSizeTitle;
-	private GLElement vertexEnvironmentSizeLineSeparator;
-	
+
+	// /**
+	// * Node Environment
+	// */
+	// private GLElement vertexEnvironmentSizeTitle;
+	private GLElement vertexEnvironmentSizeValue;
+	// private GLElement vertexEnvironmentSizeLineSeparator;
 
 	/**
 	 * focus pathway
@@ -75,7 +73,13 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 	private GLElement contextGraphsLabel;
 	private Map<String, GLElement> contextPathways;
 	private AnimatedGLElementContainer contextPathwayElements;
-	private boolean isFocusGraphSet = false;
+
+	// TODO: replace with controllbar listen
+	/**
+	 * if you want to add full pathways set to any value <= 0
+	 */
+	private static final int VERTEX_ENV_SIZE = -1;
+	private Integer nodeEnvironmentSize;
 
 	public ControllbarContainer(DynamicPathwayView view) {
 		super();
@@ -83,6 +87,7 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 
 		this.view = view;
 		this.contextPathways = new HashMap<String, GLElement>();
+		this.nodeEnvironmentSize = new Integer(VERTEX_ENV_SIZE);
 
 		/**
 		 * create header
@@ -112,8 +117,8 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		 * Radio group: allow/remove duplicate vertices
 		 */
 		duplicateVerticesRadioController = new RadioController(this);
-		removeDuplicateVerticesButton = createRadioButton("Remove duplicate vertices",
-				"Mandatory for merged graphs", duplicateVerticesRadioController);
+		removeDuplicateVerticesButton = createRadioButton("Remove duplicate vertices", "Mandatory for merged graphs",
+				duplicateVerticesRadioController);
 		allowDuplicateVerticesButton = createRadioButton("Allow duplicate vertices",
 				"Only possible for unmerged graphs", duplicateVerticesRadioController);
 
@@ -128,6 +133,64 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		add(createLineSeparator());
 
 		/**
+		 * vertex environment size
+		 */
+		GLElement vertexEnvironmentSizeTitle = createSubHeader("Vertex Environment Size");
+		vertexEnvironmentSizeTitle.setVisibility(EVisibility.VISIBLE);
+		add(vertexEnvironmentSizeTitle);
+
+		GLElementContainer editVertexEnvContainer = new GLElementContainer(new GLSizeRestrictiveFlowLayout(true, 30,
+				new GLPadding(8, 0, 20, 0)));
+		editVertexEnvContainer.setBounds(0, 0, this.getRectBounds().width(), 20);
+
+		String nodeEnvironment = (nodeEnvironmentSize < 1) ? "Full Pathways" : nodeEnvironmentSize.toString();
+
+		this.vertexEnvironmentSizeValue = createContentText(nodeEnvironment);
+		this.vertexEnvironmentSizeValue.setVisibility(EVisibility.VISIBLE);
+		editVertexEnvContainer.add(this.vertexEnvironmentSizeValue);
+
+		GLButton pinButton = new GLButton(EButtonMode.BUTTON);
+		pinButton.setVisibility(EVisibility.PICKABLE);
+		pinButton.setSize(16, 16);
+		pinButton.setRenderer(GLRenderers.fillImage("resources/icons/edit.png"));
+		editVertexEnvContainer.add(pinButton);
+
+		pinButton.onPick(new APickingListener() {
+
+			@Override
+			protected void clicked(Pick pick) {
+				// TODO Auto-generated method stub
+				super.clicked(pick);
+
+				Display.getDefault().asyncExec(new Runnable() {
+
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						VertexEnvironmentDialog envDialog = new VertexEnvironmentDialog(Display.getDefault()
+								.getActiveShell());
+						int returnValue = envDialog.open();
+						if (returnValue == Window.OK) {
+							boolean nodeEnvSizeChanged = setNodeEnvironmentSize(envDialog.getVertexEnv());
+							if (nodeEnvSizeChanged) {
+								ChangeVertexEnvironmentEvent changeEnvSizeEvent = new ChangeVertexEnvironmentEvent(
+										nodeEnvironmentSize);
+								EventPublisher.trigger(changeEnvSizeEvent);
+							}
+						}
+					}
+				});
+			}
+
+		});
+
+		add(editVertexEnvContainer);
+
+		GLElement vertexEnvironmentSizeLineSeparator = createLineSeparator();
+		vertexEnvironmentSizeLineSeparator.setVisibility(EVisibility.VISIBLE);
+		add(vertexEnvironmentSizeLineSeparator);
+
+		/**
 		 * current focus graph
 		 */
 		GLElement focusPathwayLabel = createSubHeader("Current Focus Pathway");
@@ -139,24 +202,11 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		this.focusContextLineSeparator = createLineSeparator();
 		this.focusContextLineSeparator.setVisibility(EVisibility.HIDDEN);
 		add(focusContextLineSeparator);
-		
-		/**
-		 * vertex environment size
-		 */
-		this.vertexEnvironmentSizeTitle = createSubHeader("Vertex Environment Size");
-		this.vertexEnvironmentSizeTitle.setVisibility(EVisibility.HIDDEN);
-		add(vertexEnvironmentSizeTitle);
-		
-		this.vertexEnvironmentSizeLineSeparator = createLineSeparator();
-		this.vertexEnvironmentSizeLineSeparator.setVisibility(EVisibility.HIDDEN);
-		add(vertexEnvironmentSizeLineSeparator);
-			
-		
-		
-//		Composite comp = new Composite();
-//		final Text clusterNumberText = new Text(this, SWT.BORDER);
-//		clusterNumberText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
+		// Composite comp = new Composite();
+		// final Text clusterNumberText = new Text(this, SWT.BORDER);
+		// clusterNumberText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
 		/**
 		 * current context graphs
 		 */
@@ -168,8 +218,7 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		add(contextPathwayElements);
 	}
 
-	public void addPathwayTitle(PathwayGraph pathwayToAdd, boolean isFocusPathway, Color titleColor)
-			throws Exception {
+	public void addPathwayTitle(PathwayGraph pathwayToAdd, boolean isFocusPathway, Color titleColor) throws Exception {
 		if (isFocusPathway)
 			addFocusPathwayTitle(pathwayToAdd, titleColor);
 		else
@@ -194,20 +243,20 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 
 		contextPathwayElements.remove(elementToRemove);
 		contextPathways.remove(pathwayTitle);
-		
-		if(contextPathwayElements.size() < 1) {
+
+		if (contextPathwayElements.size() < 1) {
 			allowDuplicateVerticesButton.setVisibility(EVisibility.PICKABLE);
 			removeDuplicateVerticesButton.setVisibility(EVisibility.PICKABLE);
 		}
-			
+
 	}
 
 	public void removeFocusPathwayTitle(PathwayGraph graphToRemove) throws Exception {
 		if (!focusPathway.equals(graphToRemove))
 			throw new Exception(
 					"INTERNAL ERROR: Wanted to remove focus pathway title from controllbar, but title to remove ("
-							+ graphToRemove.getTitle() + ") wasn't equal to the focus pathay title ("
-							+ focusGraphTitle + ")");
+							+ graphToRemove.getTitle() + ") wasn't equal to the focus pathay title (" + focusGraphTitle
+							+ ")");
 
 		this.focusPathway = null;
 		this.focusGraphTitle = "";
@@ -215,12 +264,33 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		this.contextPathways.clear();
 		this.focusGraphElement.setVisibility(EVisibility.HIDDEN);
 		this.focusContextLineSeparator.setVisibility(EVisibility.HIDDEN);
-		this.vertexEnvironmentSizeTitle.setVisibility(EVisibility.HIDDEN);
-		this.vertexEnvironmentSizeLineSeparator.setVisibility(EVisibility.HIDDEN);
+		// this.vertexEnvironmentSizeTitle.setVisibility(EVisibility.HIDDEN);
+		// this.vertexEnvironmentSizeValue.setVisibility(EVisibility.HIDDEN);
+		// this.vertexEnvironmentSizeLineSeparator.setVisibility(EVisibility.HIDDEN);
 		this.contextGraphsLabel.setVisibility(EVisibility.HIDDEN);
 		this.contextPathwayElements.setVisibility(EVisibility.HIDDEN);
 		this.allowDuplicateVerticesButton.setVisibility(EVisibility.PICKABLE);
 		this.removeDuplicateVerticesButton.setVisibility(EVisibility.PICKABLE);
+	}
+
+	public int getNodeEnvironmentSize() {
+		return nodeEnvironmentSize.intValue();
+	}
+
+	public boolean setNodeEnvironmentSize(int nodeEnvironmentSize) {
+		boolean nodeEnvSizeChanged = false;
+		System.out.println("CHANGING ENV SIZE from " + this.nodeEnvironmentSize + " to " + nodeEnvironmentSize);
+		if (this.nodeEnvironmentSize.intValue() != nodeEnvironmentSize) {
+			this.nodeEnvironmentSize = nodeEnvironmentSize;
+			
+			String nodeEnvonmentSizeString = (this.nodeEnvironmentSize < 0) ? "Full Pathways" : this.nodeEnvironmentSize.toString();
+			vertexEnvironmentSizeValue.setRenderer(GLRenderers.drawText(nodeEnvonmentSizeString));
+//			this.vertexEnvironmentSizeValue = createContentText(this.nodeEnvironmentSize.toString());
+			vertexEnvironmentSizeValue.repaint();
+			nodeEnvSizeChanged = true;
+		}
+
+		return nodeEnvSizeChanged;
 	}
 
 	/**
@@ -242,8 +312,9 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		this.focusGraphElement.setNormalTitleColor(titleColor);
 		this.focusGraphElement.setVisibility(EVisibility.PICKABLE);
 		this.focusContextLineSeparator.setVisibility(EVisibility.VISIBLE);
-		this.vertexEnvironmentSizeTitle.setVisibility(EVisibility.VISIBLE);
-		this.vertexEnvironmentSizeLineSeparator.setVisibility(EVisibility.VISIBLE);
+		// this.vertexEnvironmentSizeTitle.setVisibility(EVisibility.VISIBLE);
+		// this.vertexEnvironmentSizeValue.setVisibility(EVisibility.VISIBLE);
+		// this.vertexEnvironmentSizeLineSeparator.setVisibility(EVisibility.VISIBLE);
 		this.contextGraphsLabel.setVisibility(EVisibility.VISIBLE);
 		this.contextPathwayElements.setVisibility(EVisibility.VISIBLE);
 	}
@@ -263,8 +334,8 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		if (contextPathways.containsKey(pathway.getTitle()))
 			return;
 
-		ControllbarPathwayTitleEntry contextGraphTitle = new ControllbarPathwayTitleEntry(pathway,
-				titleColor, false, view);// createContentText(BULLET_POINT
+		ControllbarPathwayTitleEntry contextGraphTitle = new ControllbarPathwayTitleEntry(pathway, titleColor, false,
+				view);// createContentText(BULLET_POINT
 		contextGraphTitle.setVisibility(EVisibility.PICKABLE);
 
 		/**
@@ -305,8 +376,8 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		pinButton.setVisibility(EVisibility.PICKABLE);
 		pinButton.setSize(16, 16);
 		pinButton.setTooltip(toolTip);
-		DynamicPathwayIconLabelRenderer dynamicPwIconLabelRenderer = new DynamicPathwayIconLabelRenderer(
-				buttonLabel, EButtonIcon.RADIO);
+		DynamicPathwayIconLabelRenderer dynamicPwIconLabelRenderer = new DynamicPathwayIconLabelRenderer(buttonLabel,
+				EButtonIcon.RADIO);
 		pinButton.setRenderer(dynamicPwIconLabelRenderer);
 		pinButton.setSelectedRenderer(dynamicPwIconLabelRenderer);
 		parentRadioGroup.add(pinButton);
@@ -333,7 +404,7 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 	 */
 	private GLElement createContentText(String contentText) {
 		GLElement text = new GLElement(GLRenderers.drawText(contentText));
-		text.setSize(Float.NaN, 12);
+		text.setSize(Float.NaN, 15);
 		return text;
 	}
 

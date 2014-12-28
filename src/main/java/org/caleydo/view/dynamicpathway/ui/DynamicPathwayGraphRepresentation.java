@@ -7,7 +7,6 @@ package org.caleydo.view.dynamicpathway.ui;
 
 import gleem.linalg.Vec2f;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,27 +16,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.FileHandler;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
-import org.caleydo.core.data.datadomain.graph.Edge;
 import org.caleydo.core.data.selection.EventBasedSelectionManager;
 import org.caleydo.core.data.selection.IEventBasedSelectionManagerUser;
 import org.caleydo.core.data.selection.SelectionType;
-import org.caleydo.core.event.EventListenerManager.ListenTo;
 import org.caleydo.core.id.IDType;
-import org.caleydo.core.util.collection.MultiHashMap;
 import org.caleydo.core.util.collection.Pair;
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
+import org.caleydo.core.view.opengl.layout2.animation.InOutInitializers;
+import org.caleydo.core.view.opengl.layout2.animation.InOutTransitions;
+import org.caleydo.core.view.opengl.layout2.animation.MoveTransitions;
 import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.datadomain.genetic.EGeneIDTypes;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
-import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexGroupRep;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 import org.caleydo.view.dynamicpathway.internal.DynamicPathwayView;
 import org.caleydo.view.dynamicpathway.internal.NodeMergingException;
@@ -48,9 +44,6 @@ import org.caleydo.view.dynamicpathway.layout.IFRLayoutGraph;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
 import org.caleydo.view.dynamicpathway.util.GraphMergeUtil;
 import org.jgrapht.graph.DefaultEdge;
-
-import com.google.common.collect.Collections2;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
 
 /**
  * Container, which is defined by the graph layout {@link GLFruchtermanReingoldLayout} contains the renderable Elements
@@ -130,6 +123,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		setDefaultDuration(1500);
 
+		setDefaultInTransition(new InOutTransitions.InOutTransitionBase(InOutInitializers.APPEAR,MoveTransitions.GROW_LINEAR));
 	}
 
 	/**
@@ -147,7 +141,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	public void addPathwayRep(PathwayGraph graph, Boolean isFocusPathway, Boolean clearOriginalSubwaysMap,
 			Boolean keepFocusVertex) {
 
-		pathway.addFocusOrKontextPathway(graph, !isFocusPathway, currentSelectedNode);
+		pathway.addFocusOrKontextPathway(graph, !isFocusPathway);
 
 		Color nodeColor = isFocusPathway ? Color.LIGHT_BLUE : Color.LIGHT_GRAY;
 		if (!isFocusPathway && pathway.getContextPathways().size() <= contextPathwaysColors.size())
@@ -375,7 +369,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			NodeElement node = GraphMergeUtil.createNewNodeElement(vRepToCheck, nonDuplicateVertexList, null, this,
 					nodeColor, pathwayToAdd);
 			nodeSet.add(node);
-			add(node);
+//			add(node);
+			add(node, 1500);
 
 			for (PathwayVertex vertex : nonDuplicateVertexList) {
 				vertexNodeMap.put(vertex, node);
@@ -458,9 +453,17 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 				if (!addToSameGraph && mergeWithinSameGraph)
 					mergedNode.setIsMerged(false);
+				
+				mergedNode.setCenter(nodeWithDuplicateVertices.getCenterX(), nodeWithDuplicateVertices.getCenterY());
 
 				nodeSet.add(mergedNode);
-				add(mergedNode);
+//				add(mergedNode);
+				add(mergedNode, 1500);
+				
+				
+				//TODO use this for merged
+//				add(index, child, duration, animation);
+
 
 				/**
 				 * STEP 3.1a.2a: if the duplicate vertices are all of the (not merged) node's vertices, it needs to be
@@ -610,8 +613,10 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 						vertexNodeMap.put(mergedVertex, newNodeForNonDuplicateVertices);
 					}
 
+					newNodeForNonDuplicateVertices.setCenter(nodeWithDuplicateVertices.getCenterX(), nodeWithDuplicateVertices.getCenterY());
 					nodeSet.add(newNodeForNonDuplicateVertices);
-					add(newNodeForNonDuplicateVertices);
+//					add(newNodeForNonDuplicateVertices);
+					add(newNodeForNonDuplicateVertices, 1500);
 
 					// nodeWithDuplicateVertices.addVrepWithThisNodesVerticesList(pathwayVertexRepToCheck);
 
@@ -839,7 +844,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		 * if nothing was selected, just set the new node
 		 */
 		if (currentFilteringNode == null) {
-			System.out.println("Setting new filtering node without old: " + newFilteringNode);
+//			System.out.println("Setting new filtering node without old: " + newFilteringNode);
 			currentFilteringNode = newFilteringNode;
 			currentFilteringNode.setIsThisNodeUsedForFiltering(true);
 			focusNodeChanged = false;
@@ -847,7 +852,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		}
 
 		else if (currentFilteringNode.equals(newFilteringNode)) {
-			System.out.println("Removing filtering node: " + currentFilteringNode);
+//			System.out.println("Removing filtering node: " + currentFilteringNode);
 			currentFilteringNode.setIsThisNodeUsedForFiltering(false);
 			currentFilteringNode = null;
 			focusNodeChanged = false;
@@ -857,7 +862,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		 * if another node was selected before, deselect it and selected the new node
 		 */
 		else if (newFilteringNode != null) {
-			System.out.println("Changing filtering node from  " + currentFilteringNode + " to " + newFilteringNode);
+//			System.out.println("Changing filtering node from  " + currentFilteringNode + " to " + newFilteringNode);
 			currentFilteringNode.setIsThisNodeUsedForFiltering(false);
 			currentFilteringNode = newFilteringNode;
 			currentFilteringNode.setIsThisNodeUsedForFiltering(true);
@@ -976,7 +981,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		return pathway.getFocusPathway();
 	}
 
-	public List<PathwayGraph> getContextGraphs() {
+	public List<PathwayGraph> getContextPathways() {
 		return pathway.getContextPathways();
 	}
 
@@ -1026,18 +1031,15 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 	public boolean isPathwayPresent(PathwayGraph pathway) {
 		if (this.pathway.isFocusGraph(pathway)) {
-			System.out.println(pathway + " is focus pathway");
 			return true;
 		}
-		if( this.originalPathwaysOfSubpathwaysMap.containsKey(pathway)) {
-			System.out.println(pathway + " is subathway");
+		if(this.pathway.isContextGraph(pathway)) {
 			return true;
-		}if(this.pathway.isContextGraph(pathway)) {
-			System.out.println(pathway + " is context pathway");
+		}
+		if( this.originalPathwaysOfSubpathwaysMap.containsValue(pathway)) {
 			return true;
 		}
 		
-		System.out.println(pathway + " isn't on canvas");
 		return false;
 	}
 
