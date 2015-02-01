@@ -5,10 +5,12 @@
  ******************************************************************************/
 package org.caleydo.view.dynamicpathway.ui;
 
+import static org.caleydo.core.view.opengl.layout2.animation.MoveTransitions.MOVE_LINEAR;
 import gleem.linalg.Vec2f;
+import gleem.linalg.Vec4f;
 
+import java.awt.geom.Line2D;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,11 +26,14 @@ import org.caleydo.core.data.selection.SelectionType;
 import org.caleydo.core.id.IDType;
 import org.caleydo.core.util.collection.Pair;
 import org.caleydo.core.util.color.Color;
+import org.caleydo.core.util.color.ColorBrewer;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
+import org.caleydo.core.view.opengl.layout2.animation.Duration;
 import org.caleydo.core.view.opengl.layout2.animation.InOutInitializers;
 import org.caleydo.core.view.opengl.layout2.animation.InOutTransitions;
 import org.caleydo.core.view.opengl.layout2.animation.MoveTransitions;
+import org.caleydo.core.view.opengl.layout2.geom.Rect;
 import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.datadomain.genetic.EGeneIDTypes;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
@@ -45,6 +50,14 @@ import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
 import org.caleydo.view.dynamicpathway.util.GraphMergeUtil;
 import org.jgrapht.graph.DefaultEdge;
 
+import setvis.SetOutline;
+import setvis.bubbleset.BubbleSet;
+import setvis.gui.CanvasComponent;
+import setvis.shape.AbstractShapeGenerator;
+import setvis.shape.BSplineShapeGenerator;
+
+import com.jogamp.opengl.util.awt.TextureRenderer;
+
 /**
  * Container, which is defined by the graph layout {@link GLFruchtermanReingoldLayout} contains the renderable Elements
  * 
@@ -53,6 +66,10 @@ import org.jgrapht.graph.DefaultEdge;
  */
 public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContainer implements IFRLayoutGraph,
 		IEventBasedSelectionManagerUser {
+
+	private static final Duration DEFAULT_IN_TRANSITION_DURATION = new Duration(2500);
+	private static final int DEFAULT_ADD_PATHWAY_DURATION = 1500;
+	private static final int DEFAULT_REMOVE_PATHWAY_DURATION = 200;
 
 	private boolean displayOnlyVerticesWithEdges = true;
 	private boolean removeDuplicateVertices = true;
@@ -71,7 +88,9 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	private Set<NodeElement> nodeSet;
 	private Set<EdgeElement> edgeSet;
 
-	private List<Color> contextPathwaysColors = Arrays.asList(Color.LIGHT_RED, Color.GREEN, Color.ORANGE, Color.CYAN);
+	private List<Color> contextPathwaysColors = ColorBrewer.Set1.getColors(10);// Arrays.asList(Color.LIGHT_RED,
+																				// Color.GREEN, Color.ORANGE,
+																				// Color.CYAN);
 
 	/**
 	 * the currently selected node
@@ -82,6 +101,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 * is null if no node was selected, otherwise it is a reference to the currently selected node -> needed for merging
 	 */
 	private NodeElement focusNode;
+	private PathwayVertex focusVertex = null;
 
 	/**
 	 * the view that hold the pathway list & the pathway representation
@@ -92,15 +112,22 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 * informs other that (and which) vertex (nodeElement) was selected
 	 */
 	private EventBasedSelectionManager vertexSelectionManager;
-	
-	private PathwayVertex focusVertex = null;
 
 	/**
 	 * needed for node merging & edge representation
 	 */
-	Map<PathwayVertex, NodeElement> uniqueVertexMap;
+	private Map<PathwayVertex, NodeElement> uniqueVertexMap;
 
-	Map<PathwayGraph, PathwayGraph> originalPathwaysOfSubpathwaysMap;
+	/**
+	 * the bubble set
+	 */
+	private CanvasComponent bubblesetCanvas;
+
+	/**
+	 * mapping for the pathway graphs that contain only of a part of vertices & edges to the full pathway graphs <br />
+	 * (only needed when context pathways are added partly)
+	 */
+	private Map<PathwayGraph, PathwayGraph> originalPathwaysOfSubpathwaysMap;
 
 	Logger mergeLogger = Logger.getLogger("MergeLog");
 
@@ -123,13 +150,17 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		setLayout(layout);
 
-		setDefaultDuration(1500);
-
+		// Pathways animation setting
+		setDefaultDuration(DEFAULT_ADD_PATHWAY_DURATION);
 		setDefaultInTransition(new InOutTransitions.InOutTransitionBase(InOutInitializers.APPEAR,
 				MoveTransitions.GROW_LINEAR));
-	}
-	
+		setDefaultOutTransition(new InOutTransitions.InOutTransitionBase(InOutInitializers.APPEAR,
+				MoveTransitions.MOVE_LINEAR));
 
+		// setUpBubbleSet();
+	}
+
+	private List<PathwayVertex> previousFocusVertices = new ArrayList<PathwayVertex>();
 
 	/**
 	 * 
@@ -168,16 +199,20 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		view.addPathwayToControllBar(graph, isFocusPathway, nodeColor);
 
-		if (focusNode != null && (addNewFocusNode || isFocusPathway))
+		if (focusNode != null && (addNewFocusNode || isFocusPathway)) {
 			focusVertex = focusNode.getDisplayedVertex();
-		else
+			previousFocusVertices = new ArrayList<PathwayVertex>(focusNode.getVertices());
+			previousFocusVertices.remove(focusVertex);
+		} else
 			System.out.println("Filtering node was null");
 
 		// if you want to add a new focus graph
 		if (isFocusPathway) {
 
 			// clears all from past selection
-			clearCanvasAndInfo(clearOriginalSubwaysMap);
+			clearCanvasAndInfo(clearOriginalSubwaysMap, addNewFocusNode);
+
+			setDefaultDuration(DEFAULT_ADD_PATHWAY_DURATION);
 
 			/**
 			 * if duplicate are allowed or not
@@ -189,20 +224,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				focusGraphWithDuplicateVertices = false;
 				addPathwayWithoutDuplicates(graph, uniqueVertexMap, true, pathway.getCombinedGraph(), nodeColor);
 
-				if (focusVertex != null) {
-
-					if (addNewFocusNode) {
-						NodeElement newFilteringNode = uniqueVertexMap.get(focusVertex);
-						System.out.println("Resetting focus vertex: " + focusVertex + " to node: "
-								+ newFilteringNode);
-
-						makeFocusNode(newFilteringNode);
-					}
-
-					// setOrResetFilteringNode(newFilteringNode);
-
-					// newFilteringNode.makeThisFocusNode();
-				}
+				if (focusVertex != null && addNewFocusNode)
+					makeFocusNodeBasedOnFocusNode();
 
 				try {
 					checkForDuplicateVertices(nodeSet);
@@ -211,6 +234,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				}
 			}
 		} else {
+
+			setDefaultDuration(1500);
 
 			// if the focus graph was added with duplicates, it needs to be
 			// added without them
@@ -224,40 +249,17 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			}
 
 			System.out.println("old current filtering node: " + focusNode);
-			// TODO: save old filtering node
-			// if (currentFilteringNode != null)
-			// setOrResetFilteringNode(currentFilteringNode);
 
 			addPathwayWithoutDuplicates(graph, uniqueVertexMap, false, pathway.getCombinedGraph(), nodeColor);
 
-			if (focusVertex != null) {
-				NodeElement newFilteringNode = uniqueVertexMap.get(focusVertex);
-				// setOrResetFilteringNode(newFilteringNode);
-				// newFilteringNode.makeThisFocusNode();
-				// makeFocusNode(newFilteringNode);
-				// setOrResetFilteringNode(newFilteringNode);
-				makeFocusNode(newFilteringNode);
-			}
+			if (focusVertex != null)
+				makeFocusNodeBasedOnFocusNode();
 
 		}
 
-		// TODO: find better solution
 		for (NodeElement node : nodeSet)
 			node.setIsMerged(false);
 
-		// view.unfilterPathwayList();
-
-	}
-
-	private void makeFocusNode(NodeElement newFocusgNode) {
-		System.out.println("Setting new focus node: " + newFocusgNode + "\n=========================================");
-
-		if (newFocusgNode != null) {
-			setFocusNode(newFocusgNode);
-
-			view.filterPathwayList(newFocusgNode.getVertices(), getDisplayedPathways());
-
-		}
 	}
 
 	/**
@@ -266,11 +268,15 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 * @param clearOriginalPathwaysMap
 	 *            true if all information needs to be reset
 	 */
-	public void clearCanvasAndInfo(Boolean clearOriginalPathwaysMap) {
+	public void clearCanvasAndInfo(Boolean clearOriginalPathwaysMap, Boolean keepFocusNode) {
+		setDefaultDuration(DEFAULT_REMOVE_PATHWAY_DURATION);
 
 		// clear all selection
 		currentSelectedNode = null;
-		focusNode = null;
+		if (!keepFocusNode) {
+			focusNode = null;
+			focusVertex = null;
+		}
 
 		// clear all sets -> might be reset again
 		nodeSet.clear();
@@ -286,8 +292,37 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		view.unfilterPathwayList();
 	}
 
+	private final void setUpBubbleSet() {
+		SetOutline setOutline = new BubbleSet(100, 20, 3, 10.0, 7.0, 0.5, 2.5, 15.0, 8);
+		((BubbleSet) setOutline).useVirtualEdges(false);
+		AbstractShapeGenerator shaper = new BSplineShapeGenerator(setOutline);
+		this.bubblesetCanvas = new CanvasComponent(shaper);
+		this.bubblesetCanvas.setDefaultView();
+	}
+
 	/**
-	 * add this new pathway, but remove all duplicate PathwayVertices
+	 * 
+	 */
+	private void makeFocusNodeBasedOnFocusNode() {
+
+		NodeElement newFocusNode = uniqueVertexMap.get(focusVertex);
+		System.out.println("Setting focus vertex: " + focusVertex + " to node: " + newFocusNode);
+
+		if (newFocusNode != null) {
+			setFocusNode(newFocusNode);
+			view.filterPathwayList(newFocusNode.getVertices(), getDisplayedPathways());
+
+		}
+
+		for (PathwayVertex previousFocusVertex : previousFocusVertices) {
+			NodeElement wasPreviouslyFocusNode = uniqueVertexMap.get(previousFocusVertex);
+			if (wasPreviouslyFocusNode != null && !wasPreviouslyFocusNode.equals(newFocusNode))
+				wasPreviouslyFocusNode.setWasPreviouslyFocusNode(true);
+		}
+	}
+
+	/**
+	 * add this new pathway, but remove all duplicate PathwayVerticeso
 	 * 
 	 * @param pathwayToAdd
 	 *            the new pathway to add
@@ -389,6 +424,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 			NodeElement node = GraphMergeUtil.createNewNodeElement(vRepToCheck, nonDuplicateVertexList, null, this,
 					nodeColor, pathwayToAdd);
 			nodeSet.add(node);
+
 			// add(node);
 			add(node, 1500);
 
@@ -477,11 +513,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				mergedNode.setCenter(nodeWithDuplicateVertices.getCenterX(), nodeWithDuplicateVertices.getCenterY());
 
 				nodeSet.add(mergedNode);
-				// add(mergedNode);
-				add(mergedNode, 1500);
-
-				// TODO use this for merged
-				// add(index, child, duration, animation);
+				add(size(), mergedNode, DEFAULT_IN_TRANSITION_DURATION,
+						calcInTransition(nodeWithDuplicateVertices, nodeVrep));
 
 				/**
 				 * STEP 3.1a.2a: if the duplicate vertices are all of the (not merged) node's vertices, it needs to be
@@ -491,8 +524,9 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 				if (nodeWithDuplicateVertices.getVertices().size() == sameVerticesList.size()) {
 
 					boolean containedNode = nodeSet.remove(nodeWithDuplicateVertices);
-					if (containedNode)
+					if (containedNode) {
 						remove(nodeWithDuplicateVertices);
+					}
 
 					List<Pair<EdgeElement, Boolean>> edgesContainingThisNode = GraphMergeUtil
 							.getEdgeWithThisNodeAsSourceOrTarget(edgeSet, nodeWithDuplicateVertices);
@@ -634,8 +668,8 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 					newNodeForNonDuplicateVertices.setCenter(nodeWithDuplicateVertices.getCenterX(),
 							nodeWithDuplicateVertices.getCenterY());
 					nodeSet.add(newNodeForNonDuplicateVertices);
-					// add(newNodeForNonDuplicateVertices);
-					add(newNodeForNonDuplicateVertices, 1500);
+					add(size(), newNodeForNonDuplicateVertices, DEFAULT_IN_TRANSITION_DURATION,
+							calcInTransition(nodeWithDuplicateVertices, nodeVrep));
 
 					// nodeWithDuplicateVertices.addVrepWithThisNodesVerticesList(pathwayVertexRepToCheck);
 
@@ -785,9 +819,48 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		return (new Color(newR, newG, newB));
 	}
 
+	private TextureRenderer textureRenderer = null;
+
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {
 		super.renderImpl(g, w, h);
+
+		// TODO: fix or remove
+		// if(textureRenderer == null)
+		// textureRenderer = new TextureRenderer((int) w, (int) h, true);
+		//
+		// calcAndSetBubbleSet(Color.CYAN,g);
+		//
+		//
+		// List<Vec2f> points = new ArrayList<>();
+		// Graphics2D g2d = textureRenderer.createGraphics();
+		// points = bubblesetCanvas.getShapePoints(g2d);
+		// g2d.dispose();
+		//
+		// ITesselatedPolygon polygon = TesselatedPolygons.polygon2(points);
+		// g.incZ(-0.3f); // move to 0
+		// g.color(Color.CYAN).fillPolygon(polygon).lineWidth(2).drawPath(polygon);
+		// g.incZ(0.3f);
+	}
+
+	private final void calcAndSetBubbleSet(Color color, GLGraphics g) {
+		bubblesetCanvas.removeAllGroups();
+		// new group
+		bubblesetCanvas.addGroup(color.getAWTColor(), 2, true);
+
+		for (NodeElement node : this.nodeSet) {
+
+			Rect nodeBounds = node.getRectBounds();
+			bubblesetCanvas.addItem(0, nodeBounds.x(), nodeBounds.y(), nodeBounds.width(), nodeBounds.height());
+
+		}
+
+		for (EdgeElement edge : this.edgeSet) {
+			Line2D edgeLine = edge.getEdgeToRender();
+
+			bubblesetCanvas.addEdge(0, edgeLine.getX1(), edgeLine.getY1(), edgeLine.getX2(), edgeLine.getY2());
+		}
+
 	}
 
 	@Override
@@ -1008,6 +1081,10 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		return pathway.getFocusPathway();
 	}
 
+	public void setFocusPathway(PathwayGraph newFocusPathway) {
+		pathway.setFocusPathway(newFocusPathway);
+	}
+
 	public List<PathwayGraph> getContextPathways() {
 		return pathway.getContextPathways();
 	}
@@ -1070,7 +1147,35 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		return false;
 	}
 
-	// public void clearOriginalPathwaysOfSubpathwaysMap() {
-	// this.originalPathwaysOfSubpathwaysMap.clear();
-	// }
+	/**
+	 * calculation the InTransition with the original node's position as base (when splitting)
+	 * 
+	 * @param originalNode
+	 *            the original node (before splitting)
+	 * @param originalNodeVrep
+	 *            if the position of the original node wasn't set yet, the position of the vrep is used instread
+	 * @return the In Transition
+	 */
+	private InOutTransitions.IInTransition calcInTransition(NodeElement originalNode, PathwayVertexRep originalNodeVrep) {
+		final Vec4f originNodePosition;
+		if (originalNode.getBounds().get(0) < 1 && originalNode.getBounds().get(1) < 1)
+			originNodePosition = new Vec4f(originalNodeVrep.getCenterX() - (originalNodeVrep.getWidth() / 2.0f),
+					originalNodeVrep.getCenterY() - (originalNodeVrep.getHeight() / 2.0f), originalNodeVrep.getWidth(),
+					originalNodeVrep.getHeight());
+		else
+			originNodePosition = new Vec4f(originalNode.getBounds());
+		System.out.println("TMP1: " + originNodePosition);
+		InOutInitializers.IInOutInitializer ioInit = new InOutInitializers.IInOutInitializer() {
+
+			@Override
+			public Vec4f get(Vec4f to_from, float w, float h) {
+
+				return originNodePosition;
+			}
+		};
+		InOutTransitions.IInTransition inTransition = new InOutTransitions.InOutTransitionBase(ioInit, MOVE_LINEAR);
+
+		return inTransition;
+	}
+
 }

@@ -12,6 +12,8 @@ import java.awt.geom.Line2D;
 public interface IFRLayoutEdge {
 	IFRLayoutNode getSource();
 	IFRLayoutNode getTarget();
-	Line2D getCenterToCenterLine();
-	void setCenterToCenterLine(Line2D centerToCenterLine);
+	
+	//TODO: remove
+//	Line2D getCenterToCenterLine();
+//	void setCenterToCenterLine(Line2D centerToCenterLine);
 }

@@ -108,14 +108,17 @@ public class NodeGeneElement extends NodeElement {
 		if (isThisNodeUsedForFiltering) {
 			g.color(FILTER_CONTOUR_COLOR).fillRoundedRect(-1, -1, width + INNER_BOUNDS + 2,
 					height + INNER_BOUNDS + 2, ROUND_EDGE_RADIUS);
-		}
-		else if (isThisNodeSelected) {
+		} else if (isThisNodeSelected) {
 			g.color(SELECTION_CONTOUR_COLOR).fillRoundedRect(-1, -1, width + INNER_BOUNDS + 2,
 					height + INNER_BOUNDS + 2, ROUND_EDGE_RADIUS);
 		} else if (isMouseOver) {
 			g.color(MOUSEROVER_CONTOUR_COLOR).fillRoundedRect(-1, -1, width + INNER_BOUNDS + 2,
 					height + INNER_BOUNDS + 2, ROUND_EDGE_RADIUS);
-		} else {
+		} else if (wasPreviouslyFocusNode) {
+			g.color(PREVIOUS_FOCUS_NODE_COLOR).fillRoundedRect(-1, -1, width + INNER_BOUNDS + 2,
+					height + INNER_BOUNDS + 2, ROUND_EDGE_RADIUS);
+		}
+		else {
 			g.color(CONTOUR_COLOR).fillRoundedRect(0, 0, width + INNER_BOUNDS, height + INNER_BOUNDS,
 					ROUND_EDGE_RADIUS);
 		}

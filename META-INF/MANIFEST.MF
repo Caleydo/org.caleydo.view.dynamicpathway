@@ -22,4 +22,8 @@ Export-Package: org.caleydo.view.dynamicpathway.internal;x-internal:=true,
 Import-Package: org.caleydo.core.view.opengl.layout2,
  org.caleydo.core.view.opengl.layout2.util,
  org.caleydo.datadomain.genetic,
- org.caleydo.view.enroute
+ org.caleydo.view.enroute,
+ setvis,
+ setvis.bubbleset,
+ setvis.gui,
+ setvis.shape

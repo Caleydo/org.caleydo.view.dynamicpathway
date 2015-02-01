@@ -131,15 +131,6 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		return this.targetNode;
 	}
 
-	@Override
-	public Line2D getCenterToCenterLine() {
-		return this.centerToCenterLine;
-	}
-
-	@Override
-	public void setCenterToCenterLine(Line2D centerToCenterLine) {
-		this.centerToCenterLine.setLine(centerToCenterLine);
-	}
 
 	public NodeElement getSourceNode() {
 		return sourceNode;
@@ -159,6 +150,10 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 	
 	public DefaultEdge getDefaultEdge() {
 		return edge;
+	}
+
+	public Line2D getEdgeToRender() {
+		return edgeToRender;
 	}
 
 }

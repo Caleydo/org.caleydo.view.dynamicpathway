@@ -123,6 +123,10 @@ public class DynamicPathwayGraph {
 	public PathwayGraph getFocusPathway() {
 		return focusPathway;
 	}
+	
+	public void setFocusPathway(PathwayGraph newFocusPathway) {
+		this.focusPathway = newFocusPathway;
+	}
 
 	public List<PathwayGraph> getContextPathways() {
 		return contextPathways;
