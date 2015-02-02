@@ -117,6 +117,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 	 * needed for node merging & edge representation
 	 */
 	private Map<PathwayVertex, NodeElement> uniqueVertexMap;
+	private Map<PathwayVertexRep, NodeElement> vrepToGroupNodeMap;
 
 	/**
 	 * the bubble set
@@ -145,6 +146,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		this.vertexSelectionManager.registerEventListeners();
 
 		this.uniqueVertexMap = new HashMap<PathwayVertex, NodeElement>();
+		this.vrepToGroupNodeMap = new HashMap<PathwayVertexRep, NodeElement>();
 
 		this.originalPathwaysOfSubpathwaysMap = new HashMap<PathwayGraph, PathwayGraph>();
 
@@ -281,6 +283,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		// clear all sets -> might be reset again
 		nodeSet.clear();
 		edgeSet.clear();
+		vrepToGroupNodeMap.clear();
 		uniqueVertexMap.clear();
 
 		if (clearOriginalPathwaysMap)
@@ -364,7 +367,7 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 
 		for (DefaultEdge edge : pathwayToAdd.edgeSet()) {
 			try {
-				GraphMergeUtil.addEdgeToEdgeSet(edge, pathwayToAdd, vertexNodeMap, edgeSet, this);
+				GraphMergeUtil.addEdgeToEdgeSet(edge, pathwayToAdd, vertexNodeMap, edgeSet, vrepToGroupNodeMap, this);
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
 				System.exit(-1);
@@ -391,6 +394,16 @@ public class DynamicPathwayGraphRepresentation extends AnimatedGLElementContaine
 		if (displayOnlyVerticesWithEdges && (pathwayToAdd.inDegreeOf(vRepToCheck) < 1)
 				&& (pathwayToAdd.outDegreeOf(vRepToCheck) < 1))
 			return;
+		
+		if(vRepToCheck.getType() == EPathwayVertexType.group) {
+			
+			NodeElement groupNode = GraphMergeUtil.createNewNodeElement(vRepToCheck, vRepToCheck.getPathwayVertices(), null, this, nodeColor, pathwayToAdd);
+			System.out.println("Adding group vrep: " + vRepToCheck + " node: " + groupNode);
+			this.nodeSet.add(groupNode);
+			this.vrepToGroupNodeMap.put(vRepToCheck, groupNode);
+			add(groupNode);
+			return;
+		}
 
 		List<PathwayVertex> verticesToCheckList = new ArrayList<PathwayVertex>(vRepToCheck.getPathwayVertices());
 

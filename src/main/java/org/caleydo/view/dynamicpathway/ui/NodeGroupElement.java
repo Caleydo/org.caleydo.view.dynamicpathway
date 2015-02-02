@@ -63,23 +63,6 @@ public class NodeGroupElement extends NodeElement {
 		this.centerX = 0.0;
 		this.centerY = 0.0;
 		
-		
-//		/**
-//		 * calculating the center getting the vector from the first
-//		 */
-//		Vec2f lastElem = elementsOfThisGroup.getLast().getLocation();
-//		Vec2f firstElem = elementsOfThisGroup.getFirst().getLocation();
-//		
-//		Vec2f a = lastElem.minus(firstElem);
-//		float b = a.length()/2.0f;
-//		a.normalize();
-//		a.scale(b);
-//		Vec2f center = firstElem.plus(a);
-//		this.centerX = center.x();
-//		this.centerY = center.y();
-//		
-//		System.out.println("x: " + centerX + " y: " + centerY);
-		
 		repaint();
 
 	}

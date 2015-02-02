@@ -85,19 +85,10 @@ public class ControllbarPathwayTitleEntry extends GLElement {
 
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {
-
-		// super.renderImpl(g, w, h);
-
-		Color textColor;
-		if (rightClicked)
-			textColor = RIGHT_CLICKED_TEXT_COLOR;
-		else
-			textColor = normalTitleColor;
-
-		g.color(textColor).fillCircle(7, 8.5f, 4);
-		g.color(textColor).drawText(BULLET_POINT + pathwayTitle, 0, 0, w, TEXT_HEIGHT);
-//		g.color(textColor).drawLine(0+3, TEXT_HEIGHT +1, w -2, TEXT_HEIGHT+ 1).;
-		g.color(textColor).fillRect(0, TEXT_HEIGHT+2, w, 2);
+		
+		g.color(normalTitleColor).fillCircle(7, 8.5f, 4);
+		g.drawText(BULLET_POINT + pathwayTitle, 0, 0, w, TEXT_HEIGHT);
+		g.color(normalTitleColor).fillRect(0, TEXT_HEIGHT+2, w, 2);
 	}
 
 	@Override
