@@ -23,8 +23,8 @@ public class NodeGeneElement extends NodeElement {
 	private static final int ROUND_EDGE_RADIUS = 2;
 	
 	public NodeGeneElement(final PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
-			final DynamicPathwayGraphRepresentation parentGraph, Color nodeColor, Set<PathwayGraph> pathways) {
-		super(vertexRep, pathwayVertices, parentGraph, nodeColor, pathways);
+			final DynamicPathwayGraphRepresentation parentGraph, Set<PathwayGraph> pathways) {
+		super(vertexRep, pathwayVertices, parentGraph, pathways);
 		
 		onPick(new IPickingListener() {
 
@@ -98,8 +98,11 @@ public class NodeGeneElement extends NodeElement {
 //		short width = vertexRep.getWidth();
 //		short height = vertexRep.getHeight();
 		
-		short width = (short)this.width;
-		short height = (short)this.height;		
+//		short width = (short)this.width;
+//		short height = (short)this.height;
+		
+		short width = (short)w;
+		short height = (short)h;	
 
 		/**
 		 * represent BORDER of node different:
@@ -122,19 +125,8 @@ public class NodeGeneElement extends NodeElement {
 			g.color(CONTOUR_COLOR).fillRoundedRect(0, 0, width + INNER_BOUNDS, height + INNER_BOUNDS,
 					ROUND_EDGE_RADIUS);
 		}
-		
-		/**
-		 * choose filling color according to which graph it belongs
-		 */
-		GLGraphics filling = g.color(nodeColor);
-//		if(parentGraph.getDynamicPathway().getFocusGraph() == vertexRep.getPathway())
-//			filling = g.color(nodeColor);
-//		else if(parentGraph.getDynamicPathway().getCombinedGraph() == vertexRep.getPathway())
-//			filling = g.color(nodeColor);
-//		else
-//			filling = g.color(nodeColor);
-			
-		filling.fillRoundedRect(OUTER_BOUNDS, OUTER_BOUNDS, width, height, ROUND_EDGE_RADIUS);
+					
+		g.color(NODE_FILLING_COLOR).fillRoundedRect(OUTER_BOUNDS, OUTER_BOUNDS, width, height, ROUND_EDGE_RADIUS);
 
 		if (displayedVertex == null)
 			displayedVertex = vertexRep.getPathwayVertices().get(0);

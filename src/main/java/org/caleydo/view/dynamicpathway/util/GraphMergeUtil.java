@@ -1,13 +1,11 @@
 package org.caleydo.view.dynamicpathway.util;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.caleydo.core.util.collection.MultiHashMap;
 import org.caleydo.core.util.collection.Pair;
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
@@ -16,7 +14,6 @@ import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexGroupRep;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
-import org.caleydo.view.dynamicpathway.internal.NodeMergingException;
 import org.caleydo.view.dynamicpathway.ui.DynamicPathwayGraphRepresentation;
 import org.caleydo.view.dynamicpathway.ui.EdgeElement;
 import org.caleydo.view.dynamicpathway.ui.NodeCompoundElement;
@@ -36,12 +33,11 @@ public class GraphMergeUtil {
 	 */
 	public static NodeElement createNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
 			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwayGraphRepresentation graphRepresenation,
-			Color nodeColor, PathwayGraph pathway) {
+			PathwayGraph pathway) {
 		Set<PathwayGraph> pathways = new HashSet<PathwayGraph>();
 		pathways.add(pathway);
 
-		return createNewNodeElement(vrep, pathwayVertices, vrepsWithThisNodesVertices, graphRepresenation, nodeColor,
-				pathways);
+		return createNewNodeElement(vrep, pathwayVertices, vrepsWithThisNodesVertices, graphRepresenation, pathways);
 	}
 
 	/**
@@ -59,7 +55,7 @@ public class GraphMergeUtil {
 	 */
 	public static NodeElement createNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
 			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwayGraphRepresentation graphRepresenation,
-			Color nodeColor, Set<PathwayGraph> pathways) {
+			Set<PathwayGraph> pathways) {
 
 		/**
 		 * create node of correct type to vertex rep -> different shapes
@@ -70,13 +66,13 @@ public class GraphMergeUtil {
 			PathwayVertexGroupRep groupVrep = (PathwayVertexGroupRep) vrep;
 
 			if (groupVrep.getGroupedVertexReps().size() > 0)
-				node = new NodeGroupElement(vrep, pathwayVertices, graphRepresenation, nodeColor, pathways);
+				node = new NodeGroupElement(vrep, pathwayVertices, graphRepresenation, pathways);
 			else
 				return null;
 		} else if (pathwayVertices.get(0).getType() == EPathwayVertexType.compound) {
-			node = new NodeCompoundElement(vrep, pathwayVertices, graphRepresenation, nodeColor, pathways);
+			node = new NodeCompoundElement(vrep, pathwayVertices, graphRepresenation, pathways);
 		} else {
-			node = new NodeGeneElement(vrep, pathwayVertices, graphRepresenation, nodeColor, pathways);
+			node = new NodeGeneElement(vrep, pathwayVertices, graphRepresenation, pathways);
 		}
 
 		/**

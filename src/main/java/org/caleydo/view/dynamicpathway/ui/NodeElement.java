@@ -37,7 +37,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	protected static final Color CONTOUR_COLOR = Color.LIGHT_GRAY;
 	protected static final String KONTEXT_FILLING_COLOR = "#F2F2F2";
 	protected static final Color PREVIOUS_FOCUS_NODE_COLOR = Color.YELLOW;//"#3067C6";
-	protected static final Color FOCUS_FILLING_COLOR = Color.LIGHT_BLUE;
+	protected static final String NODE_FILLING_COLOR = "#F2F2F2";
 	protected static final Color SELECTION_CONTOUR_COLOR = SelectionType.SELECTION.getColor();
 	protected static final Color MOUSEROVER_CONTOUR_COLOR = SelectionType.MOUSE_OVER.getColor();
 	protected static final Color FILTER_CONTOUR_COLOR = Color.RED;
@@ -87,10 +87,8 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	protected ChangeFocusNodeEvent focusNodeEvent;
 	protected GenericContextMenuItem filterPathwayMenu;
 	
-	protected Color nodeColor;
-	
 
-	public NodeElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,final DynamicPathwayGraphRepresentation parentGraph, Color nodeColor, Set<PathwayGraph> pathways) {
+	public NodeElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,final DynamicPathwayGraphRepresentation parentGraph, Set<PathwayGraph> pathways) {
 		this.uid = UUID.randomUUID().toString();
 		this.vertexRep = vertexRep;
 		this.centerX = vertexRep.getCenterX();
@@ -101,7 +99,6 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		this.isMouseOver = false;
 		this.parentGraph = parentGraph;
 		this.vertices = new CopyOnWriteArrayList<PathwayVertex>(pathwayVertices);
-		this.nodeColor = nodeColor;
 		this.vrepsWithThisNodesVerticesList = new LinkedList<PathwayVertexRep>();
 		this.focusNodeEvent = new ChangeFocusNodeEvent(this);
 		this.representedPathways = new HashSet<PathwayGraph>(pathways);
@@ -325,7 +322,6 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		outputString += "VrepSize("
 				+ ((vrepsWithThisNodesVerticesList != null) ? Integer.toString(vrepsWithThisNodesVerticesList
 						.size()) : "1") + ") ";
-		outputString += "Color(" + nodeColor + ")";
 		outputString += "Vertices[" + vertices + "]";
 		outputString += "Pathways[" + getPathwaySetTitles() + "]";
 
@@ -356,9 +352,6 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		this.vrepsWithThisNodesVerticesList.add(vrepWithThisNodesVertices);
 	}
 
-	public Color getColor() {
-		return nodeColor;
-	}
 	
 	private String getPathwaySetTitles() {
 		String pathwayListTitles = "";

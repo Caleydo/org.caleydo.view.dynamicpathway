@@ -220,7 +220,7 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 
 	public void addPathwayTitle(PathwayGraph pathwayToAdd, boolean isFocusPathway, Color titleColor) throws Exception {
 		if (isFocusPathway)
-			addFocusPathwayTitle(pathwayToAdd, titleColor);
+			addFocusPathwayTitle(pathwayToAdd);
 		else
 			addContextPathwayTitle(pathwayToAdd, titleColor);
 	}
@@ -302,14 +302,13 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 	 * @param titleColor
 	 *            it's nodes color -> title will be underlined with the same color
 	 */
-	private void addFocusPathwayTitle(PathwayGraph pathwayToAdd, Color titleColor) {
+	private void addFocusPathwayTitle(PathwayGraph pathwayToAdd) {
 		this.contextPathwayElements.clear();
 		this.contextPathways.clear();
 		this.focusPathway = pathwayToAdd;
 		this.focusGraphTitle = pathwayToAdd.getTitle();
 
 		this.focusGraphElement.setPathway(pathwayToAdd);
-		this.focusGraphElement.setNormalTitleColor(titleColor);
 		this.focusGraphElement.setVisibility(EVisibility.PICKABLE);
 		this.focusContextLineSeparator.setVisibility(EVisibility.VISIBLE);
 		// this.vertexEnvironmentSizeTitle.setVisibility(EVisibility.VISIBLE);

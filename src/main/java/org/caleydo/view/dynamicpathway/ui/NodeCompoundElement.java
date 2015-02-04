@@ -27,8 +27,8 @@ public class NodeCompoundElement extends NodeElement {
 	private static final float HIGHLIGHT_RIGHT_PADDING = INNER_PADDING + 1 + 0.5f;
 
 	public NodeCompoundElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
-			final DynamicPathwayGraphRepresentation parentGraph, Color nodeColor, Set<PathwayGraph> pathways) {
-		super(vertexRep, pathwayVertices, parentGraph, nodeColor, pathways);
+			final DynamicPathwayGraphRepresentation parentGraph, Set<PathwayGraph> pathways) {
+		super(vertexRep, pathwayVertices, parentGraph, pathways);
 
 		onPick(new IPickingListener() {
 
@@ -90,7 +90,7 @@ public class NodeCompoundElement extends NodeElement {
 
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {
-		short width = vertexRep.getWidth();
+		short width = (short)w;//vertexRep.getWidth();
 
 		// contour
 		if (isThisNodeUsedForFiltering) {
@@ -106,16 +106,7 @@ public class NodeCompoundElement extends NodeElement {
 			g.color(CONTOUR_COLOR).fillCircle(0, 0, width + INNER_PADDING);
 		}
 
-		// filling
-		GLGraphics filling = g.color(nodeColor);
-//		if (parentGraph.getDynamicPathway().getFocusGraph() == vertexRep.getPathway())
-//			filling = g.color(FOCUS_FILLING_COLOR);
-//		else if (parentGraph.getDynamicPathway().getCombinedGraph() == vertexRep.getPathway())
-//			filling = g.color(COMBINED_FILLING_COLOR);
-//		else
-//			filling = g.color(KONTEXT_FILLING_COLOR);
-
-		filling.fillCircle(0, 0, width);
+		g.color(NODE_FILLING_COLOR).fillCircle(0, 0, width);
 
 		// TODO: label?
 		g.drawText(vertexRep.getName(), TEXT_X_POS, TEXT_Y_POS, width * FONT_SIZE_MULTIPLIER, FONT_SIZE);
