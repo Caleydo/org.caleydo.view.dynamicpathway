@@ -1,6 +1,5 @@
 package org.caleydo.view.dynamicpathway.ui;
 
-
 import java.util.List;
 import java.util.Set;
 
@@ -25,10 +24,11 @@ public class NodeCompoundElement extends NodeElement {
 	private static final int TEXT_Y_POS = 8;
 	private static final float HIGHLIGHT_LEFT_PADDING = -0.2f;
 	private static final float HIGHLIGHT_RIGHT_PADDING = INNER_PADDING + 1 + 0.5f;
+	private static final float WIDTH_AND_HEIGHT_ADDEND = 2.5f;
 
 	public NodeCompoundElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
 			final DynamicPathwayGraphRepresentation parentGraph, Set<PathwayGraph> pathways) {
-		super(vertexRep, pathwayVertices, parentGraph, pathways);
+		super(vertexRep, pathwayVertices, parentGraph, pathways, WIDTH_AND_HEIGHT_ADDEND);
 
 		onPick(new IPickingListener() {
 
@@ -45,7 +45,7 @@ public class NodeCompoundElement extends NodeElement {
 				 * if the user right clicked - show context menu
 				 */
 				if (pick.getPickingMode() == PickingMode.RIGHT_CLICKED) {
-//					parentGraph.setOrResetFilteringNode(NodeCompoundElement.this);
+					// parentGraph.setOrResetFilteringNode(NodeCompoundElement.this);
 
 					context.getSWTLayer().showContextMenu(Lists.newArrayList(focusNodeMenu));
 				}
@@ -58,8 +58,8 @@ public class NodeCompoundElement extends NodeElement {
 					parentGraph.setOrResetSelectedNode(NodeCompoundElement.this);
 
 					if (p.isCtrlDown()) {
-//						parentGraph.setOrResetFilteringNode(NodeCompoundElement.this);
-//						parentGraph.filterPathwayList();
+						// parentGraph.setOrResetFilteringNode(NodeCompoundElement.this);
+						// parentGraph.filterPathwayList();
 						makeThisFocusNode();
 					}
 
@@ -90,23 +90,20 @@ public class NodeCompoundElement extends NodeElement {
 
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {
-		short width = (short)w;//vertexRep.getWidth();
+		short width = (short) w;// vertexRep.getWidth();
 
 		// contour
 		if (isThisNodeUsedForFiltering) {
-			g.color(FILTER_CONTOUR_COLOR).fillCircle(-HIGHLIGHT_LEFT_PADDING, HIGHLIGHT_LEFT_PADDING,
-					width + HIGHLIGHT_RIGHT_PADDING);
+			g.color(FILTER_CONTOUR_COLOR).fillCircle(0, 0, width);
 		} else if (isThisNodeSelected) {
-			g.color(SELECTION_CONTOUR_COLOR).fillCircle(-HIGHLIGHT_LEFT_PADDING, HIGHLIGHT_LEFT_PADDING,
-					width + HIGHLIGHT_RIGHT_PADDING);
+			g.color(SELECTION_CONTOUR_COLOR).fillCircle(0, 0, width);
 		} else if (isMouseOver) {
-			g.color(MOUSEROVER_CONTOUR_COLOR).fillCircle(HIGHLIGHT_LEFT_PADDING, HIGHLIGHT_LEFT_PADDING,
-					width + HIGHLIGHT_RIGHT_PADDING);
+			g.color(MOUSEROVER_CONTOUR_COLOR).fillCircle(0, 0, width);
 		} else {
-			g.color(CONTOUR_COLOR).fillCircle(0, 0, width + INNER_PADDING);
+			g.color(CONTOUR_COLOR).fillCircle(0, 0, width + INNER_PADDING- HIGHLIGHT_RIGHT_PADDING);
 		}
 
-		g.color(NODE_FILLING_COLOR).fillCircle(0, 0, width);
+		g.color(NODE_FILLING_COLOR).fillCircle(0, 0, width- HIGHLIGHT_RIGHT_PADDING);
 
 		// TODO: label?
 		g.drawText(vertexRep.getName(), TEXT_X_POS, TEXT_Y_POS, width * FONT_SIZE_MULTIPLIER, FONT_SIZE);

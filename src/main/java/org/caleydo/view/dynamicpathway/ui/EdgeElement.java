@@ -4,6 +4,8 @@ import gleem.linalg.Vec2f;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLElement;
@@ -14,6 +16,15 @@ import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
 import org.caleydo.view.dynamicpathway.util.CalculateIntersectionUtil;
 import org.jgrapht.graph.DefaultEdge;
 
+/**
+ * Wrapper for {@link DefaultEdge} <br />
+ * Sets an edge from the center of the source node to the target node <br />
+ * Calculates the intersection points between this line and the nodes and creates a line <br />
+ * Calculates and draws the arrow head based on the position and the angle of this line.
+ * 
+ * @author Christiane Schwarzl
+ *
+ */
 public class EdgeElement extends GLElement implements IFRLayoutEdge {
 	private static final float ARROW_SIZE = 5.0f;
 
@@ -25,7 +36,7 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 	private Line2D centerToCenterLine;
 	private Line2D edgeToRender;
 
-	public EdgeElement(DefaultEdge edge, NodeElement sourceNode, NodeElement targetNode) {
+	public EdgeElement(DefaultEdge edge, NodeElement sourceNode, NodeElement targetNode, long drawEdgeDelay) {
 		this.edge = edge;
 		this.sourceNode = sourceNode;
 		this.targetNode = targetNode;
@@ -37,7 +48,20 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 
 		this.centerToCenterLine = new Line2D.Double(xSource, ySource, xTarget, yTarget);
 		this.edgeToRender = new Line2D.Double();
+		setVisibility(EVisibility.HIDDEN);
 
+		/**
+		 * edges are drawn after the nodes were drawn 
+		 */
+		Timer timer = new Timer();
+		timer.schedule(new TimerTask() {
+			
+			@Override
+			public void run() {
+				setVisibility(EVisibility.VISIBLE);
+				
+			}
+		}, drawEdgeDelay);
 	}
 
 	@Override
@@ -46,7 +70,7 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		calcDrawableEdge();
 		g.decZ();
 		g.drawLine((float) edgeToRender.getX1(), (float) edgeToRender.getY1(), (float) edgeToRender.getX2(),
-				(float) edgeToRender.getY2());
+				(float) edgeToRender.getY2()).lineWidth(1f);
 		g.incZ();
 		drawArrowHead(g);
 
@@ -90,16 +114,20 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		/**
 		 * check if a sourcePoint and/or a targetPoint was found
 		 */
+		boolean foundIntersection = false;
+		//TODO: should not happen
 		if (sourcePoint == null && targetPoint == null) {
 			edgeToRender.setLine(centerToCenterLine);
 		} else if (sourcePoint == null) {
-			edgeToRender.setLine(xSource, ySource, targetPoint.getX(), targetPoint.getY());
-
+			edgeToRender.setLine(xSource, ySource, targetPoint.getX(), targetPoint.getY());			
 		} else if (targetPoint == null) {
 			edgeToRender.setLine(sourcePoint.getX(), sourcePoint.getY(), xTarget, yTarget);
 		} else {
 			edgeToRender.setLine(sourcePoint, targetPoint);
+			foundIntersection = true;
 		}
+
+//		System.out.println(toString() + " foundIntersection: " + foundIntersection);
 	}
 
 	private void drawArrowHead(GLGraphics g) {
@@ -154,6 +182,12 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 
 	public Line2D getEdgeToRender() {
 		return edgeToRender;
+	}
+
+	@Override
+	public String toString() {
+		String output = "Edge: " + sourceNode.getLabel() + "->" + targetNode.getLabel();
+		return output;
 	}
 
 }

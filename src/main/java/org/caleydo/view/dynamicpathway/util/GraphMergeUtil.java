@@ -9,6 +9,7 @@ import java.util.Set;
 import org.caleydo.core.util.collection.Pair;
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
+import org.caleydo.core.view.opengl.layout2.animation.InOutTransitions.IInTransition;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
@@ -139,7 +140,7 @@ public class GraphMergeUtil {
 	 */
 	public static void addEdgeToEdgeSet(DefaultEdge edge, PathwayGraph pathway,
 			Map<PathwayVertex, NodeElement> vertexNodeMap, Set<EdgeElement> edgeSetToAdd,
-			Map<PathwayVertexRep, NodeElement> vrepToGroupNodeMap, AnimatedGLElementContainer containterToAddElementTo)
+			Map<PathwayVertexRep, NodeElement> vrepToGroupNodeMap, AnimatedGLElementContainer containterToAddElementTo, long drawEdgeDelay)
 			throws Exception {
 		PathwayVertexRep srcVrep = pathway.getEdgeSource(edge);
 		PathwayVertexRep targetVrep = pathway.getEdgeTarget(edge);
@@ -190,12 +191,12 @@ public class GraphMergeUtil {
 			for (NodeElement targetNode : targetNodes) {
 				if (srcNode.equals(targetNode))
 					continue;
-				// throw new NodeMergingException("srcNode == targetNode");
 
-				EdgeElement edgeEl = new EdgeElement(edge, srcNode, targetNode);
+				EdgeElement edgeEl = new EdgeElement(edge, srcNode, targetNode, drawEdgeDelay);
 
 				edgeEl.setLayoutData(false);
 				edgeSetToAdd.add(edgeEl);
+	
 				containterToAddElementTo.add(edgeEl);
 			}
 		}

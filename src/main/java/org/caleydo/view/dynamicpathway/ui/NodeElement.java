@@ -44,6 +44,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	protected PathwayVertexRep vertexRep;
 	protected List<PathwayVertex> vertices;
+	//TODO: remove
 	protected List<PathwayVertexRep> vrepsWithThisNodesVerticesList;
 	private Set<PathwayGraph> representedPathways;
 
@@ -88,7 +89,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	protected GenericContextMenuItem filterPathwayMenu;
 	
 
-	public NodeElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,final DynamicPathwayGraphRepresentation parentGraph, Set<PathwayGraph> pathways) {
+	public NodeElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,final DynamicPathwayGraphRepresentation parentGraph, Set<PathwayGraph> pathways, float widthAndHeightAddend) {
 		this.uid = UUID.randomUUID().toString();
 		this.vertexRep = vertexRep;
 		this.centerX = vertexRep.getCenterX();
@@ -108,8 +109,8 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 			// this.vertices = vertexRep.getPathwayVertices();
 			this.displayedVertex = vertices.get(0);
 			this.label = displayedVertex.getHumanReadableName();
-			this.height = this.vertexRep.getHeight();
-			this.width = this.vertexRep.getWidth();
+			this.height = this.vertexRep.getHeight()+widthAndHeightAddend;
+			this.width = this.vertexRep.getWidth()+widthAndHeightAddend;
 		}
 
 		focusNodeMenu = new GenericContextMenuItem("Choose as focus pathway",
@@ -169,7 +170,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		this.centerX = centerX;
 		this.centerY = centerY;
 
-		coords.setCoords(centerX, centerY, vertexRep.getWidth(), vertexRep.getHeight());
+		coords.setCoords(centerX, centerY, this.width, this.height);
 	}
 
 	public Point2D.Double getCenter() {

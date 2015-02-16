@@ -1,0 +1,4 @@
+Bakk Project
+
+* Edges zum Schluss hinzufügen (appear)
+* Vertex Env by befault, e.g. 3, 4..

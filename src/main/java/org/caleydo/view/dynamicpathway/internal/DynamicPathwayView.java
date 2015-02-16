@@ -55,7 +55,7 @@ import org.jgrapht.graph.DefaultEdge;
  * @author Christiane Schwarzl
  * 
  */
-public class DynamicPathwayView extends AGLElementView /* implements IEventBasedSelectionManagerUser */{
+public class DynamicPathwayView extends AGLElementView {
 	public static final String VIEW_TYPE = "org.caleydo.view.dynamicpathway";
 	public static final String VIEW_NAME = "DynamicPathway";
 
@@ -244,7 +244,9 @@ public class DynamicPathwayView extends AGLElementView /* implements IEventBased
 		 * Otherwise the focus pathway is exchanged with the new focus node's context pathway
 		 */
 		if (newFocusNode.getPathways().contains(dynamicGraphCanvas.getFocusPathway())) {
+			
 			dynamicGraphCanvas.setFocusNode(newFocusNode);
+			
 			if (dynamicGraphCanvas.getContextPathways().size() > 0 && controllBar.getNodeEnvironmentSize() >= 0) {
 				readdPresentPathways();
 			}

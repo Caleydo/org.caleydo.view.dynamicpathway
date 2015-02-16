@@ -14,11 +14,8 @@ import org.caleydo.view.dynamicpathway.internal.DynamicPathwayView;
 import com.google.common.collect.Lists;
 
 public class ControllbarPathwayTitleEntry extends GLElement {
-	private static final String BULLET_POINT = "    ";
+	private static final String SPACING = "      ";
 	private static final float TEXT_HEIGHT = 13.0f;
-
-	private static final Color NORMAL_TEXT_COLOR = Color.BLACK;
-	private static final Color RIGHT_CLICKED_TEXT_COLOR = Color.ORANGE;
 
 	private PathwayGraph representedPathway;
 	private String pathwayTitle;
@@ -86,9 +83,9 @@ public class ControllbarPathwayTitleEntry extends GLElement {
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {
 		
-		g.color(normalTitleColor).fillCircle(7, 8.5f, 4);
-		g.drawText(BULLET_POINT + pathwayTitle, 0, 0, w, TEXT_HEIGHT);
-		g.color(normalTitleColor).fillRect(0, TEXT_HEIGHT+2, w, 2);
+		g.color(normalTitleColor).fillCircle(10, 8.5f, 7.5f);
+		g.drawText(SPACING + pathwayTitle, 0, 0, w, TEXT_HEIGHT);
+//		g.color(normalTitleColor).fillRect(0, TEXT_HEIGHT+2, w, 2);
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.caleydo.core.event.EventPublisher;
 import org.caleydo.core.util.color.Color;
+import org.caleydo.core.view.opengl.layout.Column.VAlign;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.picking.AdvancedPick;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
@@ -18,13 +19,14 @@ import com.google.common.collect.Lists;
 
 public class NodeGeneElement extends NodeElement {
 
-	private static final int INNER_BOUNDS = 2;
+	private static final int INNER_BOUNDS = 4;
 	private static final int OUTER_BOUNDS = 1;
 	private static final int ROUND_EDGE_RADIUS = 2;
+	private static final int WIDTH_AND_HEIGHT_ADDEND = 5;
 	
 	public NodeGeneElement(final PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
 			final DynamicPathwayGraphRepresentation parentGraph, Set<PathwayGraph> pathways) {
-		super(vertexRep, pathwayVertices, parentGraph, pathways);
+		super(vertexRep, pathwayVertices, parentGraph, pathways,WIDTH_AND_HEIGHT_ADDEND);
 		
 		onPick(new IPickingListener() {
 
@@ -109,29 +111,29 @@ public class NodeGeneElement extends NodeElement {
 		 * if it was used for filtering, clicked on, the mouse is moved over or nothing of these was done
 		 */
 		if (isThisNodeUsedForFiltering) {
-			g.color(FILTER_CONTOUR_COLOR).fillRoundedRect(-1, -1, width + INNER_BOUNDS + 2,
-					height + INNER_BOUNDS + 2, ROUND_EDGE_RADIUS);
+			g.color(FILTER_CONTOUR_COLOR).fillRoundedRect(-1, -1, width,
+					height, ROUND_EDGE_RADIUS);
 		} else if (isThisNodeSelected) {
-			g.color(SELECTION_CONTOUR_COLOR).fillRoundedRect(-1, -1, width + INNER_BOUNDS + 2,
-					height + INNER_BOUNDS + 2, ROUND_EDGE_RADIUS);
+			g.color(SELECTION_CONTOUR_COLOR).fillRoundedRect(-1, -1, width,
+					height, ROUND_EDGE_RADIUS);
 		} else if (isMouseOver) {
-			g.color(MOUSEROVER_CONTOUR_COLOR).fillRoundedRect(-1, -1, width + INNER_BOUNDS + 2,
-					height + INNER_BOUNDS + 2, ROUND_EDGE_RADIUS);
+			g.color(MOUSEROVER_CONTOUR_COLOR).fillRoundedRect(-1, -1, width,
+					height, ROUND_EDGE_RADIUS);
 		} else if (wasPreviouslyFocusNode) {
-			g.color(PREVIOUS_FOCUS_NODE_COLOR).fillRoundedRect(-1, -1, width + INNER_BOUNDS + 2,
-					height + INNER_BOUNDS + 2, ROUND_EDGE_RADIUS);
+			g.color(PREVIOUS_FOCUS_NODE_COLOR).fillRoundedRect(-1, -1, width,
+					height, ROUND_EDGE_RADIUS);
 		}
 		else {
-			g.color(CONTOUR_COLOR).fillRoundedRect(0, 0, width + INNER_BOUNDS, height + INNER_BOUNDS,
+			g.color(CONTOUR_COLOR).fillRoundedRect(0, 0, width -2, height -2,
 					ROUND_EDGE_RADIUS);
 		}
 					
-		g.color(NODE_FILLING_COLOR).fillRoundedRect(OUTER_BOUNDS, OUTER_BOUNDS, width, height, ROUND_EDGE_RADIUS);
+		g.color(NODE_FILLING_COLOR).fillRoundedRect(OUTER_BOUNDS, OUTER_BOUNDS, width - INNER_BOUNDS, height - INNER_BOUNDS, ROUND_EDGE_RADIUS);
 
 		if (displayedVertex == null)
 			displayedVertex = vertexRep.getPathwayVertices().get(0);
 
-		g.drawText(label, 0, 0, width, FONT_SIZE);
+		g.drawText(label, 0, 3, width, FONT_SIZE, VAlign.CENTER);
 
 	}
 

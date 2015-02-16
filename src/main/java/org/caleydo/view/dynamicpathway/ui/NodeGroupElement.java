@@ -24,7 +24,7 @@ public class NodeGroupElement extends NodeElement {
 	private LinkedList<NodeGeneElement> elementsOfThisGroup;
 
 	public NodeGroupElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices, DynamicPathwayGraphRepresentation parentGraph, Set<PathwayGraph> pathways) {
-		super(vrep, pathwayVertices, parentGraph, pathways);
+		super(vrep, pathwayVertices, parentGraph, pathways, 0);
 		
 		setLayout(GLLayouts.flowVertical(GAP_BETWEEN_NODES));
 
@@ -44,6 +44,7 @@ public class NodeGroupElement extends NodeElement {
 			height += node.getHeight() + GAP_BETWEEN_NODES;		
 			
 			elementsOfThisGroup.add(node);
+			node.setVisibility(EVisibility.VISIBLE);
 			add(node);
 		}
 		

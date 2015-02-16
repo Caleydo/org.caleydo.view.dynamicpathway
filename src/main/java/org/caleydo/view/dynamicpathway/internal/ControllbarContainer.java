@@ -31,8 +31,8 @@ import org.eclipse.swt.widgets.Display;
 
 public class ControllbarContainer extends AnimatedGLElementContainer implements ISelectionCallback {
 
+	private static final int VERTEX_ENV_ON_START = 4;
 	private static final String TITLE = "Controllbar";
-	private static final String BULLET_POINT = "• ";
 
 	private DynamicPathwayView view;
 
@@ -55,10 +55,8 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 	// /**
 	// * Node Environment
 	// */
-	// private GLElement vertexEnvironmentSizeTitle;
+	// 
 	private GLElement vertexEnvironmentSizeValue;
-	// private GLElement vertexEnvironmentSizeLineSeparator;
-
 	/**
 	 * focus pathway
 	 */
@@ -74,11 +72,6 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 	private Map<String, GLElement> contextPathways;
 	private AnimatedGLElementContainer contextPathwayElements;
 
-	// TODO: replace with controllbar listen
-	/**
-	 * if you want to add full pathways set to any value <= 0
-	 */
-	private static final int VERTEX_ENV_SIZE = -1;
 	private Integer nodeEnvironmentSize;
 
 	public ControllbarContainer(DynamicPathwayView view) {
@@ -87,7 +80,7 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 
 		this.view = view;
 		this.contextPathways = new HashMap<String, GLElement>();
-		this.nodeEnvironmentSize = new Integer(VERTEX_ENV_SIZE);
+		this.nodeEnvironmentSize = new Integer(VERTEX_ENV_ON_START);
 
 		/**
 		 * create header
