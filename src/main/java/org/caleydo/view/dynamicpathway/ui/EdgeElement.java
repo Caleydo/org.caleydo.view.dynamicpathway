@@ -146,9 +146,11 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		 * if the node shape is circle, the intersection points need to be calculated differently
 		 */
 		if (sourceNode.getVertexRep().getType() == EPathwayVertexType.compound) {
-			double radius = sourceNode.getWidth() - 1.0;
+			
+			Line2D reversedCenterToCenterLine = new Line2D.Double(xTarget, yTarget, xSource, ySource);
+			double radius = sourceNode.getWidth();
 
-			sourcePoint = CalculateIntersectionUtil.calcIntersectionPoint(centerToCenterLine, radius);
+			sourcePoint = CalculateIntersectionUtil.calcIntersectionPoint(reversedCenterToCenterLine, radius);
 
 		} else
 			sourcePoint = sourceNode.getIntersectionPointWithNodeBound(centerToCenterLine);
@@ -159,7 +161,7 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 
 			double radius = targetNode.getWidth();
 
-			targetPoint = CalculateIntersectionUtil.calcIntersectionPoint(reversedCenterToCenterLine, radius);
+			targetPoint = CalculateIntersectionUtil.calcIntersectionPoint(centerToCenterLine, radius);
 
 		} else
 			targetPoint = targetNode.getIntersectionPointWithNodeBound(centerToCenterLine);
