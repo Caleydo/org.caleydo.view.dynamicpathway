@@ -25,8 +25,7 @@ public class DynamicPathwayGraph {
 
 	/**
 	 * the kontext graph, which may not be be fully represented TODO: change vector to : vector<KontextGraph>
-	 * KontextGraph contains: PathwayGraph, to which it belong, the main vertex, list of represented vertices
-	 * & edges
+	 * KontextGraph contains: PathwayGraph, to which it belong, the main vertex, list of represented vertices & edges
 	 */
 	private List<PathwayGraph> contextPathways;
 
@@ -34,7 +33,6 @@ public class DynamicPathwayGraph {
 	 * needed for searching all currently represented vertices
 	 */
 	private PathwayGraph combinedGraph;
-	
 
 	public DynamicPathwayGraph() {
 
@@ -46,28 +44,13 @@ public class DynamicPathwayGraph {
 		return combinedGraph;
 	}
 
-//	public Set<PathwayVertexRep> getCombinedVertexSet() {
-//		return combinedGraph.vertexSet();
-//	}
-//
-//	public Set<DefaultEdge> getCombinedEdgeSet() {
-//		return combinedGraph.edgeSet();
-//	}
-//
-//	public PathwayVertexRep getEdgeSource(DefaultEdge e) {
-//		return combinedGraph.getEdgeSource(e);
-//	}
-//
-//	public PathwayVertexRep getEdgeTarget(DefaultEdge e) {
-//		return combinedGraph.getEdgeTarget(e);
-//	}
-	
-	/** 
+	/**
 	 * checks if the current pathway is present
 	 * 
-	 * @param pathway the pathway to check
+	 * @param pathway
+	 *            the pathway to check
 	 * 
-	 * @return true if the 
+	 * @return true if the
 	 */
 	public boolean isPathwayPresent(PathwayGraph pathway) {
 		if (isFocusGraph(pathway) || isContextGraph(pathway))
@@ -75,23 +58,25 @@ public class DynamicPathwayGraph {
 
 		return false;
 	}
-	
+
 	/**
 	 * returns the pathway with this title, if it exists
 	 * 
-	 * @param title the title of the pathway to return
+	 * @param title
+	 *            the title of the pathway to return
 	 * @return the graph
-	 * @throws Exception if there is no pathway with this title 
+	 * @throws Exception
+	 *             if there is no pathway with this title
 	 */
 	public PathwayGraph getPathwayWithThisTitle(String title) throws Exception {
-		if(focusPathway.getTitle().contentEquals(title))
+		if (focusPathway.getTitle().contentEquals(title))
 			return focusPathway;
-		
-		for(PathwayGraph contextGraph : contextPathways) {
-			if(contextGraph.getTitle().contentEquals(title))
+
+		for (PathwayGraph contextGraph : contextPathways) {
+			if (contextGraph.getTitle().contentEquals(title))
 				return contextGraph;
 		}
-				
+
 		throw new Exception("INTERNAL ERROR: Pathway with this title (" + title + ") doesn't exist.");
 	}
 
@@ -105,14 +90,6 @@ public class DynamicPathwayGraph {
 		}
 
 	}
-//
-//	public float getFocusPathwayWidth() {
-//		return focusPathway.getWidth();
-//	}
-//
-//	public float getFocusPathwayHeight() {
-//		return focusPathway.getHeight();
-//	}
 
 	public boolean isFocusPathwaySet() {
 		if (focusPathway != null)
@@ -123,7 +100,7 @@ public class DynamicPathwayGraph {
 	public PathwayGraph getFocusPathway() {
 		return focusPathway;
 	}
-	
+
 	public void setFocusPathway(PathwayGraph newFocusPathway) {
 		this.focusPathway = newFocusPathway;
 	}
@@ -131,11 +108,11 @@ public class DynamicPathwayGraph {
 	public List<PathwayGraph> getContextPathways() {
 		return contextPathways;
 	}
-	
+
 	public void removeContextPathway(PathwayGraph contextPathwayToRemove) {
 		contextPathways.remove(contextPathwayToRemove);
 	}
-	
+
 	public void removeAllPathways() {
 		focusPathway = null;
 		contextPathways.clear();
@@ -157,49 +134,24 @@ public class DynamicPathwayGraph {
 		}
 		return false;
 	}
-	
-	/**
-	 * 
-	 * @return list of all displayed pathways -> focus + context
-	 */
-	public List<PathwayGraph> getDisplayedPathways() {
-		List<PathwayGraph> displayedPathways = new LinkedList<PathwayGraph>(this.getContextPathways());
-		displayedPathways.add(focusPathway);
-		return displayedPathways;
-	}
 
 	private void addFocusPathway(PathwayGraph newFocusPathway) {
 		focusPathway = newFocusPathway;
 		contextPathways.clear();
 
-		combinedGraph = new PathwayGraph(newFocusPathway.getType(), "Combined Graph [Focus:" + newFocusPathway.getName()+ "]", "Combined Graph [Focus:" + newFocusPathway.getTitle()+ "]",
+		combinedGraph = new PathwayGraph(newFocusPathway.getType(), "Combined Graph [Focus:"
+				+ newFocusPathway.getName() + "]", "Combined Graph [Focus:" + newFocusPathway.getTitle() + "]",
 				newFocusPathway.getImage(), newFocusPathway.getExternalLink());
 
 		for (PathwayVertexRep vrep : newFocusPathway.vertexSet()) {
-			
-			/**
-			 * map is the type, which display the current pathway's name this should be layoutet
-			 * 
-			 * user can choose if only vertices with edges should be displayed, so that the workspace is not
-			 * so cluttered
-			 * TODO: implement user interaction
-			 */
-//			if (vrep.getType() != EPathwayVertexType.map) {
-//				if (DISPLAY_ONLY_VERTICES_WITH_EDGES) {
-//					if(graph.inDegreeOf(vrep) > 0 && graph.outDegreeOf(vrep) > 0)
-//						combinedGraph.addVertex(vrep);
-//				}
-//				else
-					combinedGraph.addVertex(vrep);
-					
-//			}
+
+			combinedGraph.addVertex(vrep);
+
 		}
 		for (DefaultEdge edge : newFocusPathway.edgeSet()) {
-			
+
 			combinedGraph.addEdge(newFocusPathway.getEdgeSource(edge), newFocusPathway.getEdgeTarget(edge), edge);
 		}
 	}
-
-
 
 }

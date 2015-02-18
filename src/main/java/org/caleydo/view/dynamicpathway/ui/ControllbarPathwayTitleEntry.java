@@ -19,21 +19,18 @@ public class ControllbarPathwayTitleEntry extends GLElement {
 
 	private PathwayGraph representedPathway;
 	private String pathwayTitle;
-	private boolean rightClicked = false;
-	private final boolean isFocusPathway;
 	
 	private Color normalTitleColor;
 
 	/**
 	 * menu item in right click menu that triggers the deletion of the pathway represented by this entry
 	 */
-	GenericContextMenuItem removePathwayMenuItem;
-	GenericContextMenuItem makeFocusGraphMenuItem;
+	private GenericContextMenuItem removePathwayMenuItem;
+	private GenericContextMenuItem makeFocusGraphMenuItem;
 
 	public ControllbarPathwayTitleEntry(PathwayGraph representedPathway, Color titleColor, final boolean isFocusPathway, final DynamicPathwayView view) {
 		this.normalTitleColor = titleColor;
 		this.representedPathway = representedPathway;
-		this.isFocusPathway = isFocusPathway;
 		if (representedPathway != null)
 			this.pathwayTitle = representedPathway.getTitle();
 		else
@@ -61,12 +58,7 @@ public class ControllbarPathwayTitleEntry extends GLElement {
 						context.getSWTLayer().showContextMenu(Lists.newArrayList(removePathwayMenuItem));
 					else
 						context.getSWTLayer().showContextMenu(Lists.newArrayList(removePathwayMenuItem, makeFocusGraphMenuItem));
-
-					rightClicked = true;
-
-				} else {
-					rightClicked = false;
-				}
+				} 
 
 				// //TODO: change to strg + del key
 				// if(p.isCtrlDown() && pick.getPickingMode() == PickingMode.CLICKED) {

@@ -25,7 +25,7 @@ public class NodeGeneElement extends NodeElement {
 	private static final int WIDTH_AND_HEIGHT_ADDEND = 5;
 	
 	public NodeGeneElement(final PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
-			final DynamicPathwayGraphRepresentation parentGraph, Set<PathwayGraph> pathways) {
+			final DynamicPathwaysCanvas parentGraph, Set<PathwayGraph> pathways) {
 		super(vertexRep, pathwayVertices, parentGraph, pathways,WIDTH_AND_HEIGHT_ADDEND);
 		
 		onPick(new IPickingListener() {

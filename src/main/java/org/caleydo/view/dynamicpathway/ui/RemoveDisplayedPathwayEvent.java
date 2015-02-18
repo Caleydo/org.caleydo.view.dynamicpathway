@@ -17,10 +17,7 @@ public class RemoveDisplayedPathwayEvent extends AEvent {
 	}
 	
 	public PathwayGraph getPathway() {
-		if(pathwayEntryToRemove != null)
 			return pathwayEntryToRemove.getRepresentedPathway();
-		//TODO: exception
-		return null;
 	}
 
 }

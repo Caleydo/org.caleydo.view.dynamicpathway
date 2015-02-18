@@ -15,7 +15,7 @@ import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexGroupRep;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
-import org.caleydo.view.dynamicpathway.ui.DynamicPathwayGraphRepresentation;
+import org.caleydo.view.dynamicpathway.ui.DynamicPathwaysCanvas;
 import org.caleydo.view.dynamicpathway.ui.EdgeElement;
 import org.caleydo.view.dynamicpathway.ui.NodeCompoundElement;
 import org.caleydo.view.dynamicpathway.ui.NodeElement;
@@ -28,12 +28,12 @@ public class GraphMergeUtil {
 	/**
 	 * convenience method for creating a new node with just one pathway <br />
 	 * creates set with one pathway & calls
-	 * {@link #createNewNodeElement(PathwayVertexRep, List, List, DynamicPathwayGraphRepresentation, Color, Set)}
+	 * {@link #createNewNodeElement(PathwayVertexRep, List, List, DynamicPathwaysCanvas, Color, Set)}
 	 * 
 	 * @return
 	 */
 	public static NodeElement createNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
-			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwayGraphRepresentation graphRepresenation,
+			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwaysCanvas graphRepresenation,
 			PathwayGraph pathway) {
 		Set<PathwayGraph> pathways = new HashSet<PathwayGraph>();
 		pathways.add(pathway);
@@ -55,7 +55,7 @@ public class GraphMergeUtil {
 	 * @return the created node element
 	 */
 	public static NodeElement createNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
-			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwayGraphRepresentation graphRepresenation,
+			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwaysCanvas graphRepresenation,
 			Set<PathwayGraph> pathways) {
 
 		/**

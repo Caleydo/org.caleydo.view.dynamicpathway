@@ -23,7 +23,7 @@ public class NodeGroupElement extends NodeElement {
 	private int groupSize;
 	private LinkedList<NodeGeneElement> elementsOfThisGroup;
 
-	public NodeGroupElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices, DynamicPathwayGraphRepresentation parentGraph, Set<PathwayGraph> pathways) {
+	public NodeGroupElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices, DynamicPathwaysCanvas parentGraph, Set<PathwayGraph> pathways) {
 		super(vrep, pathwayVertices, parentGraph, pathways, 0);
 		
 		setLayout(GLLayouts.flowVertical(GAP_BETWEEN_NODES));

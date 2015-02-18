@@ -7,6 +7,8 @@ import java.awt.geom.Point2D;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.media.opengl.GL2;
+
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLElement;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
@@ -26,6 +28,7 @@ import org.jgrapht.graph.DefaultEdge;
  *
  */
 public class EdgeElement extends GLElement implements IFRLayoutEdge {
+	private static final float EDGE_WIDTH = 1.5f;
 	private static final float ARROW_SIZE = 5.0f;
 
 	private DefaultEdge edge;
@@ -35,6 +38,7 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 	private NodeElement targetNode;
 	private Line2D centerToCenterLine;
 	private Line2D edgeToRender;
+	private Timer timer;
 
 	public EdgeElement(DefaultEdge edge, NodeElement sourceNode, NodeElement targetNode, long drawEdgeDelay) {
 		this.edge = edge;
@@ -53,7 +57,11 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		/**
 		 * edges are drawn after the nodes were drawn 
 		 */
-		Timer timer = new Timer();
+		timer = new Timer();
+		setTimerDelay(drawEdgeDelay);
+	}
+	
+	public void setTimerDelay(long drawEdgeDelay) {
 		timer.schedule(new TimerTask() {
 			
 			@Override
@@ -64,14 +72,59 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		}, drawEdgeDelay);
 	}
 
+	public DefaultEdge getDefaultEdge() {
+		return edge;
+	}
+
+	public Line2D getEdgeToRender() {
+		return edgeToRender;
+	}
+
+	@Override
+	public IFRLayoutNode getSource() {
+		return this.sourceNode;
+	}
+
+	public NodeElement getSourceNode() {
+		return sourceNode;
+	}
+
+	@Override
+	public IFRLayoutNode getTarget() {
+		return this.targetNode;
+	}
+
+
+	public NodeElement getTargetNode() {
+		return targetNode;
+	}
+
+	public void setSourceNode(NodeElement sourceNode) {
+		this.sourceNode = sourceNode;
+	}
+
+	public void setTargetNode(NodeElement targetNode) {
+		this.targetNode = targetNode;
+	}
+
+	@Override
+	public String toString() {
+		String output = "Edge: " + sourceNode.getLabel() + "->" + targetNode.getLabel();
+		return output;
+	}
+	
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {
 
 		calcDrawableEdge();
-		g.decZ();
+//		g.decZ();
+		g.incZ(-0.5f);
+		g.gl.glEnable(GL2.GL_LINE_SMOOTH);
+		g.gl.glEnable(GL2.GL_BLEND);
+		g.gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 		g.drawLine((float) edgeToRender.getX1(), (float) edgeToRender.getY1(), (float) edgeToRender.getX2(),
-				(float) edgeToRender.getY2()).lineWidth(1f);
-		g.incZ();
+				(float) edgeToRender.getY2()).lineWidth(EDGE_WIDTH);
+		g.incZ(0.5f);
 		drawArrowHead(g);
 
 	}
@@ -111,10 +164,6 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		} else
 			targetPoint = targetNode.getIntersectionPointWithNodeBound(centerToCenterLine);
 
-		/**
-		 * check if a sourcePoint and/or a targetPoint was found
-		 */
-		boolean foundIntersection = false;
 		//TODO: should not happen
 		if (sourcePoint == null && targetPoint == null) {
 			edgeToRender.setLine(centerToCenterLine);
@@ -124,10 +173,8 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 			edgeToRender.setLine(sourcePoint.getX(), sourcePoint.getY(), xTarget, yTarget);
 		} else {
 			edgeToRender.setLine(sourcePoint, targetPoint);
-			foundIntersection = true;
 		}
 
-//		System.out.println(toString() + " foundIntersection: " + foundIntersection);
 	}
 
 	private void drawArrowHead(GLGraphics g) {
@@ -147,47 +194,6 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 				- unitDy * ARROW_SIZE - unitDx * ARROW_SIZE);
 
 		g.color(Color.BLACK).fillPolygon(target, arrowPoint1, arrowPoint2);
-	}
-
-	@Override
-	public IFRLayoutNode getSource() {
-		return this.sourceNode;
-	}
-
-	@Override
-	public IFRLayoutNode getTarget() {
-		return this.targetNode;
-	}
-
-
-	public NodeElement getSourceNode() {
-		return sourceNode;
-	}
-
-	public void setSourceNode(NodeElement sourceNode) {
-		this.sourceNode = sourceNode;
-	}
-
-	public NodeElement getTargetNode() {
-		return targetNode;
-	}
-
-	public void setTargetNode(NodeElement targetNode) {
-		this.targetNode = targetNode;
-	}
-	
-	public DefaultEdge getDefaultEdge() {
-		return edge;
-	}
-
-	public Line2D getEdgeToRender() {
-		return edgeToRender;
-	}
-
-	@Override
-	public String toString() {
-		String output = "Edge: " + sourceNode.getLabel() + "->" + targetNode.getLabel();
-		return output;
 	}
 
 }

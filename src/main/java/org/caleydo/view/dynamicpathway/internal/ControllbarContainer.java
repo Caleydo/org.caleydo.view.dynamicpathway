@@ -23,6 +23,7 @@ import org.caleydo.core.view.opengl.picking.APickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.view.dynamicpathway.ui.ChangeVertexEnvironmentEvent;
+import org.caleydo.view.dynamicpathway.ui.ClearCanvasEvent;
 import org.caleydo.view.dynamicpathway.ui.ControllbarPathwayTitleEntry;
 import org.caleydo.view.dynamicpathway.ui.VertexEnvironmentDialog;
 import org.caleydo.vis.lineup.ui.RenderStyle;
@@ -33,6 +34,7 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 
 	private static final int VERTEX_ENV_ON_START = 4;
 	private static final String TITLE = "Controllbar";
+	private static final String CLEAR_CANVAS_INFO_TEXT = "Remove Pathways:";
 
 	private DynamicPathwayView view;
 
@@ -142,13 +144,13 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		this.vertexEnvironmentSizeValue.setVisibility(EVisibility.VISIBLE);
 		editVertexEnvContainer.add(this.vertexEnvironmentSizeValue);
 
-		GLButton pinButton = new GLButton(EButtonMode.BUTTON);
-		pinButton.setVisibility(EVisibility.PICKABLE);
-		pinButton.setSize(16, 16);
-		pinButton.setRenderer(GLRenderers.fillImage("resources/icons/edit.png"));
-		editVertexEnvContainer.add(pinButton);
+		GLButton editEnvSizeButton = new GLButton(EButtonMode.BUTTON);
+		editEnvSizeButton.setVisibility(EVisibility.PICKABLE);
+		editEnvSizeButton.setSize(16, 16);
+		editEnvSizeButton.setRenderer(GLRenderers.fillImage("resources/icons/edit.png"));
+		editVertexEnvContainer.add(editEnvSizeButton);
 
-		pinButton.onPick(new APickingListener() {
+		editEnvSizeButton.onPick(new APickingListener() {
 
 			@Override
 			protected void clicked(Pick pick) {
@@ -182,7 +184,42 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		GLElement vertexEnvironmentSizeLineSeparator = createLineSeparator();
 		vertexEnvironmentSizeLineSeparator.setVisibility(EVisibility.VISIBLE);
 		add(vertexEnvironmentSizeLineSeparator);
+		
+		
+		/**
+		 * Clear all button
+		 */
+		GLElementContainer clearCanvasContainer = new GLElementContainer(new GLSizeRestrictiveFlowLayout(true, 10,
+				new GLPadding(2, 0, 20, 0)));
+		clearCanvasContainer.setBounds(0, 0, this.getRectBounds().width(), 20);
+		
+		GLElement clearCanvasInfoText = new GLElement(GLRenderers.drawText(CLEAR_CANVAS_INFO_TEXT));
+		clearCanvasInfoText.setSize(Float.NaN, 16);
+		clearCanvasContainer.add(clearCanvasInfoText);	
+		
+		GLButton clearAllButton = new GLButton(EButtonMode.BUTTON);
+		clearAllButton.setVisibility(EVisibility.PICKABLE);
+		clearAllButton.setSize(17, 17);
+		clearAllButton.setRenderer(GLRenderers.fillImage("resources/icons/clear_pathways.png"));
+		clearAllButton.onPick(new APickingListener() {
 
+			@Override
+			protected void clicked(Pick pick) {
+				super.clicked(pick);
+				
+				ClearCanvasEvent clearCanvasEvent = new ClearCanvasEvent();
+				EventPublisher.trigger(clearCanvasEvent);
+			}
+		});
+		clearCanvasContainer.add(clearAllButton);
+		
+		add(clearCanvasContainer);
+		
+		GLElement clearCanvasLineSeparator = createLineSeparator();
+		clearCanvasLineSeparator.setVisibility(EVisibility.VISIBLE);
+		add(clearCanvasLineSeparator);
+		
+		
 		/**
 		 * current focus graph
 		 */

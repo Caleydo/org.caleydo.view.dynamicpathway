@@ -2,7 +2,6 @@ package org.caleydo.view.dynamicpathway.ui;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -36,7 +35,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	protected static final int FONT_SIZE = 12;
 	protected static final Color CONTOUR_COLOR = Color.LIGHT_GRAY;
 	protected static final String KONTEXT_FILLING_COLOR = "#F2F2F2";
-	protected static final Color PREVIOUS_FOCUS_NODE_COLOR = Color.YELLOW;//"#3067C6";
+	protected static final Color PREVIOUS_FOCUS_NODE_COLOR = Color.YELLOW;// "#3067C6";
 	protected static final String NODE_FILLING_COLOR = "#F2F2F2";
 	protected static final Color SELECTION_CONTOUR_COLOR = SelectionType.SELECTION.getColor();
 	protected static final Color MOUSEROVER_CONTOUR_COLOR = SelectionType.MOUSE_OVER.getColor();
@@ -44,7 +43,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	protected PathwayVertexRep vertexRep;
 	protected List<PathwayVertex> vertices;
-	//TODO: remove
+	// TODO: remove
 	protected List<PathwayVertexRep> vrepsWithThisNodesVerticesList;
 	private Set<PathwayGraph> representedPathways;
 
@@ -67,18 +66,17 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	protected String label;
 
-	protected DynamicPathwayGraphRepresentation parentGraph;
+	protected DynamicPathwaysCanvas parentGraph;
 
 	protected double height;
 	protected double width;
 
 	/**
-	 * if this node element is merged (artificially created - not in original PathwayGraph) set false by
-	 * default
+	 * if this node element is merged (artificially created - not in original PathwayGraph) set false by default
 	 */
 	protected boolean isMerged = false;
 	protected boolean wasMerged = false;
-	
+
 	protected boolean wasPreviouslyFocusNode = false;
 
 	/**
@@ -87,9 +85,9 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	protected GenericContextMenuItem focusNodeMenu;
 	protected ChangeFocusNodeEvent focusNodeEvent;
 	protected GenericContextMenuItem filterPathwayMenu;
-	
 
-	public NodeElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,final DynamicPathwayGraphRepresentation parentGraph, Set<PathwayGraph> pathways, float widthAndHeightAddend) {
+	public NodeElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
+			final DynamicPathwaysCanvas parentGraph, Set<PathwayGraph> pathways, float widthAndHeightAddend) {
 		this.uid = UUID.randomUUID().toString();
 		this.vertexRep = vertexRep;
 		this.centerX = vertexRep.getCenterX();
@@ -103,22 +101,224 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		this.vrepsWithThisNodesVerticesList = new LinkedList<PathwayVertexRep>();
 		this.focusNodeEvent = new ChangeFocusNodeEvent(this);
 		this.representedPathways = new HashSet<PathwayGraph>(pathways);
-		
-		
+
 		if (vertices.size() > 0 && vertices.get(0).getType() != EPathwayVertexType.group) {
-			// this.vertices = vertexRep.getPathwayVertices();
 			this.displayedVertex = vertices.get(0);
 			this.label = displayedVertex.getHumanReadableName();
-			this.height = this.vertexRep.getHeight()+widthAndHeightAddend;
-			this.width = this.vertexRep.getWidth()+widthAndHeightAddend;
+			this.height = this.vertexRep.getHeight() + widthAndHeightAddend;
+			this.width = this.vertexRep.getWidth() + widthAndHeightAddend;
 		}
 
-		focusNodeMenu = new GenericContextMenuItem("Choose as focus pathway",
-				focusNodeEvent);
-		filterPathwayMenu = new GenericContextMenuItem("Filter pathway list by these node", new FilterPathwayEvent(this));
-		
-	setVisibility(EVisibility.PICKABLE);
+		focusNodeMenu = new GenericContextMenuItem("Choose as focus pathway", focusNodeEvent);
+		filterPathwayMenu = new GenericContextMenuItem("Filter pathway list by these node",
+				new FilterPathwayEvent(this));
 
+		setVisibility(EVisibility.PICKABLE);
+
+	}
+
+	public void addPathway(PathwayGraph pathway) {
+		this.representedPathways.add(pathway);
+	}
+
+	public void addPathways(Set<PathwayGraph> pathways) {
+		for (PathwayGraph pathway : pathways)
+			addPathway(pathway);
+	}
+
+	public void addVrepWithThisNodesVerticesList(PathwayVertexRep vrepWithThisNodesVertices) {
+		this.vrepsWithThisNodesVerticesList.add(vrepWithThisNodesVertices);
+	}
+
+	public Point2D.Double getCenter() {
+		return (new Point2D.Double(centerX, centerY));
+	}
+
+	@Override
+	public double getCenterX() {
+		return this.centerX;
+	}
+
+	@Override
+	public double getCenterY() {
+		return this.centerY;
+	}
+
+	public Coordinates getCoords() {
+		return coords;
+	}
+
+	public PathwayVertex getDisplayedVertex() {
+		return displayedVertex;
+	}
+
+	@Override
+	public double getHeight() {
+		return this.height;
+	}
+
+	/**
+	 * 
+	 * calculate intersection if the node shape is rectangular used in
+	 * {@link org.caleydo.view.dynamicpathway.ui.EdgeElement#renderImpl(GLGraphics, float, float)} for drawing the edges
+	 * between 2 nodes
+	 * 
+	 * @param intersectingLine
+	 * @return
+	 */
+	public Point2D.Double getIntersectionPointWithNodeBound(Line2D intersectingLine) {
+		for (Line2D bound : coords.getBounds()) {
+			if (intersectingLine.intersectsLine(bound)) {
+				return CalculateIntersectionUtil.calcIntersectionPoint(intersectingLine, bound);
+			}
+		}
+		return null;
+	}
+
+	public Boolean getIsNodeSelected() {
+		return this.isThisNodeSelected;
+	}
+
+	public Boolean getIsThisNodeUsedForFiltering() {
+		return this.isThisNodeUsedForFiltering;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public List<PathwayGraph> getPathways() {
+		List<PathwayGraph> pathways = new ArrayList<PathwayGraph>(this.representedPathways);
+		return pathways;
+	}
+
+	public EPathwayVertexType getType() {
+		return vertexRep.getType();
+	}
+
+	public PathwayVertexRep getVertexRep() {
+		return vertexRep;
+	}
+
+	public List<PathwayVertex> getVertices() {
+		return vertices;
+	}
+
+	public List<PathwayVertexRep> getVrepsWithThisNodesVerticesList() {
+		return vrepsWithThisNodesVerticesList;
+	}
+
+	@Override
+	public double getWidth() {
+		return this.width;
+	}
+
+	public boolean isMerged() {
+		return isMerged;
+	}
+
+	public boolean isWasPreviouslyFocusNode() {
+		return wasPreviouslyFocusNode;
+	}
+
+	public void makeThisFocusNode() {
+		EventPublisher.trigger(focusNodeEvent);
+	}
+
+	/**
+	 * remove multiple vertices from the nodes displayed vertex list
+	 * 
+	 * @param node
+	 * @param verticesToRemove
+	 */
+	public boolean removeMultipleVertices(List<PathwayVertex> verticesToRemove) {
+
+		boolean success = true;
+		for (PathwayVertex vertexToRemove : verticesToRemove) {
+			boolean tmp = this.removeVertex(vertexToRemove);
+			success = success && tmp;
+		}
+
+		return success;
+	}
+
+	public boolean removePathway(PathwayGraph pathway) {
+		return this.representedPathways.remove(pathway);
+	}
+
+	/**
+	 * removes a vertex from the displayed vertex list -> needed to remove duplicate vertices within the graph
+	 * 
+	 * @param vertexToRemove
+	 * @return returns true if this is the last vertex of the NodeElement (which means the whole node needs to be
+	 *         removed) & false otherwise
+	 */
+	public boolean removeVertex(PathwayVertex vertexToRemove) {
+		if (vertices.size() < 2)
+			return false;
+		boolean containedElement = vertices.remove(vertexToRemove);
+		this.displayedVertex = vertices.get(0);
+		this.label = displayedVertex.getHumanReadableName();
+		return containedElement;
+	}
+
+	@Override
+	public void setCenter(double centerX, double centerY) {
+		this.centerX = centerX;
+		this.centerY = centerY;
+
+		coords.setCoords(centerX, centerY, this.width, this.height);
+	}
+
+	public void setDisplayedVertex(PathwayVertex displayedVertex) {
+		this.displayedVertex = displayedVertex;
+		this.label = displayedVertex.getHumanReadableName();
+	}
+
+	public void setIsMerged(boolean isMerged) {
+		this.isMerged = isMerged;
+	}
+
+	public void setIsNodeSelected(Boolean selection) {
+		this.isThisNodeSelected = selection;
+		repaint();
+	}
+
+	public void setIsThisNodeUsedForFiltering(Boolean selection) {
+		this.isThisNodeUsedForFiltering = selection;
+		repaint();
+	}
+
+	public void setVertices(List<PathwayVertex> vertices) {
+		this.vertices = vertices;
+		this.displayedVertex = vertices.get(0);
+		this.label = displayedVertex.getHumanReadableName();
+	}
+
+	public void setWasMerged(boolean wasMerged) {
+		this.wasMerged = wasMerged;
+	}
+
+	public void setWasPreviouslyFocusNode(boolean wasPreviouslyFocusNode) {
+		this.wasPreviouslyFocusNode = wasPreviouslyFocusNode;
+	}
+
+	@Override
+	public String toString() {
+		String outputString = uid + ": ";
+		outputString += "Label(" + label + ") ";
+		outputString += "wasMerged(" + wasMerged + ")";
+		outputString += "VrepSize("
+				+ ((vrepsWithThisNodesVerticesList != null) ? Integer.toString(vrepsWithThisNodesVerticesList.size())
+						: "1") + ") ";
+		outputString += "Vertices[" + vertices + "]";
+		outputString += "Pathways[" + getPathwaySetTitles() + "]";
+
+		return outputString;
+	}
+
+	public boolean wasMerged() {
+		return wasMerged;
 	}
 
 	@Override
@@ -155,222 +355,15 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		super.renderPickImpl(g, w, h);
 	}
 
-	@Override
-	public double getCenterX() {
-		return this.centerX;
-	}
-
-	@Override
-	public double getCenterY() {
-		return this.centerY;
-	}
-
-	@Override
-	public void setCenter(double centerX, double centerY) {
-		this.centerX = centerX;
-		this.centerY = centerY;
-
-		coords.setCoords(centerX, centerY, this.width, this.height);
-	}
-
-	public Point2D.Double getCenter() {
-		return (new Point2D.Double(centerX, centerY));
-	}
-
-	@Override
-	public double getHeight() {
-		return this.height;
-	}
-
-	@Override
-	public double getWidth() {
-		return this.width;
-	}
-
-	public Coordinates getCoords() {
-		return coords;
-	}
-
-	public EPathwayVertexType getType() {
-		return vertexRep.getType();
-	}
-
-	/**
-	 * 
-	 * calculate intersection if the node shape is rectangular used in
-	 * {@link org.caleydo.view.dynamicpathway.ui.EdgeElement#renderImpl(GLGraphics, float, float)} for drawing
-	 * the edges between 2 nodes
-	 * 
-	 * @param intersectingLine
-	 * @return
-	 */
-	public Point2D.Double getIntersectionPointWithNodeBound(Line2D intersectingLine) {
-		for (Line2D bound : coords.getBounds()) {
-			if (intersectingLine.intersectsLine(bound)) {
-				return CalculateIntersectionUtil.calcIntersectionPoint(intersectingLine, bound);
-			}
-		}
-		return null;
-	}
-
-	public void setIsNodeSelected(Boolean selection) {
-		this.isThisNodeSelected = selection;
-		repaint();
-	}
-
-	public Boolean getIsNodeSelected() {
-		return this.isThisNodeSelected;
-	}
-
-	public void setIsThisNodeUsedForFiltering(Boolean selection) {
-		this.isThisNodeUsedForFiltering = selection;
-		repaint();
-	}
-
-	public Boolean getIsThisNodeUsedForFiltering() {
-		return this.isThisNodeUsedForFiltering;
-	}
-
-	public PathwayVertexRep getVertexRep() {
-		return vertexRep;
-	}
-
-	public List<PathwayVertex> getVertices() {
-		return vertices;
-	}
-
-	public void setVertices(List<PathwayVertex> vertices) {
-		this.vertices = vertices;
-		this.displayedVertex = vertices.get(0);
-		this.label = displayedVertex.getHumanReadableName();
-	}
-
-	public PathwayVertex getDisplayedVertex() {
-		return displayedVertex;
-	}
-
-	public void setDisplayedVertex(PathwayVertex displayedVertex) {
-		this.displayedVertex = displayedVertex;
-		this.label = displayedVertex.getHumanReadableName();
-	}
-
-	public String getLabel() {
-		return label;
-	}
-
-	/**
-	 * removes a vertex from the displayed vertex list -> needed to remove duplicate vertices within the graph
-	 * 
-	 * @param vertexToRemove
-	 * @return returns true if this is the last vertex of the NodeElement (which means the whole node needs to
-	 *         be removed) & false otherwise
-	 */
-	public boolean removeVertex(PathwayVertex vertexToRemove) {
-		if (vertices.size() < 2)
-			return false;
-		boolean containedElement = vertices.remove(vertexToRemove);
-		this.displayedVertex = vertices.get(0);
-		this.label = displayedVertex.getHumanReadableName();
-		return containedElement;
-	}
-
-	/**
-	 * remove multiple vertices from the nodes displayed vertex list
-	 * 
-	 * @param node
-	 * @param verticesToRemove
-	 */
-	public boolean removeMultipleVertices(List<PathwayVertex> verticesToRemove) {
-
-		boolean success = true;
-		for (PathwayVertex vertexToRemove : verticesToRemove) {
-			boolean tmp = this.removeVertex(vertexToRemove);
-			success = success && tmp;
-		}
-
-		return success;
-	}
-	
-	
-	public void makeThisFocusNode() {
-		EventPublisher.trigger(focusNodeEvent);
-	}
-	
-	public List<PathwayGraph> getPathways() {
-		List<PathwayGraph> pathways = new ArrayList<PathwayGraph>(this.representedPathways);
-		return pathways;
-	}
-	
-	public void addPathways(Set<PathwayGraph> pathways) {
-		for(PathwayGraph pathway : pathways)
-			addPathway(pathway);
-	}
-	
-	public void addPathway(PathwayGraph pathway) {
-		this.representedPathways.add(pathway);
-	}
-	
-	
-	public boolean removePathway(PathwayGraph pathway) {
-		return this.representedPathways.remove(pathway);
-	}
-
-	@Override
-	public String toString() {
-		String outputString = uid + ": ";
-		outputString += "Label(" + label + ") ";
-		outputString += "wasMerged(" + wasMerged + ")";		
-		outputString += "VrepSize("
-				+ ((vrepsWithThisNodesVerticesList != null) ? Integer.toString(vrepsWithThisNodesVerticesList
-						.size()) : "1") + ") ";
-		outputString += "Vertices[" + vertices + "]";
-		outputString += "Pathways[" + getPathwaySetTitles() + "]";
-
-		return outputString;
-	}
-
-	public boolean isMerged() {
-		return isMerged;
-	}
-
-	public void setIsMerged(boolean isMerged) {
-		this.isMerged = isMerged;
-	}
-	
-	public boolean wasMerged() {
-		return wasMerged;
-	}
-	
-	public void setWasMerged(boolean wasMerged) {
-		this.wasMerged = wasMerged;
-	}
-
-	public List<PathwayVertexRep> getVrepsWithThisNodesVerticesList() {
-		return vrepsWithThisNodesVerticesList;
-	}
-
-	public void addVrepWithThisNodesVerticesList(PathwayVertexRep vrepWithThisNodesVertices) {
-		this.vrepsWithThisNodesVerticesList.add(vrepWithThisNodesVertices);
-	}
-
-	
 	private String getPathwaySetTitles() {
 		String pathwayListTitles = "";
-		
-		for(PathwayGraph pathway : this.representedPathways)
+
+		for (PathwayGraph pathway : this.representedPathways)
 			pathwayListTitles += pathway.getTitle() + ",";
-		
-		pathwayListTitles = pathwayListTitles.substring(0, pathwayListTitles.length()-1);
-	
+
+		pathwayListTitles = pathwayListTitles.substring(0, pathwayListTitles.length() - 1);
+
 		return pathwayListTitles;
-	}
-
-	public boolean isWasPreviouslyFocusNode() {
-		return wasPreviouslyFocusNode;
-	}
-
-	public void setWasPreviouslyFocusNode(boolean wasPreviouslyFocusNode) {
-		this.wasPreviouslyFocusNode = wasPreviouslyFocusNode;
 	}
 
 }

@@ -27,7 +27,7 @@ public class NodeCompoundElement extends NodeElement {
 	private static final float WIDTH_AND_HEIGHT_ADDEND = 2.5f;
 
 	public NodeCompoundElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
-			final DynamicPathwayGraphRepresentation parentGraph, Set<PathwayGraph> pathways) {
+			final DynamicPathwaysCanvas parentGraph, Set<PathwayGraph> pathways) {
 		super(vertexRep, pathwayVertices, parentGraph, pathways, WIDTH_AND_HEIGHT_ADDEND);
 
 		onPick(new IPickingListener() {
