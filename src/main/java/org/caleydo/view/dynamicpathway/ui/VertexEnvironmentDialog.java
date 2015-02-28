@@ -30,8 +30,12 @@ public class VertexEnvironmentDialog extends AHelpButtonDialog {
 	public static final String LABEL = "Choose Vertex Environment";
 	public static final String ENV_TYPE_LABEL = "Choose Environment Type:";
 	public static final String ENV_TYPE_LABEL2 = "Show pathways ";
+	
+	private static final int DEFAULT_ENV_SIZE = 4;
+	
+	private boolean partlySelected = true;
 
-	private Integer vertexEnv;
+	private Integer vertexEnv = DEFAULT_ENV_SIZE;
 	private ChangeVertexEnvironmentEvent changeVertexEnvEvent;
 
 	public VertexEnvironmentDialog(Shell parentShell) {
@@ -86,20 +90,21 @@ public class VertexEnvironmentDialog extends AHelpButtonDialog {
 				if(envSizeText.getText().length() < 1)
 					return;
 				int newEnvValue = Integer.parseInt(envSizeText.getText());
-				System.out.println("newEnv: " + newEnvValue);
+				System.out.println(newEnvValue);
 				if (newEnvValue > 0) {
-					if (vertexEnv != newEnvValue && envSizeText.getEnabled() == true) {
+					if (vertexEnv != newEnvValue/* && partlySelected*/) 
 						vertexEnv = newEnvValue;
-					} else if(envSizeText.getEnabled() == false) {
-						vertexEnv = -1;
-					}
-
+//					} else if(!partlySelected) {
+//						vertexEnv = -1;
+//					}
 				} else {
 					throw new NumberFormatException("Only positive values > 0 allowed");
 				}
+				
+				partlySelected = true;
 			}
 		});
-		envSizeText.setText("4");
+		envSizeText.setText(Integer.toString(DEFAULT_ENV_SIZE));
 		envSizeText.setToolTipText("Only positive values > 0 allowed");
 
 		Button envTypeFullPathwayRadio = new Button(chooseEnvTypeChildComposite, SWT.RADIO);
@@ -109,7 +114,8 @@ public class VertexEnvironmentDialog extends AHelpButtonDialog {
 		envTypeFullPathwayRadio.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				System.out.println("PARTLY !!!");
+				partlySelected = false;
+				vertexEnv = -1;
 				setEnOrDisabled(envSizeText, false);
 
 			}
@@ -121,6 +127,7 @@ public class VertexEnvironmentDialog extends AHelpButtonDialog {
 		envTypePartlyPathwayRadio.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				partlySelected = true;
 				setEnOrDisabled(envSizeText, true);
 			}
 		});
@@ -137,5 +144,12 @@ public class VertexEnvironmentDialog extends AHelpButtonDialog {
 	public Integer getVertexEnv() {
 		return vertexEnv;
 	}
+
+	@Override
+	protected void okPressed() {
+		// TODO Auto-generated method stub
+		super.okPressed();
+	}
+
 
 }

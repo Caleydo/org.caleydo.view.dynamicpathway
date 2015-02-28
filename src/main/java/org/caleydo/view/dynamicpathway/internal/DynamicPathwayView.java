@@ -59,6 +59,8 @@ import org.jgrapht.graph.DefaultEdge;
 public class DynamicPathwayView extends AGLElementView {
 	public static final String VIEW_TYPE = "org.caleydo.view.dynamicpathway";
 	public static final String VIEW_NAME = "DynamicPathway";
+	
+	private static final String PATHWAY_PARTLY_IDENTIFIER = " [P]";
 
 	private DynamicPathwayWindow activeWindow;
 
@@ -162,13 +164,20 @@ public class DynamicPathwayView extends AGLElementView {
 	 *            the pathway which was selected
 	 */
 	public void addPathway(PathwayGraph pathwayToAdd) {
-		Boolean addContextPathway = (dynamicGraphCanvas.getFocusPathway() != null && (dynamicGraphCanvas.getFocusNode() != null)) ? true
-				: false;
+		// Boolean addContextPathway = (dynamicGraphCanvas.getFocusPathway() != null &&
+		// (dynamicGraphCanvas.getFocusNode() != null)) ? true
+		// : false;
+		Boolean addContextPathway = (dynamicGraphCanvas.getFocusPathway() != null) ? true : false;
 
 		try {
 			int envSize = controllBar.getNodeEnvironmentSize();
 			if (addContextPathway && envSize > 0) {
-				PathwayGraph subPathway = createPathwayWithFocusVertexAndHisEnvironment(pathwayToAdd, envSize);
+
+				PathwayGraph subPathway;
+				if (dynamicGraphCanvas.getFocusNode() == null)
+					subPathway = null;
+				else
+					subPathway = createPathwayWithFocusVertexAndHisEnvironment(pathwayToAdd, envSize);
 
 				if (subPathway != null && subPathway.vertexSet().size() > 0)
 					dynamicGraphCanvas.addPathwayToCanvas(subPathway, !addContextPathway, true, true);
@@ -184,6 +193,36 @@ public class DynamicPathwayView extends AGLElementView {
 		} catch (Exception e) {
 			e.printStackTrace();
 			// System.exit(-1);
+		}
+
+	}
+
+	private void addContextPathway(PathwayGraph contextPathway) {
+
+		try {
+
+			int envSize = controllBar.getNodeEnvironmentSize();
+			if (envSize > 0) {
+
+				PathwayGraph subPathway;
+				if (dynamicGraphCanvas.getFocusNode() == null)
+					subPathway = null;
+				else
+					subPathway = createPathwayWithFocusVertexAndHisEnvironment(contextPathway, envSize);
+
+				if (subPathway != null && subPathway.vertexSet().size() > 0)
+					dynamicGraphCanvas.addPathwayToCanvas(subPathway, false, true, true);
+				else {
+					addPathwayToControllBar(contextPathway, false, Color.LIGHT_GRAY);
+					dynamicGraphCanvas.getDynamicPathway().addFocusOrKontextPathway(contextPathway, true);
+					System.out.println("Pathway didn't contain the focus vrep");
+				}
+			} else {
+				dynamicGraphCanvas.addPathwayToCanvas(contextPathway, false, false, true);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 	}
@@ -339,7 +378,7 @@ public class DynamicPathwayView extends AGLElementView {
 			newContextGraphs.add(oldFocusPathway);
 		}
 
-		dynamicGraphCanvas.addPathwayToCanvas(pathwayToAdd, true, false, false);
+		dynamicGraphCanvas.addPathwayToCanvas(pathwayToAdd, true, false, true);
 		System.out.println("New Title: " + dynamicGraphCanvas.getFocusPathway() + ", old Title: "
 				+ oldFocusPathway.getTitle());
 
@@ -402,8 +441,9 @@ public class DynamicPathwayView extends AGLElementView {
 
 		if (hasContextPathways) {
 			for (PathwayGraph contextGraph : contextPathways)
+				addContextPathway(contextGraph);
 
-				dynamicGraphCanvas.addPathwayToCanvas(contextGraph, false, false, true);
+			// dynamicGraphCanvas.addPathwayToCanvas(contextGraph, false, false, true);
 
 		}
 
@@ -552,52 +592,13 @@ public class DynamicPathwayView extends AGLElementView {
 		edgesOfThisNode = pathwayToAdd.edgesOf(currentFilteringVRep);
 		focusVertex = currentFilteringNode.getVertices().get(0);
 
-		// /**
-		// * if the currentFilteringVRep is in the pathway -> add this to the limited version of the graph
-		// */
-		// if (pathwayToAdd.containsVertex(currentFilteringVRep)) {
-		// edgesOfThisNode = pathwayToAdd.edgesOf(currentFilteringVRep);
-		// focusVertex = currentFilteringNode.getVertices().get(0);
-		// } else {
-		// /**
-		// * if the currentFilteringVRep isn't in the pathway -> find the vrep that is in the pathway & add this to
-		// * the limited version of the graph
-		// *
-		// */
-		//
-		// // List<PathwayVertexRep> alternativeVreps = currentFilteringNode.getVrepsWithThisNodesVerticesList();
-		// // for(PathwayVertexRep alternativeVrep : alternativeVreps) {
-		// // if(pathwayToAdd.containsVertex(alternativeVrep)) {
-		// // focusVertex = alternativeVrep.getPathwayVertices().get(0);
-		// // edgesOfThisNode = pathwayToAdd.edgesOf(alternativeVrep);
-		// // alternativeVrepFromPathway = alternativeVrep;
-		// // break;
-		// // }
-		// // }
-		//
-		// List<PathwayVertex> alternativeVertices = currentFilteringNode.getVertices();
-		// if (alternativeVertices == null)
-		// throw new Exception(
-		// "pathway didn't contain main vrep of filtering node & did not contain additional vreps");
-		// outerloop: for (PathwayVertex alternativeVertex : alternativeVertices) {
-		// // TODO: what if more than one vrep are in pathway??
-		// List<PathwayVertexRep> alternativeVreps = alternativeVertex.getPathwayVertexReps();
-		// for (PathwayVertexRep alternativeVrep : alternativeVreps) {
-		// if (pathwayToAdd.containsVertex(alternativeVrep)) {
-		// focusVertex = alternativeVertex;
-		// edgesOfThisNode = pathwayToAdd.edgesOf(alternativeVrep);
-		// alternativeVrepFromPathway = alternativeVrep;
-		// break outerloop;
-		// }
-		// }
-		// }
-		// }
-
 		if (edgesOfThisNode == null || focusVertex == null)
 			return null;
+		
+		String title = pathwayToAdd.getTitle().endsWith(PATHWAY_PARTLY_IDENTIFIER) ? pathwayToAdd.getTitle() : pathwayToAdd.getTitle() + PATHWAY_PARTLY_IDENTIFIER;
 
 		PathwayGraph subPathway = new PathwayGraph(pathwayToAdd.getType(), pathwayToAdd.getName(),
-				pathwayToAdd.getTitle() + " [P]", pathwayToAdd.getImage(), pathwayToAdd.getExternalLink());
+				title, pathwayToAdd.getImage(), pathwayToAdd.getExternalLink());
 
 		subPathway.addVertex(currentFilteringVRep);
 
