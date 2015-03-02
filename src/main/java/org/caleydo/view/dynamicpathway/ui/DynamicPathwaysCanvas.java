@@ -99,6 +99,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	 * A list of colors which are being used to color the bubble sets
 	 */
 	private List<Color> bubbleSetColors = ColorBrewer.Set1.getColors(100);
+//	private List<Integer> usedColorIndezes = new LinkedList<Integer>(); 
 
 	/**
 	 * the currently selected node
@@ -309,6 +310,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		vrepToGroupNodeMap.clear();
 		uniqueVertexMap.clear();
 		contextPathwayColorIndex.clear();
+//		usedColorIndezes.clear();
 		nextColorIndex = 0;
 
 		if (clearOriginalPathwaysMap)
@@ -512,6 +514,8 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		
 		if (index.intValue() == (nextColorIndex.intValue() - 1))
 			nextColorIndex--;
+//		else 
+//			usedColorIndezes.add(index);
 
 		contextPathwayColorIndex.remove(pathway);
 	}
@@ -1358,7 +1362,14 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	 * @param pathwayToAdd
 	 */
 	private void setColorOfPathway(PathwayGraph pathwayToAdd) {
-		contextPathwayColorIndex.put(pathwayToAdd, nextColorIndex++);
+		
+		Integer colorIndex;
+//		if(usedColorIndezes.size() > 0)
+//			colorIndex = usedColorIndezes.remove(0);
+//		else
+			colorIndex = nextColorIndex++;
+		
+		contextPathwayColorIndex.put(pathwayToAdd, colorIndex);
 	}
 
 	private final void setUpBubbleSet() {

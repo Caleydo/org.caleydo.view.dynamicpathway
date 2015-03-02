@@ -117,7 +117,7 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 	protected void renderImpl(GLGraphics g, float w, float h) {
 
 		calcDrawableEdge();
-//		g.decZ();
+
 		g.incZ(-0.5f);
 		g.gl.glEnable(GL2.GL_LINE_SMOOTH);
 		g.gl.glEnable(GL2.GL_BLEND);
@@ -174,6 +174,7 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		} else if (targetPoint == null) {
 			edgeToRender.setLine(sourcePoint.getX(), sourcePoint.getY(), xTarget, yTarget);
 		} else {
+//			edgeToRender.setLine(centerToCenterLine);
 			edgeToRender.setLine(sourcePoint, targetPoint);
 		}
 

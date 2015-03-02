@@ -99,36 +99,6 @@ public class DynamicPathwayView extends AGLElementView {
 
 	}
 
-	/**
-	 * Filter contains all pathways that contain at least one of the vertices is part of <br />
-	 * Need by the Pathway List, that shows all available (representable) pathways
-	 *
-	 */
-	// public static class CommonVertexListFilter implements IPathwayFilter {
-	//
-	// private Set<PathwayGraph> pathways = new HashSet<>();
-	//
-	// public CommonVertexListFilter(List<PathwayVertex> vertices) {
-	//
-	// // TODO: fix filter -> don't use vreps!!!
-	// for (PathwayVertex vertex : vertices) {
-	// List<PathwayVertexRep> vertexReps = vertex.getPathwayVertexReps();
-	//
-	//
-	// for (PathwayVertexRep vr : vertexReps) {
-	// PathwayGraph pathway = vr.getPathway();
-	// pathways.add(pathway);
-	// }
-	// }
-	//
-	// }
-	//
-	// @Override
-	// public boolean showPathway(PathwayGraph pathway) {
-	// return pathways.contains(pathway);
-	// }
-	//
-	// }
 
 	public static class CommonVertexListFilter implements IPathwayFilter {
 
@@ -164,9 +134,7 @@ public class DynamicPathwayView extends AGLElementView {
 	 *            the pathway which was selected
 	 */
 	public void addPathway(PathwayGraph pathwayToAdd) {
-		// Boolean addContextPathway = (dynamicGraphCanvas.getFocusPathway() != null &&
-		// (dynamicGraphCanvas.getFocusNode() != null)) ? true
-		// : false;
+
 		Boolean addContextPathway = (dynamicGraphCanvas.getFocusPathway() != null) ? true : false;
 
 		try {
@@ -468,17 +436,21 @@ public class DynamicPathwayView extends AGLElementView {
 				dynamicGraphCanvas.removePathwayFromContextPathwayColorIndexMap(pathwayToRemove);
 				controllBar.removeContextPathwayTitle(pathwayToRemove);
 
-				List<PathwayGraph> presentContextGraphs = new ArrayList<PathwayGraph>(
+				List<PathwayGraph> presentContextPathways = new ArrayList<PathwayGraph>(
 						dynamicGraphCanvas.getContextPathways());
-				presentContextGraphs.remove(pathwayToRemove);
+				presentContextPathways.remove(pathwayToRemove);
 
 				if (dynamicGraphCanvas.isSubPathway(pathwayToRemove))
 					dynamicGraphCanvas.removeOriginalPathwayAndSubpathwayOfMap(pathwayToRemove);
 
 				dynamicGraphCanvas.addPathwayToCanvas(dynamicGraphCanvas.getFocusPathway(), true, false, true);
 
-				for (PathwayGraph contextGraph : presentContextGraphs) {
-					dynamicGraphCanvas.addPathwayToCanvas(contextGraph, false, false, true);
+				for (PathwayGraph contextPathway : presentContextPathways) {
+					PathwayGraph pathwayToAdd = dynamicGraphCanvas.getOriginalPathwaysOfSubpathway(contextPathway);
+					if(pathwayToAdd == null)
+						pathwayToAdd = contextPathway;
+					addContextPathway(pathwayToAdd);
+//					dynamicGraphCanvas.addPathwayToCanvas(contextGraph, false, false, true);
 				}
 			}
 

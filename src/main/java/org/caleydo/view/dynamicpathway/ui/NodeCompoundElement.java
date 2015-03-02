@@ -90,7 +90,11 @@ public class NodeCompoundElement extends NodeElement {
 
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {
-		short width = (short) w;// vertexRep.getWidth();
+		this.height = h;
+		this.width = w;
+		this.centerX = this.getBounds().get(0);
+		this.centerY = this.getBounds().get(1);
+		short width = (short) w;
 
 		// contour
 		if (isThisNodeUsedForFiltering) {

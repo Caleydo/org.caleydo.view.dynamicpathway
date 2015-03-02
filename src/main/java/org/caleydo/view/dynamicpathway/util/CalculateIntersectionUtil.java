@@ -46,7 +46,9 @@ public class CalculateIntersectionUtil {
 	}
 	
 	
-	public static final Point2D.Double calcIntersectionPoint(Line2D lineToCenter, double givenRadius) {
+	public static final Point2D.Double calcIntersectionPoint(Line2D lineToCenter, double circleDiameter) {
+		
+		double radius = circleDiameter/2.0f;
 		
 		
 		double xSource = lineToCenter.getX1();
@@ -56,8 +58,8 @@ public class CalculateIntersectionUtil {
 		
 		double lineLength = EuclideanDistance(xSource, ySource, xTarget, yTarget);
 		
-		double xAdd = ((xSource-xTarget) > 0) ? -givenRadius : givenRadius;
-		double yAdd = ((ySource-yTarget) > 0) ? -givenRadius : givenRadius;
+		double xAdd = ((xSource-xTarget) > 0) ? -radius : radius;
+		double yAdd = ((ySource-yTarget) > 0) ? -radius : radius;
 		
 		double newLineLength = EuclideanDistance(xSource+xAdd, ySource+yAdd, xTarget, yTarget);
 		
@@ -65,40 +67,6 @@ public class CalculateIntersectionUtil {
 		double newY = ySource + (newLineLength/lineLength)* (yTarget-ySource);
 		
 		return new Point2D.Double(newX, newY);
-		
-//		double radius = givenRadius;		
-//		Vec2f centerToCenterVector = new Vec2f((float)(xSource-xTarget), (float)(ySource-yTarget));
-//		double distanceToIntersectingPoint = centerToCenterVector.length()-radius;
-//		Vec2f centerToIntersectionVector = new Vec2f(centerToCenterVector);
-//		centerToIntersectionVector.normalize();
-//		centerToIntersectionVector.scale((float)distanceToIntersectingPoint);	
-//		
-//		Ellipse2D circleAroundSourceCenter = new Ellipse2D.Double(xSource-radius,ySource-radius, 2*radius, 2*radius);
-//		
-//		sourcePoint = new Point2D.Double(xTarget+centerToIntersectionVector.x(), yTarget+centerToIntersectionVector.y());	
-//		
-//		double i = 1.0;
-//		while(circleAroundSourceCenter.contains(sourcePoint) == false) {		
-//			
-//			if(radius < (givenRadius/2.0))
-//				break;
-//			
-//			radius -= i;
-//			
-//			centerToCenterVector = new Vec2f((float)(xSource-xTarget), (float)(ySource-yTarget));
-//			distanceToIntersectingPoint = centerToCenterVector.length()-radius;
-//			centerToIntersectionVector = new Vec2f(centerToCenterVector);
-//			centerToIntersectionVector.normalize();
-//			centerToIntersectionVector.scale((float)distanceToIntersectingPoint);	
-//			
-//			sourcePoint = new Point2D.Double(xTarget+centerToIntersectionVector.x(), yTarget+centerToIntersectionVector.y());	
-//			
-//			circleAroundSourceCenter = new Ellipse2D.Double(xSource-radius,ySource-radius, 2*radius, 2*radius);
-//			
-//			i += 1.0;
-//		}
-//		
-//		return sourcePoint;
 		
 	}
 	
