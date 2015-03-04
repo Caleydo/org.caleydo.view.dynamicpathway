@@ -452,6 +452,8 @@ public class DynamicPathwayView extends AGLElementView {
 					addContextPathway(pathwayToAdd);
 //					dynamicGraphCanvas.addPathwayToCanvas(contextGraph, false, false, true);
 				}
+				
+				
 			}
 
 		} catch (Exception e) {

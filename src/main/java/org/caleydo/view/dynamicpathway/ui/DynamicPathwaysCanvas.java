@@ -99,7 +99,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	 * A list of colors which are being used to color the bubble sets
 	 */
 	private List<Color> bubbleSetColors = ColorBrewer.Set1.getColors(100);
-//	private List<Integer> usedColorIndezes = new LinkedList<Integer>(); 
+	// private List<Integer> usedColorIndezes = new LinkedList<Integer>();
 
 	/**
 	 * the currently selected node
@@ -268,19 +268,19 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 
 			if (focusVertex != null)
 				findAndCreateNewFocusNodeBasedOnOldFocusVertex();
-			
-			if(!noNodesAdded)
+
+			if (!noNodesAdded)
 				resetEdges();
 
 		}
 
 		for (NodeElement node : nodeSet)
 			node.setIsMerged(false);
-		
+
 	}
-	
+
 	private void resetEdges() {
-		for(EdgeElement edge : this.edgeSet) {
+		for (EdgeElement edge : this.edgeSet) {
 			edge.setVisibility(EVisibility.HIDDEN);
 			edge.setTimerDelay(DEFAULT_ADD_PATHWAY_DURATION);
 		}
@@ -310,7 +310,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		vrepToGroupNodeMap.clear();
 		uniqueVertexMap.clear();
 		contextPathwayColorIndex.clear();
-//		usedColorIndezes.clear();
+		// usedColorIndezes.clear();
 		nextColorIndex = 0;
 
 		if (clearOriginalPathwaysMap)
@@ -508,14 +508,14 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	public void removePathwayFromContextPathwayColorIndexMap(PathwayGraph pathway) {
 		// TODO: find better solution!! -> list of freed indexes
 		Integer index = contextPathwayColorIndex.get(pathway);
-		
-		if(index == null)
+
+		if (index == null)
 			return;
-		
+
 		if (index.intValue() == (nextColorIndex.intValue() - 1))
 			nextColorIndex--;
-//		else 
-//			usedColorIndezes.add(index);
+		// else
+		// usedColorIndezes.add(index);
 
 		contextPathwayColorIndex.remove(pathway);
 	}
@@ -756,7 +756,6 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	private boolean addPathwayWithoutDuplicates(PathwayGraph pathwayToAdd, boolean addMergedNodesToSamePathway,
 			PathwayGraph combinedPathway) {
 
-		
 		boolean noNodeDisplayed = true;
 		/**
 		 * VERTICES <br />
@@ -790,7 +789,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 				System.exit(-1);
 			}
 		}
-		
+
 		return noNodeDisplayed;
 
 	}
@@ -814,6 +813,15 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 
 			Rect nodeBounds = node.getRectBounds();
 
+			double centerX, centerY;
+			if (node.getType() == EPathwayVertexType.compound) {
+				centerX = nodeBounds.x();
+				centerY = nodeBounds.y();
+			} else {
+				centerX = nodeBounds.x() + (nodeBounds.width() / 2.0f);
+				centerY = nodeBounds.y() + (nodeBounds.height() / 2.0f);
+			}
+
 			for (PathwayGraph pathway : pathways) {
 				if (pathway.equals(focusPathway))
 					continue;
@@ -826,8 +834,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 					index = bubblesetCanvas.getGroupCount() - 1;
 					pathwayBubbleSetIndexMap.put(pathway, index);
 				}
-				bubblesetCanvas.addItem(index, nodeBounds.x() + (nodeBounds.width() / 2.0f), nodeBounds.y()
-						+ (nodeBounds.height() / 2.0f), nodeBounds.width(), nodeBounds.height());
+				bubblesetCanvas.addItem(index, centerX, centerY, nodeBounds.width(), nodeBounds.height());
 			}
 
 		}
@@ -876,7 +883,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 					originalNodeVrep.getHeight());
 		else
 			originNodePosition = new Vec4f(originalNode.getBounds());
-		
+
 		InOutInitializers.IInOutInitializer ioInit = new InOutInitializers.IInOutInitializer() {
 
 			@Override
@@ -1362,13 +1369,13 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	 * @param pathwayToAdd
 	 */
 	private void setColorOfPathway(PathwayGraph pathwayToAdd) {
-		
+
 		Integer colorIndex;
-//		if(usedColorIndezes.size() > 0)
-//			colorIndex = usedColorIndezes.remove(0);
-//		else
-			colorIndex = nextColorIndex++;
-		
+		// if(usedColorIndezes.size() > 0)
+		// colorIndex = usedColorIndezes.remove(0);
+		// else
+		colorIndex = nextColorIndex++;
+
 		contextPathwayColorIndex.put(pathwayToAdd, colorIndex);
 	}
 
