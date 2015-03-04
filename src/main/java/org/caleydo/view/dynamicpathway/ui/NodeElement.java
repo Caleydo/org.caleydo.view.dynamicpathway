@@ -111,7 +111,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 			this.centerY = this.vertexRep.getLowerLeftCornerY() + this.width/2.0f;
 		}
 
-		focusNodeMenu = new GenericContextMenuItem("Choose as focus pathway", focusNodeEvent);
+		focusNodeMenu = new GenericContextMenuItem("Choose as focus node", focusNodeEvent);
 		filterPathwayMenu = new GenericContextMenuItem("Filter pathway list by these node",
 				new FilterPathwayEvent(this));
 
