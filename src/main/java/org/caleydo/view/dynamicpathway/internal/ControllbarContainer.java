@@ -267,7 +267,7 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		GLElement elementToRemove = contextPathways.get(pathwayTitle);
 		if (elementToRemove == null)
 			throw new Exception(
-					"INTERNAL ERROR: Wanted to remove kontext pathway title from controllbar, but title to remove ("
+					"INTERNAL ERROR: Wanted to remove context pathway title from controllbar, but title to remove ("
 							+ pathwayTitle + ") wasn't equal to any of the kontext pathay titles ("
 							+ contextPathways.keySet() + ")");
 

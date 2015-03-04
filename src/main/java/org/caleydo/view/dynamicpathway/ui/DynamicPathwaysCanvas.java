@@ -494,9 +494,13 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	 * removes a partly added pathway from the map (i.e. if a (partly added) context pathway was removed
 	 * 
 	 * @param subPathway
+	 * @return TODO
 	 */
-	public void removeOriginalPathwayAndSubpathwayOfMap(PathwayGraph subPathway) {
-		this.originalPathwaysOfSubpathwaysMap.remove(subPathway);
+	public PathwayGraph removeOriginalPathwayAndSubpathwayOfMap(PathwayGraph subPathway) {
+		System.out.println(originalPathwaysOfSubpathwaysMap);
+		PathwayGraph fullPw = this.originalPathwaysOfSubpathwaysMap.remove(subPathway);
+		System.out.println(originalPathwaysOfSubpathwaysMap);
+		return fullPw;
 	}
 
 	/**
@@ -504,20 +508,21 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	 * 
 	 * @param pathway
 	 *            the pathway to be removed
+	 * @return TODO
 	 */
-	public void removePathwayFromContextPathwayColorIndexMap(PathwayGraph pathway) {
+	public Integer removePathwayFromContextPathwayColorIndexMap(PathwayGraph pathway) {
 		// TODO: find better solution!! -> list of freed indexes
 		Integer index = contextPathwayColorIndex.get(pathway);
 
 		if (index == null)
-			return;
+			return -1;
 
 		if (index.intValue() == (nextColorIndex.intValue() - 1))
 			nextColorIndex--;
 		// else
 		// usedColorIndezes.add(index);
 
-		contextPathwayColorIndex.remove(pathway);
+		return contextPathwayColorIndex.remove(pathway);
 	}
 
 	/**

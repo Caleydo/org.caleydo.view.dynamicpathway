@@ -109,8 +109,8 @@ public class DynamicPathwayGraph {
 		return contextPathways;
 	}
 
-	public void removeContextPathway(PathwayGraph contextPathwayToRemove) {
-		contextPathways.remove(contextPathwayToRemove);
+	public Boolean removeContextPathway(PathwayGraph contextPathwayToRemove) {
+		return contextPathways.remove(contextPathwayToRemove);
 	}
 
 	public void removeAllPathways() {
