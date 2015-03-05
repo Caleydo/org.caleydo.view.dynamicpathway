@@ -88,7 +88,7 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 
 
 	/**
-	 * added to the width & higth, when setting the bounds -> sets bounds bigger
+	 * added to the width & height, when setting the bounds -> sets bounds bigger
 	 */
 	private double nodeBoundsExtension;
 

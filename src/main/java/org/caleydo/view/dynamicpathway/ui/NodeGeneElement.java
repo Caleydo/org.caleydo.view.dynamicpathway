@@ -22,7 +22,7 @@ public class NodeGeneElement extends NodeElement {
 	private static final int INNER_BOUNDS = 4;
 	private static final int OUTER_BOUNDS = 1;
 	private static final int ROUND_EDGE_RADIUS = 2;
-	private static final int WIDTH_AND_HEIGHT_ADDEND = 5;
+	private static final int WIDTH_AND_HEIGHT_ADDEND = 10;
 	
 	public NodeGeneElement(final PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
 			final DynamicPathwaysCanvas parentGraph, Set<PathwayGraph> pathways) {

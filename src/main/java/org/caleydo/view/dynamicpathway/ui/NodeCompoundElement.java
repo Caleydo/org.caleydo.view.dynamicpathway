@@ -29,6 +29,10 @@ public class NodeCompoundElement extends NodeElement {
 	public NodeCompoundElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
 			final DynamicPathwaysCanvas parentGraph, Set<PathwayGraph> pathways) {
 		super(vertexRep, pathwayVertices, parentGraph, pathways, WIDTH_AND_HEIGHT_ADDEND);
+	
+		
+//		this.width = getSize().x();
+//		this.height = getSize().y();
 
 		onPick(new IPickingListener() {
 

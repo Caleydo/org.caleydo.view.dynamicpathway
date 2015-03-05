@@ -495,7 +495,7 @@ public class DynamicPathwayView extends AGLElementView {
 	 */
 	private void createPathwayGraphView() {
 		pathwayLayout = new GLFruchtermanReingoldLayoutBuilder().repulsionMultiplier(-1.0).attractionMultiplier(18.0)
-				.nodeBoundsExtension(4.0).buildLayout();
+				.nodeBoundsExtension(1.0).buildLayout();
 
 		dynamicGraphCanvas = new DynamicPathwaysCanvas(pathwayLayout, this);
 		// currentPathwayElement.setLocation(200, 0);
