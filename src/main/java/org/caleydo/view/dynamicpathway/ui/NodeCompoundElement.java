@@ -94,6 +94,11 @@ public class NodeCompoundElement extends NodeElement {
 
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {
+		/*
+		 * Set the contour & filling colour according to the node's state (clicked, mouse over, used for filtering,...)
+		 */
+		setColors();
+		
 		this.height = h;
 		this.width = w;
 		this.centerX = this.getBounds().get(0);
@@ -101,17 +106,13 @@ public class NodeCompoundElement extends NodeElement {
 		short width = (short) w;
 
 		// contour
-		if (isThisNodeUsedForFiltering) {
-			g.color(FILTER_CONTOUR_COLOR).fillCircle(0, 0, width);
-		} else if (isThisNodeSelected) {
-			g.color(SELECTION_CONTOUR_COLOR).fillCircle(0, 0, width);
-		} else if (isMouseOver) {
-			g.color(MOUSEROVER_CONTOUR_COLOR).fillCircle(0, 0, width);
+		if(isSomehowSelected()) {
+			g.color(contourColor).fillCircle(0, 0, width);
 		} else {
-			g.color(CONTOUR_COLOR).fillCircle(0, 0, width + INNER_PADDING- HIGHLIGHT_RIGHT_PADDING);
+			g.color(contourColor).fillCircle(0, 0, width + INNER_PADDING- HIGHLIGHT_RIGHT_PADDING);
 		}
-
-		g.color(NODE_FILLING_COLOR).fillCircle(0, 0, width- HIGHLIGHT_RIGHT_PADDING);
+		
+		g.color(fillingColor).fillCircle(0, 0, width- HIGHLIGHT_RIGHT_PADDING);
 
 		// TODO: label?
 		g.drawText(vertexRep.getName(), TEXT_X_POS, TEXT_Y_POS, width * FONT_SIZE_MULTIPLIER, FONT_SIZE);

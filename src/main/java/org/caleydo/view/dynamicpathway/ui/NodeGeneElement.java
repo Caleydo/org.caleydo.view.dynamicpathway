@@ -23,17 +23,17 @@ public class NodeGeneElement extends NodeElement {
 	private static final int OUTER_BOUNDS = 1;
 	private static final int ROUND_EDGE_RADIUS = 2;
 	private static final int WIDTH_AND_HEIGHT_ADDEND = 10;
-	
+
 	public NodeGeneElement(final PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
 			final DynamicPathwaysCanvas parentGraph, Set<PathwayGraph> pathways) {
-		super(vertexRep, pathwayVertices, parentGraph, pathways,WIDTH_AND_HEIGHT_ADDEND);
-		
+		super(vertexRep, pathwayVertices, parentGraph, pathways, WIDTH_AND_HEIGHT_ADDEND);
+
 		onPick(new IPickingListener() {
 
 			@Override
 			public void pick(Pick pick) {
 				AdvancedPick p = (AdvancedPick) pick;
-				
+
 				/**
 				 * inform other views about picking event
 				 */
@@ -43,29 +43,28 @@ public class NodeGeneElement extends NodeElement {
 				 * if the user right clicked - show context menu
 				 */
 				if (pick.getPickingMode() == PickingMode.RIGHT_CLICKED) {
-//					parentGraph.setOrResetFilteringNode(NodeGeneElement.this);
+					// parentGraph.setOrResetFilteringNode(NodeGeneElement.this);
 
 					context.getSWTLayer().showContextMenu(Lists.newArrayList(filterPathwayMenu, focusNodeMenu));
-					
+
 				}
 
 				/**
 				 * if the user clicked on the node
 				 */
 				if (pick.getPickingMode() == PickingMode.CLICKED) {
-					
+
 					System.out.println(NodeGeneElement.this.toString());
 
 					parentGraph.setOrResetSelectedNode(NodeGeneElement.this);
 
 					if (p.isCtrlDown()) {
-//						parentGraph.setOrResetFilteringNode(NodeGeneElement.this);
-//						
-//						parentGraph.filterPathwayList();
-						
+						// parentGraph.setOrResetFilteringNode(NodeGeneElement.this);
+						//
+						// parentGraph.filterPathwayList();
+
 						EventPublisher.trigger(focusNodeEvent);
 					}
-
 
 				}
 				/**
@@ -89,46 +88,31 @@ public class NodeGeneElement extends NodeElement {
 
 			}
 		});
-		
+
 	}
-
-
 
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {
+		/*
+		 * Set the contour & filling colour according to the node's state (clicked, mouse over, used for filtering,...)
+		 */
+		setColors();
 
-//		short width = vertexRep.getWidth();
-//		short height = vertexRep.getHeight();
-		
-//		short width = (short)this.width;
-//		short height = (short)this.height;
-		
-		short width = (short)w;
-		short height = (short)h;	
+		short width = (short) w;
+		short height = (short) h;
+
 
 		/**
-		 * represent BORDER of node different:
-		 * if it was used for filtering, clicked on, the mouse is moved over or nothing of these was done
+		 * if it selected it has a thicker contour
 		 */
-		if (isThisNodeUsedForFiltering) {
-			g.color(FILTER_CONTOUR_COLOR).fillRoundedRect(-1, -1, width,
-					height, ROUND_EDGE_RADIUS);
-		} else if (isThisNodeSelected) {
-			g.color(SELECTION_CONTOUR_COLOR).fillRoundedRect(-1, -1, width,
-					height, ROUND_EDGE_RADIUS);
-		} else if (isMouseOver) {
-			g.color(MOUSEROVER_CONTOUR_COLOR).fillRoundedRect(-1, -1, width,
-					height, ROUND_EDGE_RADIUS);
-		} else if (wasPreviouslyFocusNode) {
-			g.color(PREVIOUS_FOCUS_NODE_COLOR).fillRoundedRect(-1, -1, width,
-					height, ROUND_EDGE_RADIUS);
-		}
-		else {
-			g.color(CONTOUR_COLOR).fillRoundedRect(0, 0, width -2, height -2,
-					ROUND_EDGE_RADIUS);
-		}
-					
-		g.color(NODE_FILLING_COLOR).fillRoundedRect(OUTER_BOUNDS, OUTER_BOUNDS, width - INNER_BOUNDS, height - INNER_BOUNDS, ROUND_EDGE_RADIUS);
+//		if (isSomehowSelected()) {
+//			g.color(contourColor).fillRoundedRect(-1, -1, width, height, ROUND_EDGE_RADIUS);
+//		} else {
+			g.color(contourColor).fillRoundedRect(0, 0, width - 2, height - 2, ROUND_EDGE_RADIUS);
+//		}
+
+		g.color(fillingColor).fillRoundedRect(OUTER_BOUNDS, OUTER_BOUNDS, width - INNER_BOUNDS,
+				height - INNER_BOUNDS, ROUND_EDGE_RADIUS);
 
 		if (displayedVertex == null)
 			displayedVertex = vertexRep.getPathwayVertices().get(0);
@@ -144,14 +128,10 @@ public class NodeGeneElement extends NodeElement {
 
 	}
 
-
-
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
 		return super.toString();
 	}
-	
-	
 
 }

@@ -1391,5 +1391,20 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		this.bubblesetCanvas = new CanvasComponent(shaper);
 		this.bubblesetCanvas.setDefaultView();
 	}
+	
+	
+	
+	public void printCommonNodes(PathwayGraph contextPathway) {
+		System.out.println("=================" + "\nContext PW:\n" + "--------------");
+		for(PathwayVertexRep vrep : contextPathway.vertexSet()) {
+			for(PathwayVertex vertex : vrep.getPathwayVertices()) {
+				NodeElement commonNode = uniqueVertexMap.get(vertex);
+				if(commonNode == null)
+					continue;
+				
+				System.out.println("Network Node: " + commonNode + " ContextPW Vrep: " + vrep);
+			}
+		}
+	}
 
 }

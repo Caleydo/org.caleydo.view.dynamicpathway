@@ -140,6 +140,9 @@ public class DynamicPathwayView extends AGLElementView {
 		try {
 			int envSize = controllBar.getNodeEnvironmentSize();
 			if (addContextPathway && envSize > 0) {
+				
+				//TODO: remove
+				dynamicGraphCanvas.printCommonNodes(pathwayToAdd);
 
 				PathwayGraph subPathway;
 				if (dynamicGraphCanvas.getFocusNode() == null)
