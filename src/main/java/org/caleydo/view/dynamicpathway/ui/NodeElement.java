@@ -33,16 +33,29 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	protected String uid;
 
 	protected static final int FONT_SIZE = 12;
-	protected static final String CONTOUR_COLOR = Color.LIGHT_GRAY.getHEX();
-//	protected static final String CONTEXT_FILLING_COLOR = "#F2F2F2";
-	protected static final String PREVIOUS_FOCUS_NODE_COLOR = Color.YELLOW.getHEX();// "#3067C6";
-	protected static final String NODE_FILLING_COLOR = "#F2F2F2";
-	protected static final String SELECTION_CONTOUR_COLOR = "F8AB65";//SelectionType.SELECTION.getColor().getHEX();
-	protected static final String MOUSEROVER_CONTOUR_COLOR = "#FDE7B9";//SelectionType.MOUSE_OVER.getColor().getHEX();
-	protected static final String FILTER_CONTOUR_COLOR = "#F15C4C";
-	
-	protected String contourColor;
-	protected String fillingColor;
+
+	public enum ENodeState {
+		FOCUS("#F15C4C", "#87332A"), SELECTED("#F8AB65", SelectionType.SELECTION.getColor().getHEX()), MOUSE_OVER(
+				"#FDE7B9", "#F9C44F"), DEFAULT("#F2F2F2", Color.LIGHT_GRAY.getHEX()), MOUSE_OUT("",""),  DESELECT("","");
+
+		private final String fillingColor;
+		private final String contourColor;
+
+		private ENodeState(String fillingColor, String contourColor) {
+			this.fillingColor = fillingColor;
+			this.contourColor = contourColor;
+		}
+
+		public String getFillingColor() {
+			return fillingColor;
+		}
+
+		public String getContourColor() {
+			return contourColor;
+		}
+	}
+
+	protected ENodeState state;
 
 	protected PathwayVertexRep vertexRep;
 	protected List<PathwayVertex> vertices;
@@ -88,8 +101,6 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	protected GenericContextMenuItem focusNodeMenu;
 	protected ChangeFocusNodeEvent focusNodeEvent;
 	protected GenericContextMenuItem filterPathwayMenu;
-	
-	
 
 	public NodeElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
 			final DynamicPathwaysCanvas parentGraph, Set<PathwayGraph> pathways, float widthAndHeightAddend) {
@@ -106,16 +117,15 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		this.vrepsWithThisNodesVerticesList = new LinkedList<PathwayVertexRep>();
 		this.focusNodeEvent = new ChangeFocusNodeEvent(this);
 		this.representedPathways = new HashSet<PathwayGraph>(pathways);
-		this.contourColor = CONTOUR_COLOR;
-		this.fillingColor = NODE_FILLING_COLOR;
+		this.state = ENodeState.DEFAULT;
 
 		if (vertices.size() > 0 && vertices.get(0).getType() != EPathwayVertexType.group) {
 			this.displayedVertex = vertices.get(0);
 			this.label = displayedVertex.getHumanReadableName();
 			this.height = this.vertexRep.getHeight() + widthAndHeightAddend;
 			this.width = this.vertexRep.getWidth() + widthAndHeightAddend;
-			this.centerX = this.vertexRep.getLowerLeftCornerX()+ this.height/2.0f;
-			this.centerY = this.vertexRep.getLowerLeftCornerY() + this.width/2.0f;
+			this.centerX = this.vertexRep.getLowerLeftCornerX() + this.height / 2.0f;
+			this.centerY = this.vertexRep.getLowerLeftCornerY() + this.width / 2.0f;
 		}
 
 		focusNodeMenu = new GenericContextMenuItem("Choose as focus node", focusNodeEvent);
@@ -182,14 +192,6 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 			}
 		}
 		return null;
-	}
-
-	public Boolean getIsNodeSelected() {
-		return this.isThisNodeSelected;
-	}
-
-	public Boolean getIsThisNodeUsedForFiltering() {
-		return this.isThisNodeUsedForFiltering;
 	}
 
 	public String getLabel() {
@@ -298,6 +300,34 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		repaint();
 	}
 
+	public void setNodeState(ENodeState newState) {
+		if (state == newState)
+			return;
+		
+		switch (newState) {
+		case MOUSE_OVER:
+			if(state == ENodeState.DEFAULT)
+				state = newState;
+			break;
+		case SELECTED:
+			if(state == ENodeState.DEFAULT || state == ENodeState.MOUSE_OVER)
+				state = newState;
+			break;
+		case MOUSE_OUT:
+			if(state == ENodeState.MOUSE_OVER)
+				state = ENodeState.DEFAULT;
+			break;
+		case DESELECT:
+			if(state != ENodeState.FOCUS)
+				state = ENodeState.DEFAULT;
+			break;
+		default:
+			this.state = newState;
+		}
+		
+		repaint();
+	}
+
 	public void setVertices(List<PathwayVertex> vertices) {
 		this.vertices = vertices;
 		this.displayedVertex = vertices.get(0);
@@ -316,7 +346,8 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	public String toString() {
 		String outputString = uid + ": ";
 		outputString += "Label(" + label + ") ";
-		outputString += "wasMerged(" + wasMerged + ")";
+		outputString += "wasMerged(" + wasMerged + ") ";
+		outputString += "state(" + state + ") ";
 		outputString += "VrepSize("
 				+ ((vrepsWithThisNodesVerticesList != null) ? Integer.toString(vrepsWithThisNodesVerticesList.size())
 						: "1") + ") ";
@@ -359,44 +390,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 			}
 		}));
 	}
-	
-	/**
-	 * sets the colors (contour & filling) based on the nodes state
-	 */
-	protected void setColors() {
-		
-		if (isThisNodeUsedForFiltering) {
-			this.fillingColor = FILTER_CONTOUR_COLOR;
-			this.contourColor = "#87332A";
-		} else if (isThisNodeSelected) {
-			this.fillingColor = SELECTION_CONTOUR_COLOR;
-			this.contourColor = SelectionType.SELECTION.getColor().getHEX();
-		} else if (isMouseOver) {
-			this.fillingColor = MOUSEROVER_CONTOUR_COLOR;
-			this.contourColor = "#F9C44F";
-		} else if (wasPreviouslyFocusNode) {
-			this.fillingColor = PREVIOUS_FOCUS_NODE_COLOR;
-			this.contourColor = CONTOUR_COLOR;
-		}
-		else {
-			this.fillingColor = NODE_FILLING_COLOR;
-			this.contourColor = CONTOUR_COLOR;
-		}
-		
-		
-	}
-	
-	/**
-	 * Checks if it somehow selected, because then it has a thicker contour
-	 * 
-	 * @return true if is selected, false otherwise
-	 */
-	protected boolean isSomehowSelected() {
-		if(isThisNodeUsedForFiltering || isThisNodeSelected || isMouseOver || wasPreviouslyFocusNode)
-			return true;
-		else
-			return false;
-	}
+
 
 	protected void renderPickImpl(GLGraphics g, float w, float h) {
 		super.renderPickImpl(g, w, h);

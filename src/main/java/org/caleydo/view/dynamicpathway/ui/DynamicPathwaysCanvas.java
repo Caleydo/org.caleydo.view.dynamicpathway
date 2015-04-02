@@ -57,6 +57,7 @@ import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayout;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutEdge;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutGraph;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
+import org.caleydo.view.dynamicpathway.ui.NodeElement.ENodeState;
 import org.caleydo.view.dynamicpathway.util.GraphMergeUtil;
 import org.jgrapht.graph.DefaultEdge;
 
@@ -532,6 +533,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		if (focusNode != null) {
 			// System.out.println("Removing filtering node: " + currentFilteringNode);
 			focusNode.setIsThisNodeUsedForFiltering(false);
+			focusNode.setNodeState(ENodeState.DEFAULT);
 			focusNode = null;
 		}
 	}
@@ -554,8 +556,9 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 			// System.out.println("Setting new filtering node without old: " + newFilteringNode);
 			focusNode = newFilteringNode;
 			focusNode.setIsThisNodeUsedForFiltering(true);
+			focusNode.setNodeState(ENodeState.FOCUS);
+			System.out.println("\n---------------------------------------------------" + "New Focus Node: " + focusNode);
 			focusNodeChanged = false;
-
 		}
 
 		/**
@@ -564,9 +567,13 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		else if (newFilteringNode != null) {
 			// System.out.println("Changing filtering node from  " + currentFilteringNode + " to " + newFilteringNode);
 			focusNode.setIsThisNodeUsedForFiltering(false);
+			focusNode.setNodeState(ENodeState.DEFAULT);
+			System.out.println("---------------------------------------------------\n"+"Old Focus Node: " + focusNode);
 			focusNode = newFilteringNode;
 			focusNode.setIsThisNodeUsedForFiltering(true);
+			focusNode.setNodeState(ENodeState.FOCUS);
 			focusNodeChanged = true;
+			System.out.println("New Focus Node: " + focusNode);
 
 		} else
 			try {
@@ -602,6 +609,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		if (currentSelectedNode == null) {
 			currentSelectedNode = newSelectedNode;
 			currentSelectedNode.setIsNodeSelected(true);
+			currentSelectedNode.setNodeState(ENodeState.SELECTED);
 		}
 
 		/**
@@ -609,9 +617,11 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		 */
 		else {
 			currentSelectedNode.setIsNodeSelected(false);
+			currentSelectedNode.setNodeState(ENodeState.DESELECT);
+			
 			currentSelectedNode = newSelectedNode;
 			currentSelectedNode.setIsNodeSelected(true);
-
+			currentSelectedNode.setNodeState(ENodeState.SELECTED);
 		}
 
 	}

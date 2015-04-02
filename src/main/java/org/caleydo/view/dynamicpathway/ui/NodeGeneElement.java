@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.caleydo.core.event.EventPublisher;
-import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout.Column.VAlign;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.picking.AdvancedPick;
@@ -72,6 +71,8 @@ public class NodeGeneElement extends NodeElement {
 				 */
 				if (pick.getPickingMode() == PickingMode.MOUSE_OVER) {
 					isMouseOver = true;
+
+					NodeGeneElement.this.setNodeState(ENodeState.MOUSE_OVER);
 				}
 
 				/**
@@ -79,6 +80,8 @@ public class NodeGeneElement extends NodeElement {
 				 */
 				if (pick.getPickingMode() == PickingMode.MOUSE_OUT) {
 					isMouseOver = false;
+
+					NodeGeneElement.this.setNodeState(ENodeState.MOUSE_OUT);
 				}
 
 				/**
@@ -93,26 +96,21 @@ public class NodeGeneElement extends NodeElement {
 
 	@Override
 	protected void renderImpl(GLGraphics g, float w, float h) {
-		/*
-		 * Set the contour & filling colour according to the node's state (clicked, mouse over, used for filtering,...)
-		 */
-		setColors();
 
 		short width = (short) w;
 		short height = (short) h;
 
+		String contourColor = state.getContourColor();
+		String fillingColor = state.getFillingColor();
 
 		/**
 		 * if it selected it has a thicker contour
 		 */
-//		if (isSomehowSelected()) {
-//			g.color(contourColor).fillRoundedRect(-1, -1, width, height, ROUND_EDGE_RADIUS);
-//		} else {
-			g.color(contourColor).fillRoundedRect(0, 0, width - 2, height - 2, ROUND_EDGE_RADIUS);
-//		}
 
-		g.color(fillingColor).fillRoundedRect(OUTER_BOUNDS, OUTER_BOUNDS, width - INNER_BOUNDS,
-				height - INNER_BOUNDS, ROUND_EDGE_RADIUS);
+		g.color(contourColor).fillRoundedRect(0, 0, width - 2, height - 2, ROUND_EDGE_RADIUS);
+
+		g.color(fillingColor).fillRoundedRect(OUTER_BOUNDS, OUTER_BOUNDS, width - INNER_BOUNDS, height - INNER_BOUNDS,
+				ROUND_EDGE_RADIUS);
 
 		if (displayedVertex == null)
 			displayedVertex = vertexRep.getPathwayVertices().get(0);

@@ -3,15 +3,12 @@ package org.caleydo.view.dynamicpathway.ui;
 import java.util.List;
 import java.util.Set;
 
-import org.caleydo.core.util.color.Color;
-import org.caleydo.core.view.contextmenu.GenericContextMenuItem;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.picking.AdvancedPick;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.core.view.opengl.picking.PickingMode;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
-import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 
@@ -73,6 +70,7 @@ public class NodeCompoundElement extends NodeElement {
 				 */
 				if (pick.getPickingMode() == PickingMode.MOUSE_OVER) {
 					isMouseOver = true;
+					NodeCompoundElement.this.setNodeState(ENodeState.MOUSE_OVER);
 				}
 
 				/**
@@ -80,6 +78,7 @@ public class NodeCompoundElement extends NodeElement {
 				 */
 				if (pick.getPickingMode() == PickingMode.MOUSE_OUT) {
 					isMouseOver = false;
+					NodeCompoundElement.this.setNodeState(ENodeState.DEFAULT);
 				}
 
 				/**
@@ -97,7 +96,9 @@ public class NodeCompoundElement extends NodeElement {
 		/*
 		 * Set the contour & filling colour according to the node's state (clicked, mouse over, used for filtering,...)
 		 */
-		setColors();
+		
+		String contourColor = state.getContourColor();
+		String fillingColor = state.getFillingColor();
 		
 		this.height = h;
 		this.width = w;
@@ -106,11 +107,7 @@ public class NodeCompoundElement extends NodeElement {
 		short width = (short) w;
 
 		// contour
-		if(isSomehowSelected()) {
-			g.color(contourColor).fillCircle(0, 0, width);
-		} else {
 			g.color(contourColor).fillCircle(0, 0, width + INNER_PADDING- HIGHLIGHT_RIGHT_PADDING);
-		}
 		
 		g.color(fillingColor).fillCircle(0, 0, width- HIGHLIGHT_RIGHT_PADDING);
 
