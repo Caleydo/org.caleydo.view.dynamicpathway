@@ -69,7 +69,6 @@ public class NodeCompoundElement extends NodeElement {
 				 * if the user moved the curser over this node
 				 */
 				if (pick.getPickingMode() == PickingMode.MOUSE_OVER) {
-					isMouseOver = true;
 					NodeCompoundElement.this.setNodeState(ENodeState.MOUSE_OVER);
 				}
 
@@ -77,7 +76,6 @@ public class NodeCompoundElement extends NodeElement {
 				 * if the user's curser left the node
 				 */
 				if (pick.getPickingMode() == PickingMode.MOUSE_OUT) {
-					isMouseOver = false;
 					NodeCompoundElement.this.setNodeState(ENodeState.DEFAULT);
 				}
 

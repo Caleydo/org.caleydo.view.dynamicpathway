@@ -531,8 +531,6 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	 */
 	public void removeFocusNode() {
 		if (focusNode != null) {
-			// System.out.println("Removing filtering node: " + currentFilteringNode);
-			focusNode.setIsThisNodeUsedForFiltering(false);
 			focusNode.setNodeState(ENodeState.DEFAULT);
 			focusNode = null;
 		}
@@ -555,9 +553,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		if (focusNode == null) {
 			// System.out.println("Setting new filtering node without old: " + newFilteringNode);
 			focusNode = newFilteringNode;
-			focusNode.setIsThisNodeUsedForFiltering(true);
 			focusNode.setNodeState(ENodeState.FOCUS);
-			System.out.println("\n---------------------------------------------------" + "New Focus Node: " + focusNode);
 			focusNodeChanged = false;
 		}
 
@@ -566,11 +562,9 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		 */
 		else if (newFilteringNode != null) {
 			// System.out.println("Changing filtering node from  " + currentFilteringNode + " to " + newFilteringNode);
-			focusNode.setIsThisNodeUsedForFiltering(false);
 			focusNode.setNodeState(ENodeState.DEFAULT);
-			System.out.println("---------------------------------------------------\n"+"Old Focus Node: " + focusNode);
+
 			focusNode = newFilteringNode;
-			focusNode.setIsThisNodeUsedForFiltering(true);
 			focusNode.setNodeState(ENodeState.FOCUS);
 			focusNodeChanged = true;
 			System.out.println("New Focus Node: " + focusNode);
@@ -608,7 +602,6 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		 */
 		if (currentSelectedNode == null) {
 			currentSelectedNode = newSelectedNode;
-			currentSelectedNode.setIsNodeSelected(true);
 			currentSelectedNode.setNodeState(ENodeState.SELECTED);
 		}
 
@@ -616,11 +609,9 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		 * if another node was selected before, deselect it and selected the new node
 		 */
 		else {
-			currentSelectedNode.setIsNodeSelected(false);
 			currentSelectedNode.setNodeState(ENodeState.DESELECT);
 			
 			currentSelectedNode = newSelectedNode;
-			currentSelectedNode.setIsNodeSelected(true);
 			currentSelectedNode.setNodeState(ENodeState.SELECTED);
 		}
 

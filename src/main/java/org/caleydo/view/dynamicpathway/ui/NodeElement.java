@@ -73,13 +73,6 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	protected double centerY;
 	protected Coordinates coords;
 
-	/**
-	 * needed for rendering node highlighting
-	 */
-	protected Boolean isThisNodeSelected;
-	protected Boolean isThisNodeUsedForFiltering;
-	protected Boolean isMouseOver;
-
 	protected String label;
 
 	protected DynamicPathwaysCanvas parentGraph;
@@ -109,9 +102,6 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		this.centerX = vertexRep.getCenterX();
 		this.centerY = vertexRep.getCenterY();
 		this.coords = new Coordinates();
-		this.isThisNodeSelected = false;
-		this.isThisNodeUsedForFiltering = false;
-		this.isMouseOver = false;
 		this.parentGraph = parentGraph;
 		this.vertices = new CopyOnWriteArrayList<PathwayVertex>(pathwayVertices);
 		this.vrepsWithThisNodesVerticesList = new LinkedList<PathwayVertexRep>();
@@ -288,16 +278,6 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	public void setIsMerged(boolean isMerged) {
 		this.isMerged = isMerged;
-	}
-
-	public void setIsNodeSelected(Boolean selection) {
-		this.isThisNodeSelected = selection;
-		repaint();
-	}
-
-	public void setIsThisNodeUsedForFiltering(Boolean selection) {
-		this.isThisNodeUsedForFiltering = selection;
-		repaint();
 	}
 
 	public void setNodeState(ENodeState newState) {
