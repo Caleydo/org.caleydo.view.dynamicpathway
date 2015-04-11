@@ -34,12 +34,11 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 	private double globalEdgeLength;
 
 	/**
-	 * If temperature & cooldown are not set by the user, they are set when doLayout is called
-	 * In order to not override the user's setting, we have to save (in the constructor) if
-	 * it was set or not
+	 * If temperature & cooldown are not set by the user, they are set when doLayout is called In order to not override
+	 * the user's setting, we have to save (in the constructor) if it was set or not
 	 */
 	private boolean isTemperatureAndCooldownSetByUser;
-	
+
 	/**
 	 * needed for setting the bounds, so nodes are (re)drawn
 	 */
@@ -69,8 +68,8 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 	 * Standard calculation may not be applicable for the current graph. (e.g. graph is too sparse) If the
 	 * repulsionMultiplier is set higher, than not connected nodes are farer apart and vice versa.
 	 * 
-	 * If it is set to -1, it is set to the distance between the 2 nodes. Since the repulsionMultiplier is
-	 * inversely proportional to the repulsion force, this strongly limits the repulsion force
+	 * If it is set to -1, it is set to the distance between the 2 nodes. Since the repulsionMultiplier is inversely
+	 * proportional to the repulsion force, this strongly limits the repulsion force
 	 */
 	private double repulsionMultiplier;
 
@@ -80,12 +79,10 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 	 * Standard calculation may not be applicable for the current graph. (e.g. graph is too sparse) If the
 	 * attractionMultiplier is set smaller, than connected nodes are closer together and vice versa.
 	 * 
-	 * If it is set to -1, it is set to the GlobalEdgeLength. Since the attractionMultiplier is inversely
-	 * proportional to the attraction force, this strongly limits the attraction force
+	 * If it is set to -1, it is set to the GlobalEdgeLength. Since the attractionMultiplier is inversely proportional
+	 * to the attraction force, this strongly limits the attraction force
 	 */
 	private double attractionMultiplier;
-
-
 
 	/**
 	 * added to the width & height, when setting the bounds -> sets bounds bigger
@@ -112,8 +109,8 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 		this.isRepulsionMultiplierSetToDistance = false;
 
 		/**
-		 * Temperature & cooldown are set to -1.0 by default, so if these are not -1.0, the user set them by
-		 * the LayoutBuilder
+		 * Temperature & cooldown are set to -1.0 by default, so if these are not -1.0, the user set them by the
+		 * LayoutBuilder
 		 */
 		if (temperature >= 0.0) {
 			this.isTemperatureAndCooldownSetByUser = true;
@@ -122,8 +119,8 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 		}
 
 		/**
-		 * If it is set to -1, it is set to the distance between the 2 nodes. Since the repulsionMultiplier is
-		 * inversely proportional to the repulsion force, this strongly limits the repulsion force
+		 * If it is set to -1, it is set to the distance between the 2 nodes. Since the repulsionMultiplier is inversely
+		 * proportional to the repulsion force, this strongly limits the repulsion force
 		 */
 		if (repulsionMultiplier < 0.0)
 			this.isRepulsionMultiplierSetToDistance = true;
@@ -157,8 +154,8 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 	 * @return whether a relayout is needed
 	 */
 	@Override
-	public boolean doLayout(List<? extends IGLLayoutElement> children, float w, float h,
-			IGLLayoutElement parent, int deltaTimeMs) {
+	public boolean doLayout(List<? extends IGLLayoutElement> children, float w, float h, IGLLayoutElement parent,
+			int deltaTimeMs) {
 
 		if (children.size() == 0)
 			return false;
@@ -171,7 +168,7 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 		height = h;
 
 		if (!isTemperatureAndCooldownSetByUser) {
-			temperature = width / 10;
+			temperature = width / 10.0;
 			cooldown = temperature / maxIterations;
 		}
 
@@ -201,8 +198,8 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 		for (int i = 1; i <= maxIterations; i++) {
 
 			/**
-			 * reset Displacement for the current iteration otherwise it would get too big and the nodes would
-			 * be out of bounds
+			 * reset Displacement for the current iteration otherwise it would get too big and the nodes would be out of
+			 * bounds
 			 */
 			for (IFRLayoutNode node : nodeSet) {
 				displacementMap.put(node, new Point2D.Double());
@@ -221,7 +218,7 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 			for (IFRLayoutEdge edge : edgeSet) {
 				calcAttractiveForces(edge);
 			}
-			
+
 			/**
 			 * setting bounds of edges, so they are updated (renderImpl is called)
 			 */
@@ -233,8 +230,6 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 				IFRLayoutNode node = (IFRLayoutNode) child.asElement();
 				calcNewVertexPositions(child, node);
 			}
-
-
 
 			coolDownTemp();
 
@@ -256,30 +251,31 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 	 */
 	private void calcRepulsiveForces(IFRLayoutNode currentNode, IFRLayoutNode otherNode) {
 
-		if (currentNode != otherNode) {
-			double xDistance = currentNode.getCenterX() - otherNode.getCenterX();
-			double yDistance = currentNode.getCenterY() - otherNode.getCenterY();
+		if (currentNode.equals(otherNode))
+			return;
+		
+		double xDistance = currentNode.getCenterX() - otherNode.getCenterX();
+		double yDistance = currentNode.getCenterY() - otherNode.getCenterY();
 
-			double distance = calcDistance(xDistance, yDistance);
+		double distance = calcDistance(xDistance, yDistance);
 
-			if (isRepulsionMultiplierSetToDistance) {
-				this.repulsionMultiplier = distance;
+		if (isRepulsionMultiplierSetToDistance) {
+			this.repulsionMultiplier = distance;
+		}
+
+		double repulsiveForce = globalEdgeLength * globalEdgeLength / (distance * repulsionMultiplier);
+
+		if (distance > 0) {
+			double xDisplacementFactor = (xDistance / distance) * repulsiveForce;
+			double yDisplacementFactor = (yDistance / distance) * repulsiveForce;
+
+			try {
+				editDisplacement(currentNode, xDisplacementFactor, yDisplacementFactor);
+			} catch (NodeMergingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 
-			double repulsiveForce = globalEdgeLength * globalEdgeLength / (distance * repulsionMultiplier);
-
-			if (distance > 0) {
-				double xDisplacementFactor = (xDistance / distance) * repulsiveForce;
-				double yDisplacementFactor = (yDistance / distance) * repulsiveForce;
-
-				try {
-					editDisplacement(currentNode, xDisplacementFactor, yDisplacementFactor);
-				} catch (NodeMergingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-			}
 		}
 
 	}
@@ -340,7 +336,7 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 
 		double maxDisplacementLimit = Math.min(displacementDistance, temperature);
 
-		if (maxDisplacementLimit > 0) {
+		if (maxDisplacementLimit > 0.0) {
 			xPosition += (xDisplacement / displacementDistance) * maxDisplacementLimit;
 			yPosition += (yDisplacement / displacementDistance) * maxDisplacementLimit;
 		}
@@ -377,8 +373,8 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 
 	private void coolDownTemp() {
 		temperature -= cooldown;
-		if (temperature < 0)
-			temperature = 0;
+		if (temperature < 0.0)
+			temperature = 0.0;
 	}
 
 	/**
@@ -386,19 +382,21 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 	 * 
 	 * @param node
 	 *            which's displacement has to be edited
-	 * @param x the addend for the xDisplacement value
-	 * @param y the addend for the yDisplacement value
-	 * @throws NodeMergingException 
+	 * @param x
+	 *            the addend for the xDisplacement value
+	 * @param y
+	 *            the addend for the yDisplacement value
+	 * @throws NodeMergingException
 	 * 
 	 */
 	private void editDisplacement(IFRLayoutNode node, double x, double y) throws NodeMergingException {
-		
-		if(!displacementMap.containsKey(node))
+
+		if (!displacementMap.containsKey(node))
 			throw new NodeMergingException("Node(" + node + ") is not in displacementMap");
-		
-		if(displacementMap.get(node) == null)
+
+		if (displacementMap.get(node) == null)
 			throw new NodeMergingException("Node(" + node + ") contained no value in displacementMap");
-		
+
 		double xDisplacement = displacementMap.get(node).getX() + x;
 		double yDisplacement = displacementMap.get(node).getY() + y;
 		displacementMap.remove(node);

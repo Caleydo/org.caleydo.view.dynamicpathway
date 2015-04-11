@@ -60,7 +60,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	protected PathwayVertexRep vertexRep;
 	protected List<PathwayVertex> vertices;
 	// TODO: remove
-	protected List<PathwayVertexRep> vrepsWithThisNodesVerticesList;
+	protected List<PathwayVertexRep> vreps;
 	private Set<PathwayGraph> representedPathways;
 
 	/**
@@ -104,7 +104,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		this.coords = new Coordinates();
 		this.parentGraph = parentGraph;
 		this.vertices = new CopyOnWriteArrayList<PathwayVertex>(pathwayVertices);
-		this.vrepsWithThisNodesVerticesList = new LinkedList<PathwayVertexRep>();
+		this.vreps = new LinkedList<PathwayVertexRep>();
 		this.focusNodeEvent = new ChangeFocusNodeEvent(this);
 		this.representedPathways = new HashSet<PathwayGraph>(pathways);
 		this.state = ENodeState.DEFAULT;
@@ -136,7 +136,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	}
 
 	public void addVrepWithThisNodesVerticesList(PathwayVertexRep vrepWithThisNodesVertices) {
-		this.vrepsWithThisNodesVerticesList.add(vrepWithThisNodesVertices);
+		this.vreps.add(vrepWithThisNodesVertices);
 	}
 
 	public Point2D.Double getCenter() {
@@ -205,8 +205,8 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		return vertices;
 	}
 
-	public List<PathwayVertexRep> getVrepsWithThisNodesVerticesList() {
-		return vrepsWithThisNodesVerticesList;
+	public List<PathwayVertexRep> getVreps() {
+		return vreps;
 	}
 
 	@Override
@@ -329,7 +329,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 		outputString += "wasMerged(" + wasMerged + ") ";
 		outputString += "state(" + state + ") ";
 		outputString += "VrepSize("
-				+ ((vrepsWithThisNodesVerticesList != null) ? Integer.toString(vrepsWithThisNodesVerticesList.size())
+				+ ((vreps != null) ? Integer.toString(vreps.size())
 						: "1") + ") ";
 		outputString += "Vertices[" + vertices + "]";
 		outputString += "Pathways[" + getPathwaySetTitles() + "]";

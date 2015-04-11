@@ -23,7 +23,82 @@ import org.caleydo.view.dynamicpathway.ui.NodeGeneElement;
 import org.caleydo.view.dynamicpathway.ui.NodeGroupElement;
 import org.jgrapht.graph.DefaultEdge;
 
-public class GraphMergeUtil {
+public final class GraphMergeUtil {
+
+	private static final int DEFAULT_ADD_PATHWAY_DURATION = DynamicPathwaysCanvas.DEFAULT_ADD_PATHWAY_DURATION;
+
+	public static final NodeElement createNewMergedNodeElement(List<PathwayVertex> sameVerticesList,
+			PathwayGraph pathwayToAdd, PathwayVertexRep addingVrep, NodeElement mergingWithNode,
+			boolean mergeWithinSameGraph, boolean addToSameGraph, DynamicPathwaysCanvas layoutContainer) {
+
+		/**
+		 * Create the merged Vrep
+		 */
+		PathwayGraph mergedVrepsPathway;
+		if (addToSameGraph || mergeWithinSameGraph)
+			mergedVrepsPathway = pathwayToAdd;
+		else
+			mergedVrepsPathway = layoutContainer.getDynamicPathway().getCombinedGraph();
+		PathwayVertexRep mergedVrep = GraphMergeUtil.createNewVrep(mergingWithNode.getVertexRep(), sameVerticesList,
+				mergedVrepsPathway);
+
+		/**
+		 * Create the merged node
+		 */
+
+		List<PathwayVertexRep> vreps = new LinkedList<PathwayVertexRep>();
+		vreps.add(addingVrep);
+		vreps.add(mergingWithNode.getVertexRep());
+
+		List<PathwayVertexRep> vrepList = mergingWithNode.getVreps();
+		if (vrepList.size() > 0) {
+			for (PathwayVertexRep vrep : vrepList) {
+				if (!vreps.contains(vrep))
+					vreps.add(vrep);
+			}
+		}
+
+		NodeElement mergedNode;
+		if (mergeWithinSameGraph) {
+			mergedNode = GraphMergeUtil.createNewNodeElement(mergedVrep, sameVerticesList, vreps, layoutContainer,
+					pathwayToAdd);
+
+			if (!addToSameGraph)
+				mergedNode.setIsMerged(false);
+		} else {
+			Set<PathwayGraph> pathways = new HashSet<PathwayGraph>(mergingWithNode.getPathways());
+			pathways.add(pathwayToAdd);
+			mergedNode = GraphMergeUtil.createNewNodeElement(mergedVrep, sameVerticesList, vreps, layoutContainer,
+					pathways);
+		}
+
+		mergedNode.setCenter(mergingWithNode.getCenterX(), mergingWithNode.getCenterY());
+
+		return mergedNode;
+	}
+
+	/**
+	 * creates a new vertex rep based on a given one with mainVertex as it's name
+	 * 
+	 * @param oldVrep
+	 *            everything besides the name is based on this vrep
+	 * @param mainVertex
+	 *            defines the vreps name
+	 * @return a new vrep
+	 */
+	public static final PathwayVertexRep createNewVrep(PathwayVertexRep oldVrep, List<PathwayVertex> newVrepVertexList,
+			PathwayGraph newVrepsPathway) {
+		PathwayVertexRep newVrep = new PathwayVertexRep(newVrepVertexList.get(0).getHumanReadableName(), oldVrep
+				.getShapeType().name(), oldVrep.getCenterX(), oldVrep.getCenterY(), oldVrep.getWidth(),
+				oldVrep.getHeight());
+
+		for (PathwayVertex mergedVertex : newVrepVertexList)
+			newVrep.addPathwayVertex(mergedVertex);
+
+		newVrep.setPathway(newVrepsPathway);
+
+		return newVrep;
+	}
 
 	/**
 	 * convenience method for creating a new node with just one pathway <br />
@@ -32,13 +107,13 @@ public class GraphMergeUtil {
 	 * 
 	 * @return
 	 */
-	public static NodeElement createNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
-			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwaysCanvas graphRepresenation,
+	public static final NodeElement createNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
+			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwaysCanvas layoutContainer,
 			PathwayGraph pathway) {
 		Set<PathwayGraph> pathways = new HashSet<PathwayGraph>();
 		pathways.add(pathway);
 
-		return createNewNodeElement(vrep, pathwayVertices, vrepsWithThisNodesVertices, graphRepresenation, pathways);
+		return createNewNodeElement(vrep, pathwayVertices, vrepsWithThisNodesVertices, layoutContainer, pathways);
 	}
 
 	/**
@@ -54,8 +129,8 @@ public class GraphMergeUtil {
 	 *            needed for callback method
 	 * @return the created node element
 	 */
-	public static NodeElement createNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
-			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwaysCanvas graphRepresenation,
+	public static final NodeElement createNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
+			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwaysCanvas layoutContainer,
 			Set<PathwayGraph> pathways) {
 
 		/**
@@ -67,13 +142,13 @@ public class GraphMergeUtil {
 			PathwayVertexGroupRep groupVrep = (PathwayVertexGroupRep) vrep;
 
 			if (groupVrep.getGroupedVertexReps().size() > 0)
-				node = new NodeGroupElement(vrep, pathwayVertices, graphRepresenation, pathways);
+				node = new NodeGroupElement(vrep, pathwayVertices, layoutContainer, pathways);
 			else
 				return null;
 		} else if (pathwayVertices.get(0).getType() == EPathwayVertexType.compound) {
-			node = new NodeCompoundElement(vrep, pathwayVertices, graphRepresenation, pathways);
+			node = new NodeCompoundElement(vrep, pathwayVertices, layoutContainer, pathways);
 		} else {
-			node = new NodeGeneElement(vrep, pathwayVertices, graphRepresenation, pathways);
+			node = new NodeGeneElement(vrep, pathwayVertices, layoutContainer, pathways);
 		}
 
 		/**
@@ -100,6 +175,65 @@ public class GraphMergeUtil {
 
 		return node;
 
+	}
+
+	/**
+	 * Redirects all edges from one node to another
+	 * 
+	 * @param originalNode
+	 *            all of it's edges are redirected to the node
+	 * @param redirectedNode
+	 *            all of the other edges are redirected to this node
+	 * @param edgeSet
+	 *            set containing the edges
+	 */
+	public static final void redirectEdges(NodeElement originalNode, NodeElement redirectedNode,
+			Set<EdgeElement> edgeSet) {
+		List<Pair<EdgeElement, Boolean>> edgesContainingThisNode = GraphMergeUtil.getEdgeWithThisNodeAsSourceOrTarget(
+				edgeSet, originalNode);
+		for (Pair<EdgeElement, Boolean> edgePair : edgesContainingThisNode) {
+			// node was edge source
+			if (edgePair.getSecond())
+				edgePair.getFirst().setSourceNode(redirectedNode);
+			else
+				edgePair.getFirst().setTargetNode(redirectedNode);
+		}
+	}
+
+	/**
+	 * Gets all the edges from original node and copies them with newNode as source/target instead
+	 * 
+	 * @param originalNode
+	 *            get all it's edges
+	 * @param newNode
+	 *            new source/target
+	 * @param edgeSet
+	 *            set which contains the edges
+	 * @param layoutContainer
+	 *            add new edges to the layout container
+	 */
+	public static final void copyEdges(NodeElement originalNode, NodeElement newNode, Set<EdgeElement> edgeSet,
+			AnimatedGLElementContainer layoutContainer) {
+
+		List<Pair<EdgeElement, Boolean>> edgesContainingThisNode = GraphMergeUtil.getEdgeWithThisNodeAsSourceOrTarget(
+				edgeSet, originalNode);
+		for (Pair<EdgeElement, Boolean> edgePair : edgesContainingThisNode) {
+			EdgeElement edgeOfUnmergedNode = edgePair.getFirst();
+			NodeElement sourceNode;
+			NodeElement targetNode;
+			if (edgePair.getSecond()) {
+				sourceNode = newNode;
+				targetNode = edgeOfUnmergedNode.getTargetNode();
+			} else {
+				sourceNode = edgeOfUnmergedNode.getSourceNode();
+				targetNode = newNode;
+			}
+			EdgeElement mergedEdge = new EdgeElement(edgeOfUnmergedNode.getDefaultEdge(), sourceNode, targetNode,
+					DEFAULT_ADD_PATHWAY_DURATION);
+			mergedEdge.setLayoutData(false);
+			edgeSet.add(mergedEdge);
+			layoutContainer.add(mergedEdge);
+		}
 	}
 
 	/**
@@ -140,8 +274,8 @@ public class GraphMergeUtil {
 	 */
 	public static void addEdgeToEdgeSet(DefaultEdge edge, PathwayGraph pathway,
 			Map<PathwayVertex, NodeElement> vertexNodeMap, Set<EdgeElement> edgeSetToAdd,
-			Map<PathwayVertexRep, NodeElement> vrepToGroupNodeMap, AnimatedGLElementContainer containterToAddElementTo, long drawEdgeDelay)
-			throws Exception {
+			Map<PathwayVertexRep, NodeElement> vrepToGroupNodeMap, AnimatedGLElementContainer containterToAddElementTo,
+			long drawEdgeDelay) throws Exception {
 		PathwayVertexRep srcVrep = pathway.getEdgeSource(edge);
 		PathwayVertexRep targetVrep = pathway.getEdgeTarget(edge);
 
@@ -196,7 +330,7 @@ public class GraphMergeUtil {
 
 				edgeEl.setLayoutData(false);
 				edgeSetToAdd.add(edgeEl);
-	
+
 				containterToAddElementTo.add(edgeEl);
 			}
 		}
