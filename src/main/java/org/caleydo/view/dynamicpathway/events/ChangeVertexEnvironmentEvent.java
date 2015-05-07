@@ -1,4 +1,4 @@
-package org.caleydo.view.dynamicpathway.ui;
+package org.caleydo.view.dynamicpathway.events;
 
 import org.caleydo.core.event.AEvent;
 

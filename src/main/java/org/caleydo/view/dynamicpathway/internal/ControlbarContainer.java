@@ -18,19 +18,19 @@ import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
 import org.caleydo.core.view.opengl.layout2.layout.GLPadding;
 import org.caleydo.core.view.opengl.layout2.layout.GLSizeRestrictiveFlowLayout;
 import org.caleydo.core.view.opengl.layout2.renderer.GLRenderers;
-import org.caleydo.core.view.opengl.layout2.renderer.IGLRenderer;
 import org.caleydo.core.view.opengl.picking.APickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
-import org.caleydo.view.dynamicpathway.ui.ChangeVertexEnvironmentEvent;
-import org.caleydo.view.dynamicpathway.ui.ClearCanvasEvent;
-import org.caleydo.view.dynamicpathway.ui.ControllbarPathwayTitleEntry;
+import org.caleydo.view.dynamicpathway.events.ChangeVertexEnvironmentEvent;
+import org.caleydo.view.dynamicpathway.events.ClearCanvasEvent;
+import org.caleydo.view.dynamicpathway.layout.DynamicPathwayIconLabelRenderer;
+import org.caleydo.view.dynamicpathway.ui.ControlbarPathwayTitleEntry;
 import org.caleydo.view.dynamicpathway.ui.VertexEnvironmentDialog;
 import org.caleydo.vis.lineup.ui.RenderStyle;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 
-public class ControllbarContainer extends AnimatedGLElementContainer implements ISelectionCallback {
+public class ControlbarContainer extends AnimatedGLElementContainer implements ISelectionCallback {
 
 	private static final int VERTEX_ENV_ON_START = 4;
 	private static final String TITLE = "Controllbar";
@@ -57,12 +57,12 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 	// /**
 	// * Node Environment
 	// */
-	// 
+	//
 	private GLElement vertexEnvironmentSizeValue;
 	/**
 	 * focus pathway
 	 */
-	private ControllbarPathwayTitleEntry focusGraphElement;
+	private ControlbarPathwayTitleEntry focusGraphElement;
 	private PathwayGraph focusPathway = null;
 	private String focusGraphTitle = "";
 
@@ -76,7 +76,7 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 
 	private Integer nodeEnvironmentSize;
 
-	public ControllbarContainer(DynamicPathwayView view) {
+	public ControlbarContainer(DynamicPathwayView view) {
 		super();
 		setLayout(GLLayouts.flowVertical(10));
 
@@ -154,7 +154,6 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 
 			@Override
 			protected void clicked(Pick pick) {
-				// TODO Auto-generated method stub
 				super.clicked(pick);
 
 				Display.getDefault().asyncExec(new Runnable() {
@@ -184,19 +183,18 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		GLElement vertexEnvironmentSizeLineSeparator = createLineSeparator();
 		vertexEnvironmentSizeLineSeparator.setVisibility(EVisibility.VISIBLE);
 		add(vertexEnvironmentSizeLineSeparator);
-		
-		
+
 		/**
 		 * Clear all button
 		 */
 		GLElementContainer clearCanvasContainer = new GLElementContainer(new GLSizeRestrictiveFlowLayout(true, 10,
 				new GLPadding(2, 0, 20, 0)));
 		clearCanvasContainer.setBounds(0, 0, this.getRectBounds().width(), 20);
-		
+
 		GLElement clearCanvasInfoText = new GLElement(GLRenderers.drawText(CLEAR_CANVAS_INFO_TEXT));
 		clearCanvasInfoText.setSize(Float.NaN, 16);
-		clearCanvasContainer.add(clearCanvasInfoText);	
-		
+		clearCanvasContainer.add(clearCanvasInfoText);
+
 		GLButton clearAllButton = new GLButton(EButtonMode.BUTTON);
 		clearAllButton.setVisibility(EVisibility.PICKABLE);
 		clearAllButton.setSize(17, 17);
@@ -206,26 +204,25 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 			@Override
 			protected void clicked(Pick pick) {
 				super.clicked(pick);
-				
+
 				ClearCanvasEvent clearCanvasEvent = new ClearCanvasEvent();
 				EventPublisher.trigger(clearCanvasEvent);
 			}
 		});
 		clearCanvasContainer.add(clearAllButton);
-		
+
 		add(clearCanvasContainer);
-		
+
 		GLElement clearCanvasLineSeparator = createLineSeparator();
 		clearCanvasLineSeparator.setVisibility(EVisibility.VISIBLE);
 		add(clearCanvasLineSeparator);
-		
-		
+
 		/**
 		 * current focus graph
 		 */
 		GLElement focusPathwayLabel = createSubHeader("Current Focus Pathway");
 		add(focusPathwayLabel);
-		this.focusGraphElement = new ControllbarPathwayTitleEntry(null, Color.BLACK, true, view);// createContentText(focusGraphTitle);
+		this.focusGraphElement = new ControlbarPathwayTitleEntry(null, Color.BLACK, true);// createContentText(focusGraphTitle);
 		this.focusGraphElement.setVisibility(EVisibility.HIDDEN);
 		add(focusGraphElement);
 
@@ -250,7 +247,7 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 
 	public void addPathwayTitle(PathwayGraph pathwayToAdd, boolean isFocusPathway, Color titleColor) throws Exception {
 		if (isFocusPathway)
-			addFocusPathwayTitle(pathwayToAdd);
+			addFocusPathwayTitle(pathwayToAdd, titleColor);
 		else
 			addContextPathwayTitle(pathwayToAdd, titleColor);
 	}
@@ -312,10 +309,11 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		System.out.println("CHANGING ENV SIZE from " + this.nodeEnvironmentSize + " to " + nodeEnvironmentSize);
 		if (this.nodeEnvironmentSize.intValue() != nodeEnvironmentSize) {
 			this.nodeEnvironmentSize = nodeEnvironmentSize;
-			
-			String nodeEnvonmentSizeString = (this.nodeEnvironmentSize < 0) ? "Full Pathways" : this.nodeEnvironmentSize.toString();
+
+			String nodeEnvonmentSizeString = (this.nodeEnvironmentSize < 0) ? "Full Pathways"
+					: this.nodeEnvironmentSize.toString();
 			vertexEnvironmentSizeValue.setRenderer(GLRenderers.drawText(nodeEnvonmentSizeString));
-//			this.vertexEnvironmentSizeValue = createContentText(this.nodeEnvironmentSize.toString());
+			// this.vertexEnvironmentSizeValue = createContentText(this.nodeEnvironmentSize.toString());
 			vertexEnvironmentSizeValue.repaint();
 			nodeEnvSizeChanged = true;
 		}
@@ -332,13 +330,13 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 	 * @param titleColor
 	 *            it's nodes color -> title will be underlined with the same color
 	 */
-	private void addFocusPathwayTitle(PathwayGraph pathwayToAdd) {
+	private void addFocusPathwayTitle(PathwayGraph pathwayToAdd, Color pathwayColor) {
 		this.contextPathwayElements.clear();
 		this.contextPathways.clear();
 		this.focusPathway = pathwayToAdd;
 		this.focusGraphTitle = pathwayToAdd.getTitle();
 
-		this.focusGraphElement.setPathway(pathwayToAdd);
+		this.focusGraphElement.setPathway(pathwayToAdd, pathwayColor);
 		this.focusGraphElement.setVisibility(EVisibility.PICKABLE);
 		this.focusContextLineSeparator.setVisibility(EVisibility.VISIBLE);
 		// this.vertexEnvironmentSizeTitle.setVisibility(EVisibility.VISIBLE);
@@ -363,8 +361,7 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		if (contextPathways.containsKey(pathway.getTitle()))
 			return;
 
-		ControllbarPathwayTitleEntry contextGraphTitle = new ControllbarPathwayTitleEntry(pathway, titleColor, false,
-				view);// createContentText(BULLET_POINT
+		ControlbarPathwayTitleEntry contextGraphTitle = new ControlbarPathwayTitleEntry(pathway, titleColor, false);// createContentText(BULLET_POINT
 		contextGraphTitle.setVisibility(EVisibility.PICKABLE);
 
 		/**
@@ -447,26 +444,6 @@ public class ControllbarContainer extends AnimatedGLElementContainer implements 
 		return lineSeparator;
 	}
 
-	public class DynamicPathwayIconLabelRenderer implements IGLRenderer {
-		private final String label;
-		private final EButtonIcon icon;
-
-		private DynamicPathwayIconLabelRenderer(String label, EButtonIcon prefix) {
-			this.label = label;
-			this.icon = prefix;
-		}
-
-		@Override
-		public void render(GLGraphics g, float w, float h, GLElement parent) {
-			boolean s = ((GLButton) parent).isSelected();
-
-			String icon = this.icon.get(s);
-			g.fillImage(icon, 1, 1, h - 2, h - 2);
-			if (label != null && label.length() > 0)
-				g.drawText(label, 18, h - 16, 200, h - 2);
-
-		}
-	}
 
 	/**
 	 * if any of the buttons has changed

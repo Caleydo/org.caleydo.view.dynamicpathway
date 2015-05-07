@@ -22,6 +22,8 @@ public class NodeCompoundElement extends ANodeElement {
 	private static final float HIGHLIGHT_LEFT_PADDING = -0.2f;
 	private static final float HIGHLIGHT_RIGHT_PADDING = INNER_PADDING + 1 + 0.5f;
 	private static final float WIDTH_AND_HEIGHT_ADDEND = 2.5f;
+	
+	private static final float RADIUS = 10.0f;
 
 	public NodeCompoundElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
 			final DynamicPathwaysCanvas parentGraph, Set<PathwayGraph> pathways) {
@@ -105,12 +107,12 @@ public class NodeCompoundElement extends ANodeElement {
 		short width = (short) w;
 
 		// contour
-			g.color(contourColor).fillCircle(0, 0, width + INNER_PADDING- HIGHLIGHT_RIGHT_PADDING);
+		g.color(contourColor).fillCircle(0, 0, RADIUS + INNER_PADDING- HIGHLIGHT_RIGHT_PADDING);
 		
-		g.color(fillingColor).fillCircle(0, 0, width- HIGHLIGHT_RIGHT_PADDING);
+		g.color(fillingColor).fillCircle(0, 0, RADIUS- HIGHLIGHT_RIGHT_PADDING);
 
 		// TODO: label?
-		g.drawText(vertexRep.getName(), TEXT_X_POS, TEXT_Y_POS, width * FONT_SIZE_MULTIPLIER, FONT_SIZE);
+		g.drawText(vertexRep.getName(), TEXT_X_POS, TEXT_Y_POS, RADIUS * FONT_SIZE_MULTIPLIER, FONT_SIZE);
 
 	}
 

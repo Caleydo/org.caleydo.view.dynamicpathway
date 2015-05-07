@@ -1,12 +1,13 @@
-package org.caleydo.view.dynamicpathway.ui;
+package org.caleydo.view.dynamicpathway.events;
 
 import org.caleydo.core.event.AEvent;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
+import org.caleydo.view.dynamicpathway.ui.ControlbarPathwayTitleEntry;
 
 public class RemoveDisplayedPathwayEvent extends AEvent {
-	ControllbarPathwayTitleEntry pathwayEntryToRemove;
+	ControlbarPathwayTitleEntry pathwayEntryToRemove;
 
-	public RemoveDisplayedPathwayEvent(ControllbarPathwayTitleEntry pathwayEntryToRemove) {	
+	public RemoveDisplayedPathwayEvent(ControlbarPathwayTitleEntry pathwayEntryToRemove) {	
 		this.pathwayEntryToRemove = pathwayEntryToRemove;
 	}
 

@@ -1,12 +1,13 @@
-package org.caleydo.view.dynamicpathway.ui;
+package org.caleydo.view.dynamicpathway.events;
 
 import org.caleydo.core.event.AEvent;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
+import org.caleydo.view.dynamicpathway.ui.ControlbarPathwayTitleEntry;
 
 public class MakeFocusPathwayEvent extends AEvent {
-	private ControllbarPathwayTitleEntry contextPathwayToMakeFocus;
+	private ControlbarPathwayTitleEntry contextPathwayToMakeFocus;
 	
-	public MakeFocusPathwayEvent(ControllbarPathwayTitleEntry contextPathwayToMakeFocus) {
+	public MakeFocusPathwayEvent(ControlbarPathwayTitleEntry contextPathwayToMakeFocus) {
 		this.contextPathwayToMakeFocus = contextPathwayToMakeFocus;
 	}
 

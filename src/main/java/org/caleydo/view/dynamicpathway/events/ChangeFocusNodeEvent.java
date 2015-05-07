@@ -1,6 +1,7 @@
-package org.caleydo.view.dynamicpathway.ui;
+package org.caleydo.view.dynamicpathway.events;
 
 import org.caleydo.core.event.AEvent;
+import org.caleydo.view.dynamicpathway.ui.ANodeElement;
 
 public class ChangeFocusNodeEvent extends AEvent {
 	

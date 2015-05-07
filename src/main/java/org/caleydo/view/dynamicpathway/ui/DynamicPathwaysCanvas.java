@@ -97,9 +97,15 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	private Set<EdgeElement> edgeSet;
 
 	/**
+	 * the bubble set
+	 */
+	private CanvasComponent bubblesetCanvas;
+
+	/**
 	 * A list of colors which are being used to color the bubble sets
 	 */
 	private List<Color> bubbleSetColors = ColorBrewer.Set1.getColors(100);
+	private final Set<PathwayGraph> bubbleSetPathways;
 	// private List<Integer> usedColorIndezes = new LinkedList<Integer>();
 
 	/**
@@ -128,11 +134,6 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	 */
 	private Map<PathwayVertex, ANodeElement> uniqueVertexMap;
 	private Map<PathwayVertexRep, ANodeElement> vrepToGroupNodeMap;
-
-	/**
-	 * the bubble set
-	 */
-	private CanvasComponent bubblesetCanvas;
 
 	/**
 	 * mapping for the pathway graphs that contain only of a part of vertices & edges to the full pathway graphs <br />
@@ -168,6 +169,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 
 		this.previousFocusVertices = new ArrayList<PathwayVertex>();
 		this.contextPathwayColorIndex = new HashMap<PathwayGraph, Integer>();
+		this.bubbleSetPathways = new HashSet<PathwayGraph>();
 		this.nextColorIndex = 0;
 
 		setLayout(layout);
@@ -179,7 +181,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		setDefaultOutTransition(new InOutTransitions.InOutTransitionBase(GROW, MoveTransitions.GROW_LINEAR));
 
 		setUpBubbleSet();
-		
+
 	}
 
 	/**
@@ -210,17 +212,17 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	public void addPathwayToCanvas(PathwayGraph pathwayToAdd, Boolean isFocusPathway, Boolean clearOriginalSubwaysMap,
 			Boolean keepOldFocusNode) {
 
-		pathway.addFocusOrKontextPathway(pathwayToAdd, !isFocusPathway);
+		pathway.addFocusOrContextPathway(pathwayToAdd, !isFocusPathway);
 
 		Color nodeColor;
 
 		if (isFocusPathway)
-			nodeColor = null;
+			nodeColor = DynamicPathwayView.FOCUS_PATHWAY_COLOR;
 		else {
 			setColorOfPathway(pathwayToAdd);
 			nodeColor = getColorOfPathway(pathwayToAdd);
 		}
-		view.addPathwayToControllBar(pathwayToAdd, isFocusPathway, nodeColor);
+		view.addPathwayToControlBar(pathwayToAdd, isFocusPathway, nodeColor);
 
 		if (focusNode != null && (keepOldFocusNode || isFocusPathway)) {
 			focusVertex = focusNode.getDisplayedVertex();
@@ -276,6 +278,8 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 
 		}
 
+		bubbleSetPathways.add(pathwayToAdd);
+
 		for (ANodeElement node : nodeSet)
 			node.setIsMerged(false);
 
@@ -312,6 +316,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		vrepToGroupNodeMap.clear();
 		uniqueVertexMap.clear();
 		contextPathwayColorIndex.clear();
+		bubbleSetPathways.clear();
 		// usedColorIndezes.clear();
 		nextColorIndex = 0;
 
@@ -512,7 +517,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	 *            the pathway to be removed
 	 * @return TODO
 	 */
-	public Integer removePathwayFromContextPathwayColorIndexMap(PathwayGraph pathway) {
+	public Integer removePathwayFromContextPathwayColorIndexMapAndBubbleSetList(PathwayGraph pathway) {
 		// TODO: find better solution!! -> list of freed indexes
 		Integer index = contextPathwayColorIndex.get(pathway);
 
@@ -523,6 +528,8 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 			nextColorIndex--;
 		// else
 		// usedColorIndezes.add(index);
+
+		bubbleSetPathways.remove(pathway);
 
 		return contextPathwayColorIndex.remove(pathway);
 	}
@@ -611,7 +618,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		 */
 		else {
 			currentSelectedNode.setNodeState(ENodeState.DESELECT);
-			
+
 			currentSelectedNode = newSelectedNode;
 			currentSelectedNode.setNodeState(ENodeState.SELECTED);
 		}
@@ -658,7 +665,11 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 			points = bubblesetCanvas.getShapePoints(g2d);
 			g2d.dispose();
 
-			Color color = bubbleSetColors.get(colorIndex);
+			Color color;
+			if (pathway.equals(this.getFocusPathway()))
+				color = DynamicPathwayView.FOCUS_PATHWAY_COLOR;
+			else
+				color = bubbleSetColors.get(colorIndex);
 			Color transparentColor = new Color(color.getRGBA());
 			transparentColor.a = 0.2f;
 
@@ -830,13 +841,22 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 			}
 
 			for (PathwayGraph pathway : pathways) {
-				if (pathway.equals(focusPathway))
+				// if (pathway.equals(focusPathway))
+				// continue;
+
+				if (!bubbleSetPathways.contains(pathway))
 					continue;
 
 				Integer index = pathwayBubbleSetIndexMap.get(pathway);
 				if (index == null) {
-					Color bubbleSetColor = bubbleSetColors.get(colorIndex);
-					colorIndex++;
+					Color bubbleSetColor;
+					if (pathway.equals(focusPathway)) {
+						bubbleSetColor = DynamicPathwayView.FOCUS_PATHWAY_COLOR;
+					} else {
+						bubbleSetColor = bubbleSetColors.get(colorIndex);
+						colorIndex++;
+					}
+
 					bubblesetCanvas.addGroup(bubbleSetColor.getAWTColor(), 2, true);
 					index = bubblesetCanvas.getGroupCount() - 1;
 					pathwayBubbleSetIndexMap.put(pathway, index);
@@ -1028,8 +1048,9 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 			 * -------- ---------------------------------------------------------- ------------------------------
 			 */
 			if (!mergeWithNode.isMerged()) {
-				
-//				addNotMerged(addingVrep, addingPathway, mergeWithNode, combinedPathway, sameVerticesList, addToSameGraph, mergeWithinSameGraph);
+
+				// addNotMerged(addingVrep, addingPathway, mergeWithNode, combinedPathway, sameVerticesList,
+				// addToSameGraph, mergeWithinSameGraph);
 
 				/**
 				 * STEP 3.1a.1: Create a merged node element & remove the duplicate vertices from the existing node (or
@@ -1105,8 +1126,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 					}
 
 					if (containedNode == false)
-						throw new NodeMergingException("nodeSet didn't contain node(" + mergeWithNode
-								+ ") to remove");
+						throw new NodeMergingException("nodeSet didn't contain node(" + mergeWithNode + ") to remove");
 
 				}
 
@@ -1205,8 +1225,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 					 * get pathways before the new pathway is added -> needed for split off node <br />
 					 * add the new pathway to the merged node
 					 */
-					Set<PathwayGraph> pathwaysFromMergedNode = new HashSet<PathwayGraph>(
-							mergeWithNode.getPathways());
+					Set<PathwayGraph> pathwaysFromMergedNode = new HashSet<PathwayGraph>(mergeWithNode.getPathways());
 					// nodeWithDuplicateVertices.addPathway(pathwayToAdd);
 
 					PathwayVertexRep vrepOfNonDuplicateVertices = new PathwayVertexRep(
@@ -1231,8 +1250,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 						uniqueVertexMap.put(mergedVertex, newNodeForNonDuplicateVertices);
 					}
 
-					newNodeForNonDuplicateVertices.setCenter(mergeWithNode.getCenterX(),
-							mergeWithNode.getCenterY());
+					newNodeForNonDuplicateVertices.setCenter(mergeWithNode.getCenterX(), mergeWithNode.getCenterY());
 
 					addNodeToContainers(newNodeForNonDuplicateVertices, !mergeWithinSameGraph);
 
@@ -1255,15 +1273,17 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 
 		return false;
 	}
-	
-	
-	private void addNotMerged(PathwayVertexRep addingVrep, PathwayGraph pathwayToAdd, ANodeElement mergingWithNode, PathwayGraph combinedPathway, List<PathwayVertex> sameVerticesList, boolean addToSameGraph, boolean mergeWithinSameGraph) {
+
+	private void addNotMerged(PathwayVertexRep addingVrep, PathwayGraph pathwayToAdd, ANodeElement mergingWithNode,
+			PathwayGraph combinedPathway, List<PathwayVertex> sameVerticesList, boolean addToSameGraph,
+			boolean mergeWithinSameGraph) {
 		PathwayVertexRep mergingWithVrep = mergingWithNode.getVertexRep();
-		
+
 		/**
 		 * 1.Create new merged vrep & node element with common vertices
 		 */
-		ANodeElement mergedNode = GraphMergeUtil.createNewMergedNodeElement(sameVerticesList, pathwayToAdd, addingVrep, mergingWithNode, mergeWithinSameGraph, addToSameGraph, this);
+		ANodeElement mergedNode = GraphMergeUtil.createNewMergedNodeElement(sameVerticesList, pathwayToAdd, addingVrep,
+				mergingWithNode, mergeWithinSameGraph, addToSameGraph, this);
 		PathwayVertexRep mergedVrep = mergedNode.getVertexRep();
 
 		combinedPathway.addVertex(mergedVrep);
@@ -1271,8 +1291,8 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		addNodeToContainers(mergedNode, !mergeWithinSameGraph);
 
 		/**
-		 * STEP 3.1a.2a: if the duplicate vertices are all of the (not merged) node's vertices, it needs to be
-		 * deleted, because the new merged node took its purpose <br />
+		 * STEP 3.1a.2a: if the duplicate vertices are all of the (not merged) node's vertices, it needs to be deleted,
+		 * because the new merged node took its purpose <br />
 		 * ------------------------------ -------------------------------- -------------------------------
 		 */
 		if (mergingWithNode.getVertices().size() == sameVerticesList.size()) {
@@ -1286,19 +1306,18 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 			 * redirect all edges from the to be deleted node to the new merged node
 			 */
 			GraphMergeUtil.redirectEdges(mergingWithNode, mergedNode, edgeSet);
-			
+
 		}
 
 		/**
-		 * STEP 3.1a.2b: remove all duplicate vertices of the existing node, since they are already in the new
-		 * merged node <br />
+		 * STEP 3.1a.2b: remove all duplicate vertices of the existing node, since they are already in the new merged
+		 * node <br />
 		 * ---------- ---------------------------------------------------- -------------------------------
 		 */
 		else {
 
 			/**
-			 * STEP 3.1a.2b: get all edges of the unmerged already existing node & add its edges also to the
-			 * merged node <br />
+			 * STEP 3.1a.2b: get all edges of the unmerged already existing node & add its edges also to the merged node <br />
 			 * e.g. <br/>
 			 * already in nodeSet: |a,b|--->|c| <br />
 			 * to add: |a,d|--->|e| <br />
@@ -1322,8 +1341,6 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		}
 
 	}
-
-
 
 	private final Color getColorOfPathway(PathwayGraph pathway) {
 		Integer colorIndex = contextPathwayColorIndex.get(pathway);
@@ -1379,23 +1396,50 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		this.bubblesetCanvas = new CanvasComponent(shaper);
 		this.bubblesetCanvas.setDefaultView();
 	}
-	
-	
+
 	/**
 	 * TOOD: remove
+	 * 
 	 * @param contextPathway
 	 */
 	public void printCommonNodes(PathwayGraph contextPathway) {
 		System.out.println("=================" + "\nContext PW:\n" + "--------------");
-		for(PathwayVertexRep vrep : contextPathway.vertexSet()) {
-			for(PathwayVertex vertex : vrep.getPathwayVertices()) {
+		for (PathwayVertexRep vrep : contextPathway.vertexSet()) {
+			for (PathwayVertex vertex : vrep.getPathwayVertices()) {
 				ANodeElement commonNode = uniqueVertexMap.get(vertex);
-				if(commonNode == null)
+				if (commonNode == null)
 					continue;
-				
+
 				System.out.println("Network Node: " + commonNode + " ContextPW Vrep: " + vrep);
 			}
 		}
+	}
+
+	/**
+	 * Change the visibility of the bubble set of the given pathway
+	 * 
+	 * @param pathwayToChange
+	 *            it's bubble sets is going to enabled/disabled
+	 * @param newVisibilityValue
+	 *            true if it should be displayed, false otherwise
+	 */
+	public final void enableOrDisableBubbleSetOfPathway(PathwayGraph pathwayToChange, boolean newVisibilityValue) {
+		// TODO: remove this
+		if (pathwayToChange == null)
+			System.exit(-1);
+
+		// if the bubble set should be displayed, but is currently not
+		if (newVisibilityValue && !bubbleSetPathways.contains(pathwayToChange)) {
+			bubbleSetPathways.add(pathwayToChange);
+			relayout();
+		}
+		// if the bubble set should be not displayed, but is currently
+		else if (!newVisibilityValue && bubbleSetPathways.contains(pathwayToChange)) {
+			bubbleSetPathways.remove(pathwayToChange);
+			relayout();
+		}
+
+		// else do nothing
 	}
 
 }

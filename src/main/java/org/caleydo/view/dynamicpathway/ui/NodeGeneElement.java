@@ -98,6 +98,7 @@ public class NodeGeneElement extends ANodeElement {
 
 		String contourColor = state.getContourColor();
 		String fillingColor = state.getFillingColor();
+	
 
 		/**
 		 * if it selected it has a thicker contour

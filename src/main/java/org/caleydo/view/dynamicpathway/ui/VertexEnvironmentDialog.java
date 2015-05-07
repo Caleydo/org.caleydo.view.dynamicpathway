@@ -3,6 +3,7 @@ package org.caleydo.view.dynamicpathway.ui;
 import org.eclipse.swt.layout.GridLayout;
 import org.caleydo.core.event.EventPublisher;
 import org.caleydo.core.gui.util.AHelpButtonDialog;
+import org.caleydo.view.dynamicpathway.events.ChangeVertexEnvironmentEvent;
 import org.eclipse.jface.dialogs.TrayDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;

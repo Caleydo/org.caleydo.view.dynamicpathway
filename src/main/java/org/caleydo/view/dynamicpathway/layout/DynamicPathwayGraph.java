@@ -81,7 +81,7 @@ public class DynamicPathwayGraph {
 	}
 
 	// adds a new focus or kontext pathway, so they will be displayed
-	public void addFocusOrKontextPathway(PathwayGraph pathway, Boolean addContextPathway) {
+	public void addFocusOrContextPathway(PathwayGraph pathway, Boolean addContextPathway) {
 
 		if (!addContextPathway) {
 			addFocusPathway(pathway);

@@ -24,6 +24,8 @@ import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
+import org.caleydo.view.dynamicpathway.events.ChangeFocusNodeEvent;
+import org.caleydo.view.dynamicpathway.events.FilterPathwayEvent;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
 import org.caleydo.view.dynamicpathway.util.CalculateIntersectionUtil;
 import org.caleydo.view.dynamicpathway.util.Coordinates;
