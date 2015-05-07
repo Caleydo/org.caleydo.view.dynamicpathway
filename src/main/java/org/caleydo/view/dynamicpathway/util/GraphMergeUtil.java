@@ -18,7 +18,7 @@ import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 import org.caleydo.view.dynamicpathway.ui.DynamicPathwaysCanvas;
 import org.caleydo.view.dynamicpathway.ui.EdgeElement;
 import org.caleydo.view.dynamicpathway.ui.NodeCompoundElement;
-import org.caleydo.view.dynamicpathway.ui.NodeElement;
+import org.caleydo.view.dynamicpathway.ui.ANodeElement;
 import org.caleydo.view.dynamicpathway.ui.NodeGeneElement;
 import org.caleydo.view.dynamicpathway.ui.NodeGroupElement;
 import org.jgrapht.graph.DefaultEdge;
@@ -27,8 +27,8 @@ public final class GraphMergeUtil {
 
 	private static final int DEFAULT_ADD_PATHWAY_DURATION = DynamicPathwaysCanvas.DEFAULT_ADD_PATHWAY_DURATION;
 
-	public static final NodeElement createNewMergedNodeElement(List<PathwayVertex> sameVerticesList,
-			PathwayGraph pathwayToAdd, PathwayVertexRep addingVrep, NodeElement mergingWithNode,
+	public static final ANodeElement createNewMergedNodeElement(List<PathwayVertex> sameVerticesList,
+			PathwayGraph pathwayToAdd, PathwayVertexRep addingVrep, ANodeElement mergingWithNode,
 			boolean mergeWithinSameGraph, boolean addToSameGraph, DynamicPathwaysCanvas layoutContainer) {
 
 		/**
@@ -58,7 +58,7 @@ public final class GraphMergeUtil {
 			}
 		}
 
-		NodeElement mergedNode;
+		ANodeElement mergedNode;
 		if (mergeWithinSameGraph) {
 			mergedNode = GraphMergeUtil.createNewNodeElement(mergedVrep, sameVerticesList, vreps, layoutContainer,
 					pathwayToAdd);
@@ -107,7 +107,7 @@ public final class GraphMergeUtil {
 	 * 
 	 * @return
 	 */
-	public static final NodeElement createNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
+	public static final ANodeElement createNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
 			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwaysCanvas layoutContainer,
 			PathwayGraph pathway) {
 		Set<PathwayGraph> pathways = new HashSet<PathwayGraph>();
@@ -129,14 +129,14 @@ public final class GraphMergeUtil {
 	 *            needed for callback method
 	 * @return the created node element
 	 */
-	public static final NodeElement createNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
+	public static final ANodeElement createNewNodeElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices,
 			List<PathwayVertexRep> vrepsWithThisNodesVertices, DynamicPathwaysCanvas layoutContainer,
 			Set<PathwayGraph> pathways) {
 
 		/**
 		 * create node of correct type to vertex rep -> different shapes
 		 */
-		NodeElement node;
+		ANodeElement node;
 
 		if (pathwayVertices.size() == 0 && vrep.getPathwayVertices().size() == 0) {
 			PathwayVertexGroupRep groupVrep = (PathwayVertexGroupRep) vrep;
@@ -187,7 +187,7 @@ public final class GraphMergeUtil {
 	 * @param edgeSet
 	 *            set containing the edges
 	 */
-	public static final void redirectEdges(NodeElement originalNode, NodeElement redirectedNode,
+	public static final void redirectEdges(ANodeElement originalNode, ANodeElement redirectedNode,
 			Set<EdgeElement> edgeSet) {
 		List<Pair<EdgeElement, Boolean>> edgesContainingThisNode = GraphMergeUtil.getEdgeWithThisNodeAsSourceOrTarget(
 				edgeSet, originalNode);
@@ -212,15 +212,15 @@ public final class GraphMergeUtil {
 	 * @param layoutContainer
 	 *            add new edges to the layout container
 	 */
-	public static final void copyEdges(NodeElement originalNode, NodeElement newNode, Set<EdgeElement> edgeSet,
+	public static final void copyEdges(ANodeElement originalNode, ANodeElement newNode, Set<EdgeElement> edgeSet,
 			AnimatedGLElementContainer layoutContainer) {
 
 		List<Pair<EdgeElement, Boolean>> edgesContainingThisNode = GraphMergeUtil.getEdgeWithThisNodeAsSourceOrTarget(
 				edgeSet, originalNode);
 		for (Pair<EdgeElement, Boolean> edgePair : edgesContainingThisNode) {
 			EdgeElement edgeOfUnmergedNode = edgePair.getFirst();
-			NodeElement sourceNode;
-			NodeElement targetNode;
+			ANodeElement sourceNode;
+			ANodeElement targetNode;
 			if (edgePair.getSecond()) {
 				sourceNode = newNode;
 				targetNode = edgeOfUnmergedNode.getTargetNode();
@@ -248,7 +248,7 @@ public final class GraphMergeUtil {
 	 *         this EdgeElement; is target node otherwise
 	 */
 	public static final List<Pair<EdgeElement, Boolean>> getEdgeWithThisNodeAsSourceOrTarget(Set<EdgeElement> edgeSet,
-			NodeElement node) {
+			ANodeElement node) {
 
 		List<Pair<EdgeElement, Boolean>> edgesContainingThisNode = new LinkedList<Pair<EdgeElement, Boolean>>();
 
@@ -273,24 +273,24 @@ public final class GraphMergeUtil {
 	 * @throws Exception
 	 */
 	public static void addEdgeToEdgeSet(DefaultEdge edge, PathwayGraph pathway,
-			Map<PathwayVertex, NodeElement> vertexNodeMap, Set<EdgeElement> edgeSetToAdd,
-			Map<PathwayVertexRep, NodeElement> vrepToGroupNodeMap, AnimatedGLElementContainer containterToAddElementTo,
+			Map<PathwayVertex, ANodeElement> vertexNodeMap, Set<EdgeElement> edgeSetToAdd,
+			Map<PathwayVertexRep, ANodeElement> vrepToGroupNodeMap, AnimatedGLElementContainer containterToAddElementTo,
 			long drawEdgeDelay) throws Exception {
 		PathwayVertexRep srcVrep = pathway.getEdgeSource(edge);
 		PathwayVertexRep targetVrep = pathway.getEdgeTarget(edge);
 
-		List<NodeElement> srcNodes = new LinkedList<NodeElement>();
-		List<NodeElement> targetNodes = new LinkedList<NodeElement>();
+		List<ANodeElement> srcNodes = new LinkedList<ANodeElement>();
+		List<ANodeElement> targetNodes = new LinkedList<ANodeElement>();
 
-		NodeElement groupSrcNode = vrepToGroupNodeMap.get(srcVrep);
-		NodeElement groupTargetNode = vrepToGroupNodeMap.get(targetVrep);
+		ANodeElement groupSrcNode = vrepToGroupNodeMap.get(srcVrep);
+		ANodeElement groupTargetNode = vrepToGroupNodeMap.get(targetVrep);
 		if (groupSrcNode != null) {
 			if (!srcNodes.contains(groupSrcNode))
 				srcNodes.add(groupSrcNode);
 		} else {
 			for (PathwayVertex srcVertex : srcVrep.getPathwayVertices()) {
 
-				NodeElement srcNode = vertexNodeMap.get(srcVertex);
+				ANodeElement srcNode = vertexNodeMap.get(srcVertex);
 
 				if (srcNode == null) {
 					System.out.println("VertexNodeMap didn't contain srcVertex:" + srcVertex);
@@ -313,7 +313,7 @@ public final class GraphMergeUtil {
 					continue;
 				}
 
-				NodeElement targetNode = vertexNodeMap.get(targetVertex);
+				ANodeElement targetNode = vertexNodeMap.get(targetVertex);
 				if (!targetNodes.contains(targetNode) && targetNode != null)
 					targetNodes.add(targetNode);
 
@@ -321,8 +321,8 @@ public final class GraphMergeUtil {
 			}
 		}
 
-		for (NodeElement srcNode : srcNodes) {
-			for (NodeElement targetNode : targetNodes) {
+		for (ANodeElement srcNode : srcNodes) {
+			for (ANodeElement targetNode : targetNodes) {
 				if (srcNode.equals(targetNode))
 					continue;
 

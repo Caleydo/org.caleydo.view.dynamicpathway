@@ -4,9 +4,9 @@ import org.caleydo.core.event.AEvent;
 
 public class FilterPathwayEvent extends AEvent {
 
-	NodeElement newFocusNode;
+	ANodeElement newFocusNode;
 
-	public FilterPathwayEvent(NodeElement nodeElementToFilterBy) {	
+	public FilterPathwayEvent(ANodeElement nodeElementToFilterBy) {	
 		this.newFocusNode = nodeElementToFilterBy;
 	}
 
@@ -19,13 +19,13 @@ public class FilterPathwayEvent extends AEvent {
 
 
 
-	public NodeElement getNodeElementToFilterBy() {
+	public ANodeElement getNodeElementToFilterBy() {
 		return newFocusNode;
 	}
 
 
 
-	public void setNewFocusNode(NodeElement newFocusNode) {
+	public void setNewFocusNode(ANodeElement newFocusNode) {
 		this.newFocusNode = newFocusNode;
 	}
 

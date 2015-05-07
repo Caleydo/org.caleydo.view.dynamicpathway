@@ -4,9 +4,9 @@ import org.caleydo.core.event.AEvent;
 
 public class ChangeFocusNodeEvent extends AEvent {
 	
-	NodeElement newFocusNode;
+	ANodeElement newFocusNode;
 
-	public ChangeFocusNodeEvent(NodeElement nodeElementToFilterBy) {	
+	public ChangeFocusNodeEvent(ANodeElement nodeElementToFilterBy) {	
 		this.newFocusNode = nodeElementToFilterBy;
 	}
 
@@ -20,13 +20,13 @@ public class ChangeFocusNodeEvent extends AEvent {
 
 
 
-	public NodeElement getNodeElementToFilterBy() {
+	public ANodeElement getNodeElementToFilterBy() {
 		return newFocusNode;
 	}
 
 
 
-	public void setNewFocusNode(NodeElement newFocusNode) {
+	public void setNewFocusNode(ANodeElement newFocusNode) {
 		this.newFocusNode = newFocusNode;
 	}
 

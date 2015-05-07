@@ -16,7 +16,7 @@ import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 
 import com.google.common.collect.Lists;
 
-public class NodeGeneElement extends NodeElement {
+public class NodeGeneElement extends ANodeElement {
 
 	private static final int INNER_BOUNDS = 4;
 	private static final int OUTER_BOUNDS = 1;

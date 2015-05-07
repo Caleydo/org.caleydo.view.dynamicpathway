@@ -42,7 +42,7 @@ import org.caleydo.view.dynamicpathway.ui.ClearCanvasEvent;
 import org.caleydo.view.dynamicpathway.ui.DynamicPathwaysCanvas;
 import org.caleydo.view.dynamicpathway.ui.FilterPathwayEvent;
 import org.caleydo.view.dynamicpathway.ui.MakeFocusPathwayEvent;
-import org.caleydo.view.dynamicpathway.ui.NodeElement;
+import org.caleydo.view.dynamicpathway.ui.ANodeElement;
 import org.caleydo.view.dynamicpathway.ui.RemoveDisplayedPathwayEvent;
 import org.caleydo.view.entourage.SideWindow;
 import org.caleydo.view.entourage.SlideInElement;
@@ -256,7 +256,7 @@ public class DynamicPathwayView extends AGLElementView {
 	 */
 	@ListenTo
 	public void onChangeFocusNode(ChangeFocusNodeEvent event) throws Exception {
-		NodeElement newFocusNode = event.getNodeElementToFilterBy();
+		ANodeElement newFocusNode = event.getNodeElementToFilterBy();
 
 		if (newFocusNode == null)
 			return;
@@ -305,7 +305,7 @@ public class DynamicPathwayView extends AGLElementView {
 
 	@ListenTo
 	public void onFilterPathwayList(FilterPathwayEvent filterPathway) {
-		NodeElement filterNode = filterPathway.getNodeElementToFilterBy();
+		ANodeElement filterNode = filterPathway.getNodeElementToFilterBy();
 
 		if (filterNode != null) {
 			dynamicGraphCanvas.setOrResetSelectedNode(filterNode);
@@ -548,7 +548,7 @@ public class DynamicPathwayView extends AGLElementView {
 		 * STEP 1: find the FOCUS VERTEX REPRESENATION
 		 * -----------------------------------------------------------------------
 		 */
-		NodeElement currentFilteringNode = dynamicGraphCanvas.getFocusNode();
+		ANodeElement currentFilteringNode = dynamicGraphCanvas.getFocusNode();
 		
 		if(currentFilteringNode == null)
 			return null;

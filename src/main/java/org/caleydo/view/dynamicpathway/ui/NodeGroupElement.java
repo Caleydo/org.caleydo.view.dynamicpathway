@@ -15,7 +15,7 @@ import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexGroupRep;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 
-public class NodeGroupElement extends NodeElement {
+public class NodeGroupElement extends ANodeElement {
 	
 	private static final int GAP_BETWEEN_NODES = 2;
 

@@ -28,7 +28,7 @@ import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
 import org.caleydo.view.dynamicpathway.util.CalculateIntersectionUtil;
 import org.caleydo.view.dynamicpathway.util.Coordinates;
 
-public class NodeElement extends GLElementContainer implements IFRLayoutNode {
+public abstract class ANodeElement extends GLElementContainer implements IFRLayoutNode {
 
 	protected String uid;
 
@@ -95,7 +95,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 	protected ChangeFocusNodeEvent focusNodeEvent;
 	protected GenericContextMenuItem filterPathwayMenu;
 
-	public NodeElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
+	public ANodeElement(PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
 			final DynamicPathwaysCanvas parentGraph, Set<PathwayGraph> pathways, float widthAndHeightAddend) {
 		this.uid = UUID.randomUUID().toString();
 		this.vertexRep = vertexRep;
@@ -352,7 +352,7 @@ public class NodeElement extends GLElementContainer implements IFRLayoutNode {
 			public String getLabel() {
 				StringBuilder builder = new StringBuilder();
 				Set<PathwayVertex> vertices = new LinkedHashSet<>();
-				for (PathwayVertex vRep : NodeElement.this.vertices) {
+				for (PathwayVertex vRep : ANodeElement.this.vertices) {
 					vertices.add(vRep);
 				}
 				List<String> names = new ArrayList<>(vertices.size());

@@ -34,13 +34,13 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 	private DefaultEdge edge;
 
 
-	private NodeElement sourceNode;
-	private NodeElement targetNode;
+	private ANodeElement sourceNode;
+	private ANodeElement targetNode;
 	private Line2D centerToCenterLine;
 	private Line2D edgeToRender;
 	private Timer timer;
 
-	public EdgeElement(DefaultEdge edge, NodeElement sourceNode, NodeElement targetNode, long drawEdgeDelay) {
+	public EdgeElement(DefaultEdge edge, ANodeElement sourceNode, ANodeElement targetNode, long drawEdgeDelay) {
 		this.edge = edge;
 		this.sourceNode = sourceNode;
 		this.targetNode = targetNode;
@@ -85,7 +85,7 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		return this.sourceNode;
 	}
 
-	public NodeElement getSourceNode() {
+	public ANodeElement getSourceNode() {
 		return sourceNode;
 	}
 
@@ -95,15 +95,15 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 	}
 
 
-	public NodeElement getTargetNode() {
+	public ANodeElement getTargetNode() {
 		return targetNode;
 	}
 
-	public void setSourceNode(NodeElement sourceNode) {
+	public void setSourceNode(ANodeElement sourceNode) {
 		this.sourceNode = sourceNode;
 	}
 
-	public void setTargetNode(NodeElement targetNode) {
+	public void setTargetNode(ANodeElement targetNode) {
 		this.targetNode = targetNode;
 	}
 

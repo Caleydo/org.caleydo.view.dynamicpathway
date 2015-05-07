@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
-import org.caleydo.view.dynamicpathway.ui.NodeElement;
+import org.caleydo.view.dynamicpathway.ui.ANodeElement;
 import org.jgrapht.graph.DefaultEdge;
 
 /**

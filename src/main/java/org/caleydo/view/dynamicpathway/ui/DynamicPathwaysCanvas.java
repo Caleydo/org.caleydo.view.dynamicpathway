@@ -57,7 +57,7 @@ import org.caleydo.view.dynamicpathway.layout.GLFruchtermanReingoldLayout;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutEdge;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutGraph;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
-import org.caleydo.view.dynamicpathway.ui.NodeElement.ENodeState;
+import org.caleydo.view.dynamicpathway.ui.ANodeElement.ENodeState;
 import org.caleydo.view.dynamicpathway.util.GraphMergeUtil;
 import org.jgrapht.graph.DefaultEdge;
 
@@ -93,7 +93,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	/**
 	 * contains nodes & edges used for defining and rendering the layout
 	 */
-	private Set<NodeElement> nodeSet;
+	private Set<ANodeElement> nodeSet;
 	private Set<EdgeElement> edgeSet;
 
 	/**
@@ -105,12 +105,12 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	/**
 	 * the currently selected node
 	 */
-	private NodeElement currentSelectedNode;
+	private ANodeElement currentSelectedNode;
 
 	/**
 	 * is null if no node was selected, otherwise it is a reference to the currently selected node -> needed for merging
 	 */
-	private NodeElement focusNode;
+	private ANodeElement focusNode;
 	private PathwayVertex focusVertex = null;
 
 	/**
@@ -126,8 +126,8 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	/**
 	 * needed for node merging & edge representation
 	 */
-	private Map<PathwayVertex, NodeElement> uniqueVertexMap;
-	private Map<PathwayVertexRep, NodeElement> vrepToGroupNodeMap;
+	private Map<PathwayVertex, ANodeElement> uniqueVertexMap;
+	private Map<PathwayVertexRep, ANodeElement> vrepToGroupNodeMap;
 
 	/**
 	 * the bubble set
@@ -152,7 +152,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 
 		this.pathway = new DynamicPathwayGraph();
 
-		this.nodeSet = new HashSet<NodeElement>();
+		this.nodeSet = new HashSet<ANodeElement>();
 		this.edgeSet = new HashSet<EdgeElement>();
 
 		this.view = view;
@@ -161,8 +161,8 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 				.name()));
 		this.vertexSelectionManager.registerEventListeners();
 
-		this.uniqueVertexMap = new HashMap<PathwayVertex, NodeElement>();
-		this.vrepToGroupNodeMap = new HashMap<PathwayVertexRep, NodeElement>();
+		this.uniqueVertexMap = new HashMap<PathwayVertex, ANodeElement>();
+		this.vrepToGroupNodeMap = new HashMap<PathwayVertexRep, ANodeElement>();
 
 		this.originalPathwaysOfSubpathwaysMap = new HashMap<PathwayGraph, PathwayGraph>();
 
@@ -276,7 +276,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 
 		}
 
-		for (NodeElement node : nodeSet)
+		for (ANodeElement node : nodeSet)
 			node.setIsMerged(false);
 
 	}
@@ -333,14 +333,14 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	 *         verticesToCheckList, List &lt;PathwayVertex&gt;: all vertices of NodeElement, that are also in
 	 *         verticesToCheckList
 	 */
-	public Map<NodeElement, List<PathwayVertex>> getNodeElementsContainingSameVertices(
-			Map<PathwayVertex, NodeElement> vertexNodeMap, List<PathwayVertex> verticesToCheckList) {
+	public Map<ANodeElement, List<PathwayVertex>> getNodeElementsContainingSameVertices(
+			Map<PathwayVertex, ANodeElement> vertexNodeMap, List<PathwayVertex> verticesToCheckList) {
 
-		Map<NodeElement, List<PathwayVertex>> equivalentVerticesMap = new HashMap<NodeElement, List<PathwayVertex>>();
+		Map<ANodeElement, List<PathwayVertex>> equivalentVerticesMap = new HashMap<ANodeElement, List<PathwayVertex>>();
 
 		for (PathwayVertex vertexToCheck : verticesToCheckList) {
 			if (vertexNodeMap.containsKey(vertexToCheck)) {
-				NodeElement existingNodeElement = vertexNodeMap.get(vertexToCheck);
+				ANodeElement existingNodeElement = vertexNodeMap.get(vertexToCheck);
 				if (!equivalentVerticesMap.containsKey(existingNodeElement)) {
 					List<PathwayVertex> duplicateVertices = new LinkedList<PathwayVertex>();
 					duplicateVertices.add(vertexToCheck);
@@ -373,7 +373,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		return interfaceSet;
 	}
 
-	public NodeElement getFocusNode() {
+	public ANodeElement getFocusNode() {
 		return focusNode;
 	}
 
@@ -390,7 +390,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	public Set<IFRLayoutNode> getNodeSet() {
 		Set<IFRLayoutNode> interfaceSet = new HashSet<IFRLayoutNode>();
 
-		for (NodeElement node : nodeSet) {
+		for (ANodeElement node : nodeSet) {
 			interfaceSet.add((IFRLayoutNode) node);
 		}
 
@@ -457,7 +457,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	 *            to the which the vertex belongs
 	 * @param pick
 	 */
-	public void onSelect(List<PathwayVertex> vertices, NodeElement node, Pick pick) {
+	public void onSelect(List<PathwayVertex> vertices, ANodeElement node, Pick pick) {
 		switch (pick.getPickingMode()) {
 
 		case MOUSE_OVER:
@@ -544,7 +544,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	 * @param newFilteringNode
 	 *            the node, which the pathway list should be filtered with
 	 */
-	public boolean setFocusNode(NodeElement newFilteringNode) {
+	public boolean setFocusNode(ANodeElement newFilteringNode) {
 
 		boolean focusNodeChanged = false;
 
@@ -597,7 +597,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	 * 
 	 * @param newSelectedNode
 	 */
-	public void setOrResetSelectedNode(NodeElement newSelectedNode) {
+	public void setOrResetSelectedNode(ANodeElement newSelectedNode) {
 		/**
 		 * if nothing was selected, just set the new node
 		 */
@@ -688,7 +688,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	 */
 	private void addPathwayWithDuplicates(PathwayGraph pathwayToAdd) {
 
-		Map<PathwayVertexRep, NodeElement> vrepToNodeElementMap = new HashMap<PathwayVertexRep, NodeElement>();
+		Map<PathwayVertexRep, ANodeElement> vrepToNodeElementMap = new HashMap<PathwayVertexRep, ANodeElement>();
 
 		/**
 		 * VERTICES <br />
@@ -708,7 +708,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 					&& (pathwayToAdd.outDegreeOf(vrep) < 1))
 				continue;
 
-			NodeElement nodeElement = GraphMergeUtil.createNewNodeElement(vrep, vrep.getPathwayVertices(), null, this,
+			ANodeElement nodeElement = GraphMergeUtil.createNewNodeElement(vrep, vrep.getPathwayVertices(), null, this,
 					pathwayToAdd);
 
 			if (nodeElement == null) {
@@ -725,8 +725,8 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		 * ===========
 		 */
 		for (DefaultEdge edge : pathwayToAdd.edgeSet()) {
-			NodeElement sourceNode = vrepToNodeElementMap.get(pathwayToAdd.getEdgeSource(edge));
-			NodeElement targetNode = vrepToNodeElementMap.get(pathwayToAdd.getEdgeTarget(edge));
+			ANodeElement sourceNode = vrepToNodeElementMap.get(pathwayToAdd.getEdgeSource(edge));
+			ANodeElement targetNode = vrepToNodeElementMap.get(pathwayToAdd.getEdgeTarget(edge));
 
 			if (sourceNode == null || targetNode == null) {
 				System.err.println("Source (" + sourceNode + ") or Target Node (" + targetNode + ") of edge (" + edge
@@ -814,7 +814,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 
 		PathwayGraph focusPathway = this.getFocusPathway();
 		int colorIndex = 0;
-		for (NodeElement node : this.nodeSet) {
+		for (ANodeElement node : this.nodeSet) {
 
 			List<PathwayGraph> pathways = node.getPathways();
 
@@ -858,7 +858,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	 * @param isNodeMerged
 	 *            different transition animations for merged & un-merged nodes
 	 */
-	private void addNodeToContainers(NodeElement nodeToAdd, Boolean isNodeMerged) {
+	private void addNodeToContainers(ANodeElement nodeToAdd, Boolean isNodeMerged) {
 
 		nodeSet.add(nodeToAdd);
 
@@ -880,7 +880,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	 *            if the position of the original node wasn't set yet, the position of the vrep is used instread
 	 * @return the In Transition
 	 */
-	private InOutTransitions.IInTransition calcInTransitionMergedNodes(NodeElement originalNode) {
+	private InOutTransitions.IInTransition calcInTransitionMergedNodes(ANodeElement originalNode) {
 
 		PathwayVertexRep originalNodeVrep = originalNode.getVertexRep();
 		final Vec4f originNodePosition;
@@ -913,7 +913,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	 *            needed to get the center
 	 * @return the in-transition
 	 */
-	private InOutTransitions.IInTransition calcInTransitionUnmergedNodes(NodeElement unmergedNode) {
+	private InOutTransitions.IInTransition calcInTransitionUnmergedNodes(ANodeElement unmergedNode) {
 
 		final float widthHalf = (float) (unmergedNode.getWidth()) / 2.0f;
 		IInOutStrategy xInStrategy = new IInOutStrategy() {
@@ -961,7 +961,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 
 		if (addingVrep.getType() == EPathwayVertexType.group) {
 
-			NodeElement groupNode = GraphMergeUtil.createNewNodeElement(addingVrep, addingVrep.getPathwayVertices(),
+			ANodeElement groupNode = GraphMergeUtil.createNewNodeElement(addingVrep, addingVrep.getPathwayVertices(),
 					null, this, addingPathway);
 			this.vrepToGroupNodeMap.put(addingVrep, groupNode);
 			addNodeToContainers(groupNode, false);
@@ -979,7 +979,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		 * STEP 1: Get map with all duplicate nodes (i.e. NodeElement that contain same vertices as in the pathway to
 		 * add) ------------------------------------------------------------------------------------------------
 		 */
-		Map<NodeElement, List<PathwayVertex>> nodesWithSameVerticesMap = getNodeElementsContainingSameVertices(
+		Map<ANodeElement, List<PathwayVertex>> nodesWithSameVerticesMap = getNodeElementsContainingSameVertices(
 				uniqueVertexMap, verticesToCheckList);
 
 		/**
@@ -988,13 +988,13 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		 * ------------------------------------------------------------------------------------------------
 		 */
 		List<PathwayVertex> alreadyExistingPathwayVertexList = new ArrayList<PathwayVertex>();
-		for (NodeElement nodeContainingDuplicateVertices : nodesWithSameVerticesMap.keySet())
+		for (ANodeElement nodeContainingDuplicateVertices : nodesWithSameVerticesMap.keySet())
 			alreadyExistingPathwayVertexList.addAll(nodesWithSameVerticesMap.get(nodeContainingDuplicateVertices));
 		List<PathwayVertex> nonDuplicateVertexList = new ArrayList<PathwayVertex>(verticesToCheckList);
 		nonDuplicateVertexList.removeAll(alreadyExistingPathwayVertexList);
 
 		if (nonDuplicateVertexList.size() > 0) {
-			NodeElement node = GraphMergeUtil.createNewNodeElement(addingVrep, nonDuplicateVertexList, null, this,
+			ANodeElement node = GraphMergeUtil.createNewNodeElement(addingVrep, nonDuplicateVertexList, null, this,
 					addingPathway);
 			addNodeToContainers(node, false);
 
@@ -1008,9 +1008,9 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		 * STEP 3: Merge nodes that contain same vertices <br />
 		 * -------------------------------------------------------------- ----------------------------------
 		 */
-		for (Iterator<NodeElement> nodeWithDuplicateVerticesIter = nodesWithSameVerticesMap.keySet().iterator(); nodeWithDuplicateVerticesIter
+		for (Iterator<ANodeElement> nodeWithDuplicateVerticesIter = nodesWithSameVerticesMap.keySet().iterator(); nodeWithDuplicateVerticesIter
 				.hasNext();) {
-			NodeElement mergeWithNode = nodeWithDuplicateVerticesIter.next();
+			ANodeElement mergeWithNode = nodeWithDuplicateVerticesIter.next();
 
 			List<PathwayVertex> sameVerticesList = nodesWithSameVerticesMap.get(mergeWithNode);
 			PathwayVertexRep nodeVrep = mergeWithNode.getVertexRep();
@@ -1062,7 +1062,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 							vreps.add(vrep);
 					}
 				}
-				NodeElement mergedNode;
+				ANodeElement mergedNode;
 				if (mergeWithinSameGraph) {
 					mergedNode = GraphMergeUtil.createNewNodeElement(mergedVrep, sameVerticesList, vreps, this,
 							addingPathway);
@@ -1132,8 +1132,8 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 							.getEdgeWithThisNodeAsSourceOrTarget(edgeSet, mergeWithNode);
 					for (Pair<EdgeElement, Boolean> edgePair : edgesContainingThisNode) {
 						EdgeElement edgeOfUnmergedNode = edgePair.getFirst();
-						NodeElement sourceNode;
-						NodeElement targetNode;
+						ANodeElement sourceNode;
+						ANodeElement targetNode;
 						if (edgePair.getSecond()) {
 							sourceNode = mergedNode;
 							targetNode = edgeOfUnmergedNode.getTargetNode();
@@ -1222,7 +1222,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 					}
 					vrepsOfNode.add(nodeVrep);
 
-					NodeElement newNodeForNonDuplicateVertices = GraphMergeUtil.createNewNodeElement(
+					ANodeElement newNodeForNonDuplicateVertices = GraphMergeUtil.createNewNodeElement(
 							vrepOfNonDuplicateVertices, nonDuplicateVerticesOfExistingNode, vrepsOfNode, this,
 							pathwaysFromMergedNode);
 
@@ -1257,13 +1257,13 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	}
 	
 	
-	private void addNotMerged(PathwayVertexRep addingVrep, PathwayGraph pathwayToAdd, NodeElement mergingWithNode, PathwayGraph combinedPathway, List<PathwayVertex> sameVerticesList, boolean addToSameGraph, boolean mergeWithinSameGraph) {
+	private void addNotMerged(PathwayVertexRep addingVrep, PathwayGraph pathwayToAdd, ANodeElement mergingWithNode, PathwayGraph combinedPathway, List<PathwayVertex> sameVerticesList, boolean addToSameGraph, boolean mergeWithinSameGraph) {
 		PathwayVertexRep mergingWithVrep = mergingWithNode.getVertexRep();
 		
 		/**
 		 * 1.Create new merged vrep & node element with common vertices
 		 */
-		NodeElement mergedNode = GraphMergeUtil.createNewMergedNodeElement(sameVerticesList, pathwayToAdd, addingVrep, mergingWithNode, mergeWithinSameGraph, addToSameGraph, this);
+		ANodeElement mergedNode = GraphMergeUtil.createNewMergedNodeElement(sameVerticesList, pathwayToAdd, addingVrep, mergingWithNode, mergeWithinSameGraph, addToSameGraph, this);
 		PathwayVertexRep mergedVrep = mergedNode.getVertexRep();
 
 		combinedPathway.addVertex(mergedVrep);
@@ -1341,7 +1341,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	 */
 	private void findAndCreateNewFocusNodeBasedOnOldFocusVertex() {
 
-		NodeElement newFocusNode = uniqueVertexMap.get(focusVertex);
+		ANodeElement newFocusNode = uniqueVertexMap.get(focusVertex);
 
 		if (newFocusNode != null) {
 			setFocusNode(newFocusNode);
@@ -1350,7 +1350,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		}
 
 		for (PathwayVertex previousFocusVertex : previousFocusVertices) {
-			NodeElement wasPreviouslyFocusNode = uniqueVertexMap.get(previousFocusVertex);
+			ANodeElement wasPreviouslyFocusNode = uniqueVertexMap.get(previousFocusVertex);
 			if (wasPreviouslyFocusNode != null && !wasPreviouslyFocusNode.equals(newFocusNode))
 				wasPreviouslyFocusNode.setWasPreviouslyFocusNode(true);
 		}
@@ -1389,7 +1389,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		System.out.println("=================" + "\nContext PW:\n" + "--------------");
 		for(PathwayVertexRep vrep : contextPathway.vertexSet()) {
 			for(PathwayVertex vertex : vrep.getPathwayVertices()) {
-				NodeElement commonNode = uniqueVertexMap.get(vertex);
+				ANodeElement commonNode = uniqueVertexMap.get(vertex);
 				if(commonNode == null)
 					continue;
 				

@@ -14,7 +14,7 @@ import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 
 import com.google.common.collect.Lists;
 
-public class NodeCompoundElement extends NodeElement {
+public class NodeCompoundElement extends ANodeElement {
 	protected static final int INNER_PADDING = 1;
 	private static final int FONT_SIZE_MULTIPLIER = 8;
 	private static final int TEXT_X_POS = -20;
