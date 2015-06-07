@@ -33,7 +33,7 @@ import org.eclipse.swt.widgets.Display;
 public class ControlbarContainer extends AnimatedGLElementContainer implements ISelectionCallback {
 
 	private static final int VERTEX_ENV_ON_START = 4;
-	private static final String TITLE = "Controllbar";
+	private static final String TITLE = "Control Bar";
 	private static final String CLEAR_CANVAS_INFO_TEXT = "Remove Pathways:";
 
 	private DynamicPathwayView view;
@@ -336,7 +336,7 @@ public class ControlbarContainer extends AnimatedGLElementContainer implements I
 		this.focusPathway = pathwayToAdd;
 		this.focusGraphTitle = pathwayToAdd.getTitle();
 
-		this.focusGraphElement.setPathway(pathwayToAdd, pathwayColor);
+		this.focusGraphElement.setPathway(pathwayToAdd, pathwayColor, false);
 		this.focusGraphElement.setVisibility(EVisibility.PICKABLE);
 		this.focusContextLineSeparator.setVisibility(EVisibility.VISIBLE);
 		// this.vertexEnvironmentSizeTitle.setVisibility(EVisibility.VISIBLE);
@@ -344,6 +344,10 @@ public class ControlbarContainer extends AnimatedGLElementContainer implements I
 		// this.vertexEnvironmentSizeLineSeparator.setVisibility(EVisibility.VISIBLE);
 		this.contextGraphsLabel.setVisibility(EVisibility.VISIBLE);
 		this.contextPathwayElements.setVisibility(EVisibility.VISIBLE);
+	}
+	
+	public void setDisplayFocusPathwayBubbleSetCheckBox(boolean valueToSet) {
+			focusGraphElement.selectDisplayBubbleSet(valueToSet);
 	}
 
 	/**

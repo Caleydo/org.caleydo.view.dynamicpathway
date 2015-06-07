@@ -61,7 +61,7 @@ public class DynamicPathwayView extends AGLElementView {
 	public static final String VIEW_TYPE = "org.caleydo.view.dynamicpathway";
 	public static final String VIEW_NAME = "DynamicPathway";
 	public static final Color FOCUS_PATHWAY_COLOR = Color.GRAY;
-	
+
 	private static final String PATHWAY_PARTLY_IDENTIFIER = " [P]";
 
 	private DynamicPathwayWindow activeWindow;
@@ -377,7 +377,8 @@ public class DynamicPathwayView extends AGLElementView {
 
 	@ListenTo
 	public void onChangeBubbleSetVisibilityOfPathway(ChangeBubbleSetVisibilityEvent changeBubbleSetVisibilityEvent) {
-		dynamicGraphCanvas.enableOrDisableBubbleSetOfPathway(changeBubbleSetVisibilityEvent.getPathwayWithVisibilityToChange(),
+		dynamicGraphCanvas.enableOrDisableBubbleSetOfPathway(
+				changeBubbleSetVisibilityEvent.getPathwayWithVisibilityToChange(),
 				changeBubbleSetVisibilityEvent.getNewBubbleSetVisibilityStatus());
 	}
 
@@ -394,8 +395,10 @@ public class DynamicPathwayView extends AGLElementView {
 
 		dynamicGraphCanvas.setRemoveDuplicateVertices(!addWithDuplicateVertices);
 
-		if (dynamicGraphCanvas.getFocusPathway() != null)
-			dynamicGraphCanvas.addPathwayToCanvas(dynamicGraphCanvas.getFocusPathway(), true, true, true);
+		PathwayGraph focusPathway = dynamicGraphCanvas.getFocusPathway();
+		if (focusPathway != null) {			
+			readdFocusPathway(true, true);
+		}
 	}
 
 	/**
@@ -416,9 +419,10 @@ public class DynamicPathwayView extends AGLElementView {
 
 		Boolean hasContextPathways = (contextPathways.size() > 0) ? true : false;
 
-		if (dynamicGraphCanvas.getFocusPathway() != null)
-			dynamicGraphCanvas
-					.addPathwayToCanvas(dynamicGraphCanvas.getFocusPathway(), true, !hasContextPathways, true);
+		PathwayGraph focusPathway = dynamicGraphCanvas.getFocusPathway();
+		if (focusPathway != null) {			
+			readdFocusPathway(!hasContextPathways, true);
+		}
 
 		if (hasContextPathways) {
 			for (PathwayGraph contextGraph : contextPathways)
@@ -445,6 +449,8 @@ public class DynamicPathwayView extends AGLElementView {
 				dynamicGraphCanvas.getDynamicPathway().removeAllPathways();
 				controllBar.removeFocusPathwayTitle(pathwayToRemove);
 			} else {
+				PathwayGraph focusPathway = dynamicGraphCanvas.getFocusPathway();
+				boolean displayBubbleSetOfFocusPathway = dynamicGraphCanvas.isBubbleSetDisplayed(focusPathway);
 				dynamicGraphCanvas.getDynamicPathway().removeContextPathway(pathwayToRemove);
 				dynamicGraphCanvas.removePathwayFromContextPathwayColorIndexMapAndBubbleSetList(pathwayToRemove);
 				controllBar.removeContextPathwayTitle(pathwayToRemove);
@@ -457,7 +463,9 @@ public class DynamicPathwayView extends AGLElementView {
 				// dynamicGraphCanvas.getOriginalPathwaysOfSubpathway(subPathway)
 				System.out.println(dynamicGraphCanvas.removeOriginalPathwayAndSubpathwayOfMap(pathwayToRemove));
 
-				dynamicGraphCanvas.addPathwayToCanvas(dynamicGraphCanvas.getFocusPathway(), true, false, true);
+				dynamicGraphCanvas.addPathwayToCanvas(focusPathway, true, false, true);
+				if (displayBubbleSetOfFocusPathway)
+					dynamicGraphCanvas.displayBubbleSetOfPathway(focusPathway);
 
 				for (PathwayGraph contextPathway : presentContextPathways) {
 					PathwayGraph pathwayToAdd = dynamicGraphCanvas
@@ -722,10 +730,21 @@ public class DynamicPathwayView extends AGLElementView {
 		pathwayListBaseContainer.add(rankingWindow);
 	}
 
+	private void readdFocusPathway(boolean clearOriginalSubwaysMap, boolean keepOldFocusNode) {
+		PathwayGraph focusPathway = dynamicGraphCanvas.getFocusPathway();
+		boolean displayBubbleSet = dynamicGraphCanvas.isBubbleSetDisplayed(focusPathway);
+		dynamicGraphCanvas.addPathwayToCanvas(focusPathway, true, clearOriginalSubwaysMap, keepOldFocusNode);
+		if (displayBubbleSet) 
+			dynamicGraphCanvas.displayBubbleSetOfPathway(focusPathway);
+		
+		controllBar.setDisplayFocusPathwayBubbleSetCheckBox(displayBubbleSet);
+
+	}
+
 	private void readdPresentPathways() {
 		List<PathwayGraph> contextPathways = new LinkedList<PathwayGraph>(dynamicGraphCanvas.getContextPathways());
 
-		dynamicGraphCanvas.addPathwayToCanvas(dynamicGraphCanvas.getFocusPathway(), true, false, true);
+		readdFocusPathway(false, true);
 
 		for (PathwayGraph contextPathway : contextPathways) {
 			try {

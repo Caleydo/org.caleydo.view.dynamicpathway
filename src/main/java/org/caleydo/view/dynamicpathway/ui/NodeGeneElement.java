@@ -5,7 +5,11 @@ import java.util.Set;
 
 import org.caleydo.core.event.EventPublisher;
 import org.caleydo.core.view.opengl.layout.Column.VAlign;
+import org.caleydo.core.view.opengl.layout2.GLElement;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
+import org.caleydo.core.view.opengl.layout2.dnd.IDnDItem;
+import org.caleydo.core.view.opengl.layout2.dnd.IDragGLSource;
+import org.caleydo.core.view.opengl.layout2.dnd.IDragInfo;
 import org.caleydo.core.view.opengl.picking.AdvancedPick;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
@@ -26,6 +30,7 @@ public class NodeGeneElement extends ANodeElement {
 	public NodeGeneElement(final PathwayVertexRep vertexRep, List<PathwayVertex> pathwayVertices,
 			final DynamicPathwaysCanvas parentGraph, Set<PathwayGraph> pathways) {
 		super(vertexRep, pathwayVertices, parentGraph, pathways, WIDTH_AND_HEIGHT_ADDEND);
+				
 
 		onPick(new IPickingListener() {
 
@@ -47,6 +52,13 @@ public class NodeGeneElement extends ANodeElement {
 					context.getSWTLayer().showContextMenu(Lists.newArrayList(filterPathwayMenu, focusNodeMenu));
 
 				}
+				
+				
+				// TODO: doesn't work
+				if(pick.isAnyDragging() || pick.getPickingMode() == PickingMode.DRAGGED) {
+					NodeGeneElement.this.setNewLocation(pick);
+				}
+
 
 				/**
 				 * if the user clicked on the node
@@ -70,15 +82,18 @@ public class NodeGeneElement extends ANodeElement {
 				 * if the user moved the curser over this node
 				 */
 				if (pick.getPickingMode() == PickingMode.MOUSE_OVER) {
+					
 					NodeGeneElement.this.setNodeState(ENodeState.MOUSE_OVER);
+					
 				}
 
 				/**
-				 * if the user's curser left the node
+				 * if the user's cursor left the node
 				 */
 				if (pick.getPickingMode() == PickingMode.MOUSE_OUT) {
 					NodeGeneElement.this.setNodeState(ENodeState.MOUSE_OUT);
 				}
+				
 
 				/**
 				 * renderImpl is called
@@ -125,8 +140,8 @@ public class NodeGeneElement extends ANodeElement {
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
 		return super.toString();
 	}
+
 
 }

@@ -58,7 +58,8 @@ public class ControlbarPathwayTitleEntry extends GLElementContainer {
 				new MakeFocusPathwayEvent(this));
 
 		enableDisableBubbleSetCheckBox = createCheckboxButton(pathwayTitle, "En/Disable BubbleSet");
-		enableDisableBubbleSetCheckBox.setSelected(true);
+		boolean setSelectedByDefault = !isFocusPathway;
+		enableDisableBubbleSetCheckBox.setSelected(setSelectedByDefault);
 		enableDisableBubbleSetCheckBox.onPick(new APickingListener() {
 			@Override
 			protected void clicked(Pick pick) {
@@ -126,11 +127,16 @@ public class ControlbarPathwayTitleEntry extends GLElementContainer {
 		return pathwayTitle;
 	}
 
-	public void setPathway(PathwayGraph pathway, Color pathwayColor) {
+	public void setPathway(PathwayGraph pathway, Color pathwayColor, boolean displayBubbleSet) {
 		this.representedPathway = pathway;
 		this.pathwayTitle = pathway.getTitle();
 		this.pathwayColor = pathwayColor;
+		selectDisplayBubbleSet(displayBubbleSet);
 		repaint();
+	}
+	
+	public void selectDisplayBubbleSet(boolean displayBubbleSet) {
+		this.enableDisableBubbleSetCheckBox.setSelected(displayBubbleSet);
 	}
 
 	public PathwayGraph getRepresentedPathway() {

@@ -20,6 +20,8 @@ import org.caleydo.core.view.contextmenu.GenericContextMenuItem;
 import org.caleydo.core.view.opengl.layout2.GLElementContainer;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.IGLElementContext;
+import org.caleydo.core.view.opengl.picking.APickingListener;
+import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
@@ -29,6 +31,8 @@ import org.caleydo.view.dynamicpathway.events.FilterPathwayEvent;
 import org.caleydo.view.dynamicpathway.layout.IFRLayoutNode;
 import org.caleydo.view.dynamicpathway.util.CalculateIntersectionUtil;
 import org.caleydo.view.dynamicpathway.util.Coordinates;
+
+import com.sun.org.apache.xpath.internal.operations.Gte;
 
 public abstract class ANodeElement extends GLElementContainer implements IFRLayoutNode {
 
@@ -387,6 +391,17 @@ public abstract class ANodeElement extends GLElementContainer implements IFRLayo
 		pathwayListTitles = pathwayListTitles.substring(0, pathwayListTitles.length() - 1);
 
 		return pathwayListTitles;
+	}
+	
+	protected void setNewLocation(Pick pick) {
+		
+		float dx = pick.getDx();
+		float dy = pick.getDy();
+		
+		setLocation(getLocation().x() + dx, getLocation().y() + dy);
+
+		setCenter(getCenterX() + dx, getCenterY() + dy);
+		
 	}
 
 }

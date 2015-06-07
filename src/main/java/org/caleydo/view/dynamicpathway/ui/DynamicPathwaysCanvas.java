@@ -193,6 +193,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 	public void addOriginalPathwayAndSubpathwayToMap(PathwayGraph subPathway, PathwayGraph originalPathway) {
 		this.originalPathwaysOfSubpathwaysMap.put(subPathway, originalPathway);
 	}
+	
 
 	/**
 	 * 
@@ -256,6 +257,7 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		} else {
 
 			setDefaultDuration(DEFAULT_ADD_PATHWAY_DURATION);
+			
 
 			// if the focus graph was added with duplicates, it needs to be
 			// added without them
@@ -275,10 +277,12 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 
 			if (!noNodesAdded)
 				resetEdges();
+			
 
+			bubbleSetPathways.add(pathwayToAdd);
 		}
 
-		bubbleSetPathways.add(pathwayToAdd);
+			
 
 		for (ANodeElement node : nodeSet)
 			node.setIsMerged(false);
@@ -290,6 +294,15 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 			edge.setVisibility(EVisibility.HIDDEN);
 			edge.setTimerDelay(DEFAULT_ADD_PATHWAY_DURATION);
 		}
+	}
+	
+	
+	public boolean isBubbleSetDisplayed(PathwayGraph pathway) {
+		return bubbleSetPathways.contains(pathway);
+	}
+	
+	public void displayBubbleSetOfPathway(PathwayGraph pathway) {
+		bubbleSetPathways.add(pathway);
 	}
 
 	/**
@@ -1431,12 +1444,12 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		// if the bubble set should be displayed, but is currently not
 		if (newVisibilityValue && !bubbleSetPathways.contains(pathwayToChange)) {
 			bubbleSetPathways.add(pathwayToChange);
-			relayout();
+			repaint();
 		}
 		// if the bubble set should be not displayed, but is currently
 		else if (!newVisibilityValue && bubbleSetPathways.contains(pathwayToChange)) {
 			bubbleSetPathways.remove(pathwayToChange);
-			relayout();
+			repaint();
 		}
 
 		// else do nothing
