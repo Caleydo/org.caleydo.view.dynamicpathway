@@ -8,6 +8,10 @@ import org.caleydo.view.entourage.SlideInElement;
 
 import com.google.common.collect.Iterables;
 
+/**
+ * The main window of the Dynamic Pathway View
+ *
+ */
 public class DynamicPathwayWindow extends GLElementWindow {
 	
 	private final DynamicPathwayView view;

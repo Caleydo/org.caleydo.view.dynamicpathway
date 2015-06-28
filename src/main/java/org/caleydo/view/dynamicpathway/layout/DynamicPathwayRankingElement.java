@@ -47,11 +47,10 @@ import org.caleydo.vis.lineup.ui.TableUI;
 
 import com.google.common.base.Function;
 
-public class RankingElement extends GLElementContainer {
+public class DynamicPathwayRankingElement extends GLElementContainer {
 	
 	private final static int PATHWAY_NAME_COLUMN_WIDTH = 140;
 	private final static int PATHWAY_DATABASE_COLUMN_WIDTH = 70;
-	private final static int RANK_COLUMN_WIDTH = 50;
 	
 	private GLElementWindow window;
 	private final DynamicPathwayView view;
@@ -62,7 +61,7 @@ public class RankingElement extends GLElementContainer {
 	private IPathwayFilter filter = PathwayFilters.NONE;
 	private IGLMouseListener mouseListener;
 
-	public RankingElement(final DynamicPathwayView view) {
+	public DynamicPathwayRankingElement(final DynamicPathwayView view) {
 		this.view = view;
 		
 		mouseListener = GLThreadListenerWrapper.wrap(new GLMouseAdapter() {

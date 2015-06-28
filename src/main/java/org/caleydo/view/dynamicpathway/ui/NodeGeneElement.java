@@ -81,10 +81,8 @@ public class NodeGeneElement extends ANodeElement {
 				/**
 				 * if the user moved the curser over this node
 				 */
-				if (pick.getPickingMode() == PickingMode.MOUSE_OVER) {
-					
-					NodeGeneElement.this.setNodeState(ENodeState.MOUSE_OVER);
-					
+				if (pick.getPickingMode() == PickingMode.MOUSE_OVER) {					
+					NodeGeneElement.this.setNodeState(ENodeState.MOUSE_OVER);			
 				}
 
 				/**

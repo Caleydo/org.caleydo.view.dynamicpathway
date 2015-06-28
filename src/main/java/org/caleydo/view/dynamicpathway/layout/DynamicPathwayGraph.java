@@ -9,14 +9,12 @@ import org.caleydo.view.dynamicpathway.ui.ANodeElement;
 import org.jgrapht.graph.DefaultEdge;
 
 /**
- * contains all informations for the different graphs, such as the focusGraph & all kontextGraphs
+ * contains all informations for the different graphs, such as the Focus Pathway & the Context Pathways
  * 
  * @author Christiane Schwarzl
  * 
  */
 public class DynamicPathwayGraph {
-
-	private static final String COMBINED_GRAPH_NAME = "Combined Graph";
 
 	/**
 	 * the actual focus pathway graph, which is completely represented
@@ -59,26 +57,6 @@ public class DynamicPathwayGraph {
 		return false;
 	}
 
-	/**
-	 * returns the pathway with this title, if it exists
-	 * 
-	 * @param title
-	 *            the title of the pathway to return
-	 * @return the graph
-	 * @throws Exception
-	 *             if there is no pathway with this title
-	 */
-	public PathwayGraph getPathwayWithThisTitle(String title) throws Exception {
-		if (focusPathway.getTitle().contentEquals(title))
-			return focusPathway;
-
-		for (PathwayGraph contextGraph : contextPathways) {
-			if (contextGraph.getTitle().contentEquals(title))
-				return contextGraph;
-		}
-
-		throw new Exception("INTERNAL ERROR: Pathway with this title (" + title + ") doesn't exist.");
-	}
 
 	// adds a new focus or kontext pathway, so they will be displayed
 	public void addFocusOrContextPathway(PathwayGraph pathway, Boolean addContextPathway) {
@@ -89,12 +67,6 @@ public class DynamicPathwayGraph {
 			contextPathways.add(pathway);
 		}
 
-	}
-
-	public boolean isFocusPathwaySet() {
-		if (focusPathway != null)
-			return true;
-		return false;
 	}
 
 	public PathwayGraph getFocusPathway() {

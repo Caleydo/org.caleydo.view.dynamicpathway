@@ -27,79 +27,6 @@ public final class GraphMergeUtil {
 
 	private static final int DEFAULT_ADD_PATHWAY_DURATION = DynamicPathwaysCanvas.DEFAULT_ADD_PATHWAY_DURATION;
 
-	public static final ANodeElement createNewMergedNodeElement(List<PathwayVertex> sameVerticesList,
-			PathwayGraph pathwayToAdd, PathwayVertexRep addingVrep, ANodeElement mergingWithNode,
-			boolean mergeWithinSameGraph, boolean addToSameGraph, DynamicPathwaysCanvas layoutContainer) {
-
-		/**
-		 * Create the merged Vrep
-		 */
-		PathwayGraph mergedVrepsPathway;
-		if (addToSameGraph || mergeWithinSameGraph)
-			mergedVrepsPathway = pathwayToAdd;
-		else
-			mergedVrepsPathway = layoutContainer.getDynamicPathway().getCombinedGraph();
-		PathwayVertexRep mergedVrep = GraphMergeUtil.createNewVrep(mergingWithNode.getVertexRep(), sameVerticesList,
-				mergedVrepsPathway);
-
-		/**
-		 * Create the merged node
-		 */
-
-		List<PathwayVertexRep> vreps = new LinkedList<PathwayVertexRep>();
-		vreps.add(addingVrep);
-		vreps.add(mergingWithNode.getVertexRep());
-
-		List<PathwayVertexRep> vrepList = mergingWithNode.getVreps();
-		if (vrepList.size() > 0) {
-			for (PathwayVertexRep vrep : vrepList) {
-				if (!vreps.contains(vrep))
-					vreps.add(vrep);
-			}
-		}
-
-		ANodeElement mergedNode;
-		if (mergeWithinSameGraph) {
-			mergedNode = GraphMergeUtil.createNewNodeElement(mergedVrep, sameVerticesList, vreps, layoutContainer,
-					pathwayToAdd);
-
-			if (!addToSameGraph)
-				mergedNode.setIsMerged(false);
-		} else {
-			Set<PathwayGraph> pathways = new HashSet<PathwayGraph>(mergingWithNode.getPathways());
-			pathways.add(pathwayToAdd);
-			mergedNode = GraphMergeUtil.createNewNodeElement(mergedVrep, sameVerticesList, vreps, layoutContainer,
-					pathways);
-		}
-
-		mergedNode.setCenter(mergingWithNode.getCenterX(), mergingWithNode.getCenterY());
-
-		return mergedNode;
-	}
-
-	/**
-	 * creates a new vertex rep based on a given one with mainVertex as it's name
-	 * 
-	 * @param oldVrep
-	 *            everything besides the name is based on this vrep
-	 * @param mainVertex
-	 *            defines the vreps name
-	 * @return a new vrep
-	 */
-	public static final PathwayVertexRep createNewVrep(PathwayVertexRep oldVrep, List<PathwayVertex> newVrepVertexList,
-			PathwayGraph newVrepsPathway) {
-		PathwayVertexRep newVrep = new PathwayVertexRep(newVrepVertexList.get(0).getHumanReadableName(), oldVrep
-				.getShapeType().name(), oldVrep.getCenterX(), oldVrep.getCenterY(), oldVrep.getWidth(),
-				oldVrep.getHeight());
-
-		for (PathwayVertex mergedVertex : newVrepVertexList)
-			newVrep.addPathwayVertex(mergedVertex);
-
-		newVrep.setPathway(newVrepsPathway);
-
-		return newVrep;
-	}
-
 	/**
 	 * convenience method for creating a new node with just one pathway <br />
 	 * creates set with one pathway & calls
@@ -337,34 +264,5 @@ public final class GraphMergeUtil {
 
 	}
 
-	/**
-	 * return list without PathwayVertex with duplicate names
-	 * 
-	 * @param vertexListToFilter
-	 *            list to filter
-	 * @return filtered list
-	 */
-	private List<PathwayVertex> filterVerticesByName(List<PathwayVertex> vertexListToFilter) {
-		List<PathwayVertex> filteredList = new LinkedList<PathwayVertex>();
-
-		for (PathwayVertex vertexToCheck : vertexListToFilter) {
-
-			boolean alreadyContainsName = false;
-			for (PathwayVertex checkedVertex : filteredList) {
-				String checkWith = checkedVertex.getHumanReadableName();
-				String check = vertexToCheck.getHumanReadableName();
-				if (checkWith.contentEquals(check)) {
-					alreadyContainsName = true;
-					break;
-				}
-			}
-
-			if (!alreadyContainsName) {
-				filteredList.add(vertexToCheck);
-			}
-		}
-
-		return filteredList;
-	}
 
 }
