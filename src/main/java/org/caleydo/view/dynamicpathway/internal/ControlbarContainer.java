@@ -3,6 +3,7 @@ package org.caleydo.view.dynamicpathway.internal;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.caleydo.core.event.AEvent;
 import org.caleydo.core.event.EventPublisher;
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLElement;
@@ -23,6 +24,8 @@ import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.view.dynamicpathway.events.ChangeVertexEnvironmentEvent;
 import org.caleydo.view.dynamicpathway.events.ClearCanvasEvent;
+import org.caleydo.view.dynamicpathway.events.DuplicateVerticesSettingChangeEvent;
+import org.caleydo.view.dynamicpathway.events.ZeroDegreeNodesSettingChangeEvent;
 import org.caleydo.view.dynamicpathway.layout.DynamicPathwayIconLabelRenderer;
 import org.caleydo.view.dynamicpathway.ui.ControlbarPathwayTitleEntry;
 import org.caleydo.view.dynamicpathway.ui.VertexEnvironmentDialog;
@@ -345,9 +348,9 @@ public class ControlbarContainer extends AnimatedGLElementContainer implements I
 		this.contextGraphsLabel.setVisibility(EVisibility.VISIBLE);
 		this.contextPathwayElements.setVisibility(EVisibility.VISIBLE);
 	}
-	
+
 	public void setDisplayFocusPathwayBubbleSetCheckBox(boolean valueToSet) {
-			focusGraphElement.selectDisplayBubbleSet(valueToSet);
+		focusGraphElement.selectDisplayBubbleSet(valueToSet);
 	}
 
 	/**
@@ -448,7 +451,6 @@ public class ControlbarContainer extends AnimatedGLElementContainer implements I
 		return lineSeparator;
 	}
 
-
 	/**
 	 * if any of the buttons has changed
 	 */
@@ -458,14 +460,29 @@ public class ControlbarContainer extends AnimatedGLElementContainer implements I
 		if (!selected)
 			return;
 
+		AEvent settingChangeEvent = null;
+
+		// if (button.equals(ignoreZeroDegreeNodesButton))
+		// view.paintGraphWithOrWithoutZeroDegreeVertices(true);
+		// else if (button.equals(allowZeroDegreeNodesButton))
+		// view.paintGraphWithOrWithoutZeroDegreeVertices(false);
+		// else if (button.equals(allowDuplicateVerticesButton))
+		// view.paintGraphWithOrWithoutDuplicateVertices(true);
+		// else if (button.equals(removeDuplicateVerticesButton))
+		// view.paintGraphWithOrWithoutDuplicateVertices(false);
+
 		if (button.equals(ignoreZeroDegreeNodesButton))
-			view.paintGraphWithOrWithoutZeroDegreeVertices(true);
+			settingChangeEvent = new ZeroDegreeNodesSettingChangeEvent(true);
 		else if (button.equals(allowZeroDegreeNodesButton))
-			view.paintGraphWithOrWithoutZeroDegreeVertices(false);
+			settingChangeEvent = new ZeroDegreeNodesSettingChangeEvent(false);
 		else if (button.equals(allowDuplicateVerticesButton))
-			view.paintGraphWithOrWithoutDuplicateVertices(true);
+			settingChangeEvent = new DuplicateVerticesSettingChangeEvent(true);
 		else if (button.equals(removeDuplicateVerticesButton))
-			view.paintGraphWithOrWithoutDuplicateVertices(false);
+			settingChangeEvent = new DuplicateVerticesSettingChangeEvent(false);
+
+		if (settingChangeEvent != null)
+			EventPublisher.trigger(settingChangeEvent);
+
 	}
 
 	@Override

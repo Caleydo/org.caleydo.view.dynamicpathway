@@ -1,4 +1,4 @@
-package org.caleydo.view.dynamicpathway.ranking;
+package org.caleydo.view.dynamicpathway.layout;
 
 import gleem.linalg.Vec2f;
 
