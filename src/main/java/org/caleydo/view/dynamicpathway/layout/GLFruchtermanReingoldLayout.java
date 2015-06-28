@@ -272,7 +272,6 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 			try {
 				editDisplacement(currentNode, xDisplacementFactor, yDisplacementFactor);
 			} catch (NodeMergingException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -307,14 +306,11 @@ public class GLFruchtermanReingoldLayout implements IGLLayout2 {
 			try {
 				editDisplacement(sourceNode, xDisplacementSourceFactor, yDisplacementSourceFactor);
 			} catch (NodeMergingException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			try {
 				editDisplacement(targetNode, xDisplacementTargetFactor, yDisplacementTargetFactor);
 			} catch (NodeMergingException e) {
-				// TODO Auto-generated catch block
-				System.out.println("tmp");
 				e.printStackTrace();
 			}
 

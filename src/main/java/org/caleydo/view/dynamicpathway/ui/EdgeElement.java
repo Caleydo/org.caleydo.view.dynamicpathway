@@ -136,7 +136,6 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		double xTarget = targetNode.getCenterX();
 		double yTarget = targetNode.getCenterY();
 
-		// TODO: sometimes null
 		centerToCenterLine.setLine(xSource, ySource, xTarget, yTarget);
 
 		Point2D sourcePoint;
@@ -157,8 +156,6 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 
 		if (targetNode.getVertexRep().getType() == EPathwayVertexType.compound) {
 
-			Line2D reversedCenterToCenterLine = new Line2D.Double(xTarget, yTarget, xSource, ySource);
-
 			double radius = targetNode.getWidth();
 
 			targetPoint = CalculateIntersectionUtil.calcIntersectionPoint(centerToCenterLine, radius);
@@ -166,7 +163,6 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		} else
 			targetPoint = targetNode.getIntersectionPointWithNodeBound(centerToCenterLine);
 
-		//TODO: should not happen
 		if (sourcePoint == null && targetPoint == null) {
 			edgeToRender.setLine(centerToCenterLine);
 		} else if (sourcePoint == null) {
@@ -174,7 +170,6 @@ public class EdgeElement extends GLElement implements IFRLayoutEdge {
 		} else if (targetPoint == null) {
 			edgeToRender.setLine(sourcePoint.getX(), sourcePoint.getY(), xTarget, yTarget);
 		} else {
-//			edgeToRender.setLine(centerToCenterLine);
 			edgeToRender.setLine(sourcePoint, targetPoint);
 		}
 

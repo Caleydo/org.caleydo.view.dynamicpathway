@@ -19,7 +19,6 @@ public class NodeCompoundElement extends ANodeElement {
 	private static final int FONT_SIZE_MULTIPLIER = 8;
 	private static final int TEXT_X_POS = -20;
 	private static final int TEXT_Y_POS = 8;
-	private static final float HIGHLIGHT_LEFT_PADDING = -0.2f;
 	private static final float HIGHLIGHT_RIGHT_PADDING = INNER_PADDING + 1 + 0.5f;
 	private static final float WIDTH_AND_HEIGHT_ADDEND = 2.5f;
 	
@@ -104,14 +103,12 @@ public class NodeCompoundElement extends ANodeElement {
 		this.width = w;
 		this.centerX = this.getBounds().get(0);
 		this.centerY = this.getBounds().get(1);
-		short width = (short) w;
 
 		// contour
 		g.color(contourColor).fillCircle(0, 0, RADIUS + INNER_PADDING- HIGHLIGHT_RIGHT_PADDING);
 		
 		g.color(fillingColor).fillCircle(0, 0, RADIUS- HIGHLIGHT_RIGHT_PADDING);
 
-		// TODO: label?
 		g.drawText(vertexRep.getName(), TEXT_X_POS, TEXT_Y_POS, RADIUS * FONT_SIZE_MULTIPLIER, FONT_SIZE);
 
 	}

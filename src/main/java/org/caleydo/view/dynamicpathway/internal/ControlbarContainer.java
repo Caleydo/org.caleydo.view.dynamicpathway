@@ -39,8 +39,6 @@ public class ControlbarContainer extends AnimatedGLElementContainer implements I
 	private static final String TITLE = "Control Bar";
 	private static final String CLEAR_CANVAS_INFO_TEXT = "Remove Pathways:";
 
-	private DynamicPathwayView view;
-
 	/**
 	 * radio group for allowing/ignoring zero degree nodes
 	 */
@@ -79,11 +77,10 @@ public class ControlbarContainer extends AnimatedGLElementContainer implements I
 
 	private Integer nodeEnvironmentSize;
 
-	public ControlbarContainer(DynamicPathwayView view) {
+	public ControlbarContainer() {
 		super();
 		setLayout(GLLayouts.flowVertical(10));
 
-		this.view = view;
 		this.contextPathways = new HashMap<String, GLElement>();
 		this.nodeEnvironmentSize = new Integer(VERTEX_ENV_ON_START);
 
@@ -163,7 +160,6 @@ public class ControlbarContainer extends AnimatedGLElementContainer implements I
 
 					@Override
 					public void run() {
-						// TODO Auto-generated method stub
 						VertexEnvironmentDialog envDialog = new VertexEnvironmentDialog(Display.getDefault()
 								.getActiveShell());
 						int returnValue = envDialog.open();
@@ -294,9 +290,6 @@ public class ControlbarContainer extends AnimatedGLElementContainer implements I
 		this.contextPathways.clear();
 		this.focusGraphElement.setVisibility(EVisibility.HIDDEN);
 		this.focusContextLineSeparator.setVisibility(EVisibility.HIDDEN);
-		// this.vertexEnvironmentSizeTitle.setVisibility(EVisibility.HIDDEN);
-		// this.vertexEnvironmentSizeValue.setVisibility(EVisibility.HIDDEN);
-		// this.vertexEnvironmentSizeLineSeparator.setVisibility(EVisibility.HIDDEN);
 		this.contextGraphsLabel.setVisibility(EVisibility.HIDDEN);
 		this.contextPathwayElements.setVisibility(EVisibility.HIDDEN);
 		this.allowDuplicateVerticesButton.setVisibility(EVisibility.PICKABLE);
@@ -316,7 +309,6 @@ public class ControlbarContainer extends AnimatedGLElementContainer implements I
 			String nodeEnvonmentSizeString = (this.nodeEnvironmentSize < 0) ? "Full Pathways"
 					: this.nodeEnvironmentSize.toString();
 			vertexEnvironmentSizeValue.setRenderer(GLRenderers.drawText(nodeEnvonmentSizeString));
-			// this.vertexEnvironmentSizeValue = createContentText(this.nodeEnvironmentSize.toString());
 			vertexEnvironmentSizeValue.repaint();
 			nodeEnvSizeChanged = true;
 		}
@@ -342,9 +334,6 @@ public class ControlbarContainer extends AnimatedGLElementContainer implements I
 		this.focusGraphElement.setPathway(pathwayToAdd, pathwayColor, false);
 		this.focusGraphElement.setVisibility(EVisibility.PICKABLE);
 		this.focusContextLineSeparator.setVisibility(EVisibility.VISIBLE);
-		// this.vertexEnvironmentSizeTitle.setVisibility(EVisibility.VISIBLE);
-		// this.vertexEnvironmentSizeValue.setVisibility(EVisibility.VISIBLE);
-		// this.vertexEnvironmentSizeLineSeparator.setVisibility(EVisibility.VISIBLE);
 		this.contextGraphsLabel.setVisibility(EVisibility.VISIBLE);
 		this.contextPathwayElements.setVisibility(EVisibility.VISIBLE);
 	}
@@ -374,7 +363,6 @@ public class ControlbarContainer extends AnimatedGLElementContainer implements I
 		/**
 		 * disallowed with context pathways
 		 */
-		// allowIgnoreDuplicateVerticesLabel1.setVisibility(EVisibility.VISIBLE);
 		allowIgnoreDuplicateVerticesLabel2 = createSubHeader("vertices (DISABLED)");
 		allowDuplicateVerticesButton.setVisibility(EVisibility.VISIBLE);
 		removeDuplicateVerticesButton.setVisibility(EVisibility.VISIBLE);
@@ -461,15 +449,6 @@ public class ControlbarContainer extends AnimatedGLElementContainer implements I
 			return;
 
 		AEvent settingChangeEvent = null;
-
-		// if (button.equals(ignoreZeroDegreeNodesButton))
-		// view.paintGraphWithOrWithoutZeroDegreeVertices(true);
-		// else if (button.equals(allowZeroDegreeNodesButton))
-		// view.paintGraphWithOrWithoutZeroDegreeVertices(false);
-		// else if (button.equals(allowDuplicateVerticesButton))
-		// view.paintGraphWithOrWithoutDuplicateVertices(true);
-		// else if (button.equals(removeDuplicateVerticesButton))
-		// view.paintGraphWithOrWithoutDuplicateVertices(false);
 
 		if (button.equals(ignoreZeroDegreeNodesButton))
 			settingChangeEvent = new ZeroDegreeNodesSettingChangeEvent(true);

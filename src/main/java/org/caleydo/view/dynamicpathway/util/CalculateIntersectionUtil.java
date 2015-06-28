@@ -1,8 +1,5 @@
 package org.caleydo.view.dynamicpathway.util;
 
-import gleem.linalg.Vec2f;
-
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 

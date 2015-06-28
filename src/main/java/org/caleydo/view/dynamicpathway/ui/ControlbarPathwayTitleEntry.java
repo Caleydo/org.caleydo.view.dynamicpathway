@@ -5,14 +5,10 @@ import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.contextmenu.GenericContextMenuItem;
 import org.caleydo.core.view.opengl.layout2.GLElementContainer;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
-import org.caleydo.core.view.opengl.layout2.GLElement.EVisibility;
 import org.caleydo.core.view.opengl.layout2.basic.EButtonIcon;
 import org.caleydo.core.view.opengl.layout2.basic.GLButton;
 import org.caleydo.core.view.opengl.layout2.basic.GLButton.EButtonMode;
-import org.caleydo.core.view.opengl.layout2.basic.GLButton.ISelectionCallback;
-import org.caleydo.core.view.opengl.layout2.renderer.GLRenderers;
 import org.caleydo.core.view.opengl.picking.APickingListener;
-import org.caleydo.core.view.opengl.picking.AdvancedPick;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
 import org.caleydo.core.view.opengl.picking.PickingMode;
@@ -79,13 +75,11 @@ public class ControlbarPathwayTitleEntry extends GLElementContainer {
 
 			@Override
 			public void pick(Pick pick) {
-				AdvancedPick p = (AdvancedPick) pick;
 
 				/**
 				 * if the user right clicked - show context menu
 				 */
 				if (pick.getPickingMode() == PickingMode.RIGHT_CLICKED) {
-					// context.getSWTLayer().showContextMenu(Lists.newArrayList(removePathwayMenuItem));
 
 					if (isFocusPathway)
 						context.getSWTLayer().showContextMenu(Lists.newArrayList(removePathwayMenuItem));
@@ -93,11 +87,6 @@ public class ControlbarPathwayTitleEntry extends GLElementContainer {
 						context.getSWTLayer().showContextMenu(
 								Lists.newArrayList(removePathwayMenuItem, makeFocusGraphMenuItem));
 				}
-
-				// //TODO: change to strg + del key
-				// if(p.isCtrlDown() && pick.getPickingMode() == PickingMode.CLICKED) {
-				// view.removeGraph(pathwayTitle);
-				// }
 
 				repaint();
 

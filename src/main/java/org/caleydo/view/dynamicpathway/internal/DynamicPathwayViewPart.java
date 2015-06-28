@@ -31,7 +31,6 @@ public class DynamicPathwayViewPart extends ARcpGLViewPart {
 
 		createPartControlGL();
 
-		// DataMappers.getDataMapper().show();
 	}
 
 	@Override

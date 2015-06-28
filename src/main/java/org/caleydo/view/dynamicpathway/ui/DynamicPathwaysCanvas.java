@@ -305,7 +305,6 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		uniqueVertexMap.clear();
 
 		bubbleSetPathways.clear();
-		// usedColorIndezes.clear();
 		contextPathwayColorIndex.clear();
 		nextColorIndex = 0;
 
@@ -589,7 +588,6 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 		 * if another node was selected before, deselect it and selected the new node
 		 */
 		else if (newFilteringNode != null) {
-			// System.out.println("Changing filtering node from  " + currentFilteringNode + " to " + newFilteringNode);
 			focusNode.setNodeState(ENodeState.DEFAULT);
 
 			focusNode = newFilteringNode;
@@ -755,7 +753,6 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 			 * add the new pathway to the merged node
 			 */
 			Set<PathwayGraph> pathwaysFromMergedNode = new HashSet<PathwayGraph>(nodeToMergeWith.getPathways());
-			// nodeWithDuplicateVertices.addPathway(pathwayToAdd);
 
 			PathwayVertexRep vrepOfNonDuplicateVertices = new PathwayVertexRep(nonDuplicateVerticesOfExistingNode
 					.get(0).getHumanReadableName(), nodeVrep.getShapeType().name(), nodeVrep.getCenterX(),
@@ -1116,8 +1113,6 @@ public class DynamicPathwaysCanvas extends AnimatedGLElementContainer implements
 			}
 
 			for (PathwayGraph pathway : pathways) {
-				// if (pathway.equals(focusPathway))
-				// continue;
 
 				if (!bubbleSetPathways.contains(pathway))
 					continue;

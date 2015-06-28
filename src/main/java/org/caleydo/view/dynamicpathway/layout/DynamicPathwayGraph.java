@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
-import org.caleydo.view.dynamicpathway.ui.ANodeElement;
 import org.jgrapht.graph.DefaultEdge;
 
 /**
@@ -22,7 +21,7 @@ public class DynamicPathwayGraph {
 	private PathwayGraph focusPathway;
 
 	/**
-	 * the kontext graph, which may not be be fully represented TODO: change vector to : vector<KontextGraph>
+	 * the context graph, which may not be be fully represented
 	 * KontextGraph contains: PathwayGraph, to which it belong, the main vertex, list of represented vertices & edges
 	 */
 	private List<PathwayGraph> contextPathways;
@@ -48,7 +47,7 @@ public class DynamicPathwayGraph {
 	 * @param pathway
 	 *            the pathway to check
 	 * 
-	 * @return true if the
+	 * @return true if the pathway is present
 	 */
 	public boolean isPathwayPresent(PathwayGraph pathway) {
 		if (isFocusGraph(pathway) || isContextGraph(pathway))
@@ -58,7 +57,12 @@ public class DynamicPathwayGraph {
 	}
 
 
-	// adds a new focus or kontext pathway, so they will be displayed
+	/**
+	 * adds a new focus or context pathway, so they will be displayed
+	 * 
+	 * @param pathway
+	 * @param addContextPathway
+	 */
 	public void addFocusOrContextPathway(PathwayGraph pathway, Boolean addContextPathway) {
 
 		if (!addContextPathway) {
@@ -91,7 +95,6 @@ public class DynamicPathwayGraph {
 		combinedGraph = null;
 	}
 
-	// ----------------------------------------------------
 
 	public boolean isFocusGraph(PathwayGraph pathway) {
 		if (pathway.equals(focusPathway))

@@ -1,12 +1,9 @@
 package org.caleydo.view.dynamicpathway.ui;
 
-import gleem.linalg.Vec2f;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 import org.caleydo.core.view.opengl.layout2.layout.GLLayouts;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
@@ -20,7 +17,6 @@ public class NodeGroupElement extends ANodeElement {
 	private static final int GAP_BETWEEN_NODES = 2;
 
 	private PathwayVertexGroupRep groupRep;
-	private int groupSize;
 	private LinkedList<NodeGeneElement> elementsOfThisGroup;
 
 	public NodeGroupElement(PathwayVertexRep vrep, List<PathwayVertex> pathwayVertices, DynamicPathwaysCanvas parentGraph, Set<PathwayGraph> pathways) {
@@ -30,7 +26,6 @@ public class NodeGroupElement extends ANodeElement {
 
 
 		this.groupRep = (PathwayVertexGroupRep) vrep;
-		this.groupSize = groupRep.getGroupedVertexReps().size();
 		this.elementsOfThisGroup = new LinkedList<NodeGeneElement>();
 
 		

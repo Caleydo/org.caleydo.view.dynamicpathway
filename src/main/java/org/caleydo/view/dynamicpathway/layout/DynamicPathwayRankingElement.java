@@ -174,7 +174,6 @@ public class DynamicPathwayRankingElement extends GLElementContainer {
 		pathwayNameColumn.addPropertyChangeListener(ICollapseableColumnMixin.PROP_COLLAPSED, onCollapseColumn);
 		table.add(pathwayNameColumn);
 		
-		//TODO: just KEGG
 		Collection<String> dbtypes = new ArrayList<>(2);
 		for (EPathwayDatabaseType type : EPathwayDatabaseType.values()) {
 			dbtypes.add(type.getName());

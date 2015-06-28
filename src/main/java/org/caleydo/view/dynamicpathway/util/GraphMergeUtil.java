@@ -9,16 +9,15 @@ import java.util.Set;
 import org.caleydo.core.util.collection.Pair;
 import org.caleydo.core.util.color.Color;
 import org.caleydo.core.view.opengl.layout2.animation.AnimatedGLElementContainer;
-import org.caleydo.core.view.opengl.layout2.animation.InOutTransitions.IInTransition;
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexGroupRep;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
+import org.caleydo.view.dynamicpathway.ui.ANodeElement;
 import org.caleydo.view.dynamicpathway.ui.DynamicPathwaysCanvas;
 import org.caleydo.view.dynamicpathway.ui.EdgeElement;
 import org.caleydo.view.dynamicpathway.ui.NodeCompoundElement;
-import org.caleydo.view.dynamicpathway.ui.ANodeElement;
 import org.caleydo.view.dynamicpathway.ui.NodeGeneElement;
 import org.caleydo.view.dynamicpathway.ui.NodeGroupElement;
 import org.jgrapht.graph.DefaultEdge;
@@ -87,8 +86,6 @@ public final class GraphMergeUtil {
 		 * if this node contains vertices from 2 or more PathwayVertexReps, i.e. it's a merged node
 		 */
 		if (pathwayVertices != null) {
-
-			// node.setVertices(pathwayVertices);
 
 			if (vrepsWithThisNodesVertices != null) {
 
@@ -220,7 +217,6 @@ public final class GraphMergeUtil {
 				ANodeElement srcNode = vertexNodeMap.get(srcVertex);
 
 				if (srcNode == null) {
-					System.out.println("VertexNodeMap didn't contain srcVertex:" + srcVertex);
 					continue;
 				}
 
@@ -235,8 +231,6 @@ public final class GraphMergeUtil {
 		} else {
 			for (PathwayVertex targetVertex : targetVrep.getPathwayVertices()) {
 				if (!vertexNodeMap.containsKey(targetVertex) || vertexNodeMap.get(targetVertex) == null) {
-					// throw new NodeMergingException("targetVertex(" + targetVertex + ") not in uniqueVertexMap");
-					System.out.println("VertexNodeMap didn't contain targetVertex:" + targetVertex);
 					continue;
 				}
 
@@ -244,7 +238,6 @@ public final class GraphMergeUtil {
 				if (!targetNodes.contains(targetNode) && targetNode != null)
 					targetNodes.add(targetNode);
 
-				// targetNodes.add(vertexNodeMap.get(targetVertex));
 			}
 		}
 

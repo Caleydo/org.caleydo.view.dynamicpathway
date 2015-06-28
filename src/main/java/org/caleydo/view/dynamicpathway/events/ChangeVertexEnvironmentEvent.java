@@ -12,7 +12,6 @@ public class ChangeVertexEnvironmentEvent extends AEvent {
 
 	@Override
 	public boolean checkIntegrity() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 	

@@ -1,9 +1,8 @@
 package org.caleydo.view.dynamicpathway.ui;
 
-import org.eclipse.swt.layout.GridLayout;
-import org.caleydo.core.event.EventPublisher;
 import org.caleydo.core.gui.util.AHelpButtonDialog;
-import org.caleydo.view.dynamicpathway.events.ChangeVertexEnvironmentEvent;
+import org.caleydo.core.manager.GeneralManager;
+import org.caleydo.core.util.system.BrowserUtils;
 import org.eclipse.jface.dialogs.TrayDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -11,10 +10,10 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -37,7 +36,6 @@ public class VertexEnvironmentDialog extends AHelpButtonDialog {
 	private boolean partlySelected = true;
 
 	private Integer vertexEnv = DEFAULT_ENV_SIZE;
-	private ChangeVertexEnvironmentEvent changeVertexEnvEvent;
 
 	public VertexEnvironmentDialog(Shell parentShell) {
 		super(parentShell);
@@ -46,8 +44,7 @@ public class VertexEnvironmentDialog extends AHelpButtonDialog {
 
 	@Override
 	protected void helpPressed() {
-		// TODO Auto-generated method stub
-		System.out.println("TODO");
+		BrowserUtils.openURL(GeneralManager.HELP_URL);
 	}
 
 	@Override
@@ -148,7 +145,6 @@ public class VertexEnvironmentDialog extends AHelpButtonDialog {
 
 	@Override
 	protected void okPressed() {
-		// TODO Auto-generated method stub
 		super.okPressed();
 	}
 

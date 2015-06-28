@@ -13,14 +13,12 @@ public class MakeFocusPathwayEvent extends AEvent {
 
 	@Override
 	public boolean checkIntegrity() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 	
 	public PathwayGraph getPathway() {
 		if(contextPathwayToMakeFocus != null)
 			return contextPathwayToMakeFocus.getRepresentedPathway();
-		//TODO: exception
 		return null;
 	}
 

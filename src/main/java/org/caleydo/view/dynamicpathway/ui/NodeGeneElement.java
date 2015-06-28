@@ -5,11 +5,7 @@ import java.util.Set;
 
 import org.caleydo.core.event.EventPublisher;
 import org.caleydo.core.view.opengl.layout.Column.VAlign;
-import org.caleydo.core.view.opengl.layout2.GLElement;
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
-import org.caleydo.core.view.opengl.layout2.dnd.IDnDItem;
-import org.caleydo.core.view.opengl.layout2.dnd.IDragGLSource;
-import org.caleydo.core.view.opengl.layout2.dnd.IDragInfo;
 import org.caleydo.core.view.opengl.picking.AdvancedPick;
 import org.caleydo.core.view.opengl.picking.IPickingListener;
 import org.caleydo.core.view.opengl.picking.Pick;
@@ -47,18 +43,11 @@ public class NodeGeneElement extends ANodeElement {
 				 * if the user right clicked - show context menu
 				 */
 				if (pick.getPickingMode() == PickingMode.RIGHT_CLICKED) {
-					// parentGraph.setOrResetFilteringNode(NodeGeneElement.this);
 
 					context.getSWTLayer().showContextMenu(Lists.newArrayList(filterPathwayMenu, focusNodeMenu));
 
 				}
 				
-				
-				// TODO: doesn't work
-				if(pick.isAnyDragging() || pick.getPickingMode() == PickingMode.DRAGGED) {
-					NodeGeneElement.this.setNewLocation(pick);
-				}
-
 
 				/**
 				 * if the user clicked on the node
@@ -70,9 +59,6 @@ public class NodeGeneElement extends ANodeElement {
 					parentGraph.setOrResetSelectedNode(NodeGeneElement.this);
 
 					if (p.isCtrlDown()) {
-						// parentGraph.setOrResetFilteringNode(NodeGeneElement.this);
-						//
-						// parentGraph.filterPathwayList();
 
 						EventPublisher.trigger(focusNodeEvent);
 					}
