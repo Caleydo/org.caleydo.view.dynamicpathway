@@ -1,7 +1,6 @@
 package org.caleydo.view.dynamicpathway.layout;
 
 import org.caleydo.core.view.opengl.layout2.GLElement;
-import org.caleydo.view.dynamicpathway.ui.DynamicPathwayGraphRepresentation;
 
 /**
  * Interface containing methods, which are needed for the Fruchterman Reingold Layout

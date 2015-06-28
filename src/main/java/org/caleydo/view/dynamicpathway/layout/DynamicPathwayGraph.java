@@ -1,58 +1,39 @@
 package org.caleydo.view.dynamicpathway.layout;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.caleydo.datadomain.pathway.graph.PathwayGraph;
-import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexShape;
-import org.caleydo.datadomain.pathway.graph.item.vertex.EPathwayVertexType;
-import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
-import org.caleydo.datadomain.pathway.manager.PathwayManager;
-import org.caleydo.view.dynamicpathway.ui.NodeElement;
-import org.caleydo.view.dynamicpathway.util.PathwayManagementUtil;
 import org.jgrapht.graph.DefaultEdge;
 
 /**
- * contains all informations for the different graphs, such as the focusGraph & all kontextGraphs
+ * contains all informations for the different graphs, such as the Focus Pathway & the Context Pathways
  * 
  * @author Christiane Schwarzl
  * 
  */
 public class DynamicPathwayGraph {
 
-	private static final Boolean DISPLAY_ONLY_VERTICES_WITH_EDGES = false;
-
 	/**
 	 * the actual focus pathway graph, which is completely represented
 	 */
-	private PathwayGraph focusGraph;
+	private PathwayGraph focusPathway;
 
 	/**
-	 * the kontext graph, which may not be be fully represented TODO: change vector to : vector<KontextGraph>
-	 * KontextGraph contains: PathwayGraph, to which it belong, the main vertex, list of represented vertices
-	 * & edges
+	 * the context graph, which may not be be fully represented
+	 * KontextGraph contains: PathwayGraph, to which it belong, the main vertex, list of represented vertices & edges
 	 */
-	private List<PathwayGraph> kontextGraphs;
+	private List<PathwayGraph> contextPathways;
 
 	/**
 	 * needed for searching all currently represented vertices
 	 */
 	private PathwayGraph combinedGraph;
 
-	/**
-	 * get source/target vertex of edge returns a PathwayVertexRep, but we need a NodeElement, which is a
-	 * container for PathwayVertexRep
-	 */
-	private Map<PathwayVertexRep, NodeElement> vertexNodeMap;
-
 	public DynamicPathwayGraph() {
 
-		kontextGraphs = new LinkedList<PathwayGraph>();
-		vertexNodeMap = new HashMap<PathwayVertexRep, NodeElement>();
+		contextPathways = new LinkedList<PathwayGraph>();
 
 	}
 
@@ -60,247 +41,92 @@ public class DynamicPathwayGraph {
 		return combinedGraph;
 	}
 
-	public Set<PathwayVertexRep> getCombinedVertexSet() {
-		return combinedGraph.vertexSet();
-	}
-
-	public Set<DefaultEdge> getCombinedEdgeSet() {
-		return combinedGraph.edgeSet();
-	}
-
-	public PathwayVertexRep getEdgeSource(DefaultEdge e) {
-		return combinedGraph.getEdgeSource(e);
-	}
-
-	public PathwayVertexRep getEdgeTarget(DefaultEdge e) {
-		return combinedGraph.getEdgeTarget(e);
-	}
-
-	public void addVertexNodeMapEntry(PathwayVertexRep vrep, NodeElement node) {
-		vertexNodeMap.put(vrep, node);
-	}
-
-	public NodeElement getNodeOfVertex(PathwayVertexRep vrep) {
-		return vertexNodeMap.get(vrep);
-	}
-
-	public boolean isGraphPresented(PathwayGraph pathway) {
-		if (isFocusGraph(pathway))
-			return true;
-
-		if (isKontextGraph(pathway))
+	/**
+	 * checks if the current pathway is present
+	 * 
+	 * @param pathway
+	 *            the pathway to check
+	 * 
+	 * @return true if the pathway is present
+	 */
+	public boolean isPathwayPresent(PathwayGraph pathway) {
+		if (isFocusGraph(pathway) || isContextGraph(pathway))
 			return true;
 
 		return false;
 	}
 
-	// adds a new focus or kontext pathway, so they will be displayed
-	public Map<PathwayVertexRep, List<PathwayVertexRep>> addFocusOrKontextPathway(PathwayGraph pathway,
-			Boolean addKontextPathway, NodeElement currentSelectedNode) {
 
-		if (!addKontextPathway) {
+	/**
+	 * adds a new focus or context pathway, so they will be displayed
+	 * 
+	 * @param pathway
+	 * @param addContextPathway
+	 */
+	public void addFocusOrContextPathway(PathwayGraph pathway, Boolean addContextPathway) {
+
+		if (!addContextPathway) {
 			addFocusPathway(pathway);
 		} else {
-			return addKontextGraph(pathway, currentSelectedNode);
+			contextPathways.add(pathway);
 		}
-		return null;
+
 	}
 
-	public float getFocusPathwayWidth() {
-		return focusGraph.getWidth();
+	public PathwayGraph getFocusPathway() {
+		return focusPathway;
 	}
 
-	public float getFocusPathwayHeight() {
-		return focusGraph.getHeight();
+	public void setFocusPathway(PathwayGraph newFocusPathway) {
+		this.focusPathway = newFocusPathway;
 	}
 
-	public boolean isFocusGraphSet() {
-		if (focusGraph != null)
+	public List<PathwayGraph> getContextPathways() {
+		return contextPathways;
+	}
+
+	public Boolean removeContextPathway(PathwayGraph contextPathwayToRemove) {
+		return contextPathways.remove(contextPathwayToRemove);
+	}
+
+	public void removeAllPathways() {
+		focusPathway = null;
+		contextPathways.clear();
+		combinedGraph = null;
+	}
+
+
+	public boolean isFocusGraph(PathwayGraph pathway) {
+		if (pathway.equals(focusPathway))
 			return true;
 		return false;
 	}
 
-	public PathwayGraph getFocusGraph() {
-		return focusGraph;
-	}
-	
-	public String getFocusGraphTitle() {
-		return focusGraph.getTitle();
-	}
-
-	public List<PathwayGraph> getKontextGraphs() {
-		return kontextGraphs;
-	}
-
-	// ----------------------------------------------------
-
-	private boolean isFocusGraph(PathwayGraph pathway) {
-		if (pathway == focusGraph)
-			return true;
-		return false;
-	}
-
-	private boolean isKontextGraph(PathwayGraph pathway) {
-		for (PathwayGraph kontextPathway : kontextGraphs) {
-			if (pathway == kontextPathway)
+	public boolean isContextGraph(PathwayGraph pathway) {
+		for (PathwayGraph contextPathway : contextPathways) {
+			if (pathway.equals(contextPathway))
 				return true;
 		}
 		return false;
 	}
 
-	private void addFocusPathway(PathwayGraph graph) throws IllegalArgumentException {
-		focusGraph = graph;
-		kontextGraphs.clear();
+	private void addFocusPathway(PathwayGraph newFocusPathway) {
+		focusPathway = newFocusPathway;
+		contextPathways.clear();
 
-		combinedGraph = new PathwayGraph(graph.getType(), "Combined Graph", "Combined Graph",
-				graph.getImage(), graph.getExternalLink());
+		combinedGraph = new PathwayGraph(newFocusPathway.getType(), "Combined Graph [Focus:"
+				+ newFocusPathway.getName() + "]", "Combined Graph [Focus:" + newFocusPathway.getTitle() + "]",
+				newFocusPathway.getImage(), newFocusPathway.getExternalLink());
 
-		for (PathwayVertexRep vrep : graph.vertexSet()) {
+		for (PathwayVertexRep vrep : newFocusPathway.vertexSet()) {
 
-			/**
-			 * map is the type, which display the current pathway's name this should be layoutet
-			 * 
-			 * user can choose if only vertices with edges should be displayed, so that the workspace is not
-			 * so cluttered TODO: implement user interaction
-			 */
-			if (vrep.getType() != EPathwayVertexType.map) {
-				if (!(DISPLAY_ONLY_VERTICES_WITH_EDGES && graph.inDegreeOf(vrep) == 0 && graph
-						.outDegreeOf(vrep) == 0))
-					combinedGraph.addVertex(vrep);
-			}
+			combinedGraph.addVertex(vrep);
+
 		}
-		for (DefaultEdge edge : graph.edgeSet()) {
-			PathwayVertexRep source = graph.getEdgeSource(edge);
-			PathwayVertexRep target = graph.getEdgeTarget(edge);
-			if(source != null && target != null)
-				combinedGraph.addEdge(source, target, edge);
-		}
+		for (DefaultEdge edge : newFocusPathway.edgeSet()) {
 
+			combinedGraph.addEdge(newFocusPathway.getEdgeSource(edge), newFocusPathway.getEdgeTarget(edge), edge);
+		}
 	}
-
-	private Map<PathwayVertexRep, List<PathwayVertexRep>> addKontextGraph(PathwayGraph pathway,
-			NodeElement currentSelectedNode) {
-		kontextGraphs.add(pathway);
-		// Vector<PathwayVertexRep> vrepsToIgnore = new Vector<PathwayVertexRep>();
-
-		Map<PathwayVertexRep, List<PathwayVertexRep>> splittedUpVertexMap = new HashMap<PathwayVertexRep, List<PathwayVertexRep>>();
-
-		/**
-		 * contains all vertices, which represent the same vertices
-		 */
-		Map<PathwayVertexRep, PathwayVertexRep> equivalVertexMap = new HashMap<PathwayVertexRep, PathwayVertexRep>();
-
-		/**
-		 * if one of the vreps of the new kontext pathway to add, is already in the displayed graph, it is
-		 * saved in the equivalVertexMap, which contains all vertices which should be ignored, to avoid
-		 * duplicates
-		 */
-		for (PathwayVertexRep vrepToAdd : pathway.vertexSet()) {
-			List<PathwayVertexRep> splittedUpVertexList = new LinkedList<PathwayVertexRep>();
-			for (PathwayVertexRep alreadyDisplayedVrep : combinedGraph.vertexSet()) {
-				List<PathwayVertex> equivalentVertices = PathwayManagementUtil.getEquivalentVertices(
-						alreadyDisplayedVrep, vrepToAdd);
-
-				/**
-				 * if the two vreps represent the same vertices
-				 */
-				if (equivalentVertices.size() == vrepToAdd.getPathwayVertices().size()
-						&& equivalentVertices.size() == alreadyDisplayedVrep.getPathwayVertices().size()) {
-					// if (PathwayManager.get().areVerticesEquivalent(alreadyDisplayedVrep, vrepToAdd)) {
-
-					// if(equivalVertexMap.get(vrepToAdd) != null)
-					equivalVertexMap.put(vrepToAdd, alreadyDisplayedVrep);
-				} else if (equivalentVertices.size() > 0) {
-
-					
-				
-					for (PathwayVertex vertex : equivalentVertices) {
-
-						if (!PathwayManagementUtil.pathwayVertexRepListContainsVertex(splittedUpVertexList,
-								vertex)) {
-
-							PathwayVertexRep splittedOfVertex = new PathwayVertexRep(vertex.getName(),
-									EPathwayVertexShape.rectangle.name(), vrepToAdd.getCenterX(),
-									vrepToAdd.getCenterY(), vrepToAdd.getWidth(), vrepToAdd.getHeight());
-							splittedOfVertex.addPathwayVertex(vertex);
-							splittedUpVertexList.add(splittedOfVertex);
-						}
-					}
-				}
-			}
-			splittedUpVertexMap.put(vrepToAdd, splittedUpVertexList);
-		}
-
-		for (PathwayVertexRep vrep : pathway.vertexSet()) {
-
-			/**
-			 * map is the type, which display the current pathway's name this should be layoutet - TODO:
-			 * display map
-			 */
-			if (vrep.getType() != EPathwayVertexType.map) {
-
-				if (!(DISPLAY_ONLY_VERTICES_WITH_EDGES && pathway.inDegreeOf(vrep) == 0 && pathway
-						.outDegreeOf(vrep) == 0)) {
-					/**
-					 * if the vertex to add is not already displayed
-					 */
-					if (equivalVertexMap.get(vrep) == null) {
-						combinedGraph.addVertex(vrep);
-					}
-
-					if (splittedUpVertexMap.get(vrep).size() > 0) {
-						for (PathwayVertexRep splitUpVertex : splittedUpVertexMap.get(vrep)) {
-							splitUpVertex.setPathway(combinedGraph);
-							combinedGraph.addVertex(splitUpVertex);
-						}
-					}
-
-				}
-
-			}
-		}
-
-		for (DefaultEdge edge : pathway.edgeSet()) {
-			PathwayVertexRep source = pathway.getEdgeSource(edge);
-			PathwayVertexRep target = pathway.getEdgeTarget(edge);
-
-			/**
-			 * if source or target are already displayed with an equivalent vertex, change edge
-			 */
-			if (equivalVertexMap.containsKey(source)) {
-				source = equivalVertexMap.get(source);
-			}
-			if (equivalVertexMap.containsKey(target)) {
-				target = equivalVertexMap.get(target);
-			}
-
-			if (splittedUpVertexMap.get(source) != null) {
-				for (PathwayVertexRep splitUpVRepSource : splittedUpVertexMap.get(source)) {
-					combinedGraph.addEdge(splitUpVRepSource, target);
-				}
-			}
-
-			if (splittedUpVertexMap.get(target) != null) {
-				for (PathwayVertexRep splitUpVRepTarget : splittedUpVertexMap.get(target)) {
-					combinedGraph.addEdge(source, splitUpVRepTarget);
-				}
-			}
-
-			/**
-			 * if the edged is already displayed, don't add it
-			 */
-			// Set<DefaultEdge> equivalentEdges = combinedGraph.getAllEdges(source, target);
-			//
-			// if(equivalentEdges == null || equivalentEdges.size() == 0)
-			// continue;
-
-			if (source.getType() != EPathwayVertexType.map && target.getType() != EPathwayVertexType.map)
-				combinedGraph.addEdge(source, target, edge);
-		}
-		return splittedUpVertexMap;
-
-	}
-	
-	
 
 }

@@ -2,11 +2,41 @@ package org.caleydo.view.dynamicpathway.util;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
+import org.caleydo.datadomain.pathway.graph.PathwayGraph;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertex;
 import org.caleydo.datadomain.pathway.graph.item.vertex.PathwayVertexRep;
 
-public class PathwayManagementUtil {
+public class PathwayUtil {
+	
+	public static final PathwayVertexRep pathwayContainsVertex(PathwayVertex vertextoCheck, PathwayGraph pathway) {
+
+		Set<PathwayVertexRep> vreps = pathway.vertexSet();
+
+		for (PathwayVertexRep vrep : vreps) {
+			List<PathwayVertex> vertices = vrep.getPathwayVertices();
+			if (vertices.contains(vertextoCheck))
+				return vrep;
+		}
+		return null;
+	}
+
+	public static final PathwayVertexRep pathwayContainsVertices(List<PathwayVertex> verticestoCheck,
+			PathwayGraph pathway) {
+
+		Set<PathwayVertexRep> vreps = pathway.vertexSet();
+
+		for (PathwayVertexRep vrep : vreps) {
+			List<PathwayVertex> vertices = vrep.getPathwayVertices();
+			for (PathwayVertex vertex : vertices) {
+				if (verticestoCheck.contains(vertex))
+					return vrep;
+			}
+
+		}
+		return null;
+	}
 	
 	/**
 	 * returns a list of vertices which represented in vrep1 & vrep2

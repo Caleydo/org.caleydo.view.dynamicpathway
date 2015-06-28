@@ -1,4 +1,4 @@
-package org.caleydo.view.dynamicpathway.ranking;
+package org.caleydo.view.dynamicpathway.layout;
 
 import gleem.linalg.Vec2f;
 
@@ -47,11 +47,10 @@ import org.caleydo.vis.lineup.ui.TableUI;
 
 import com.google.common.base.Function;
 
-public class RankingElement extends GLElementContainer {
+public class DynamicPathwayRankingElement extends GLElementContainer {
 	
 	private final static int PATHWAY_NAME_COLUMN_WIDTH = 140;
 	private final static int PATHWAY_DATABASE_COLUMN_WIDTH = 70;
-	private final static int RANK_COLUMN_WIDTH = 50;
 	
 	private GLElementWindow window;
 	private final DynamicPathwayView view;
@@ -62,7 +61,7 @@ public class RankingElement extends GLElementContainer {
 	private IPathwayFilter filter = PathwayFilters.NONE;
 	private IGLMouseListener mouseListener;
 
-	public RankingElement(final DynamicPathwayView view) {
+	public DynamicPathwayRankingElement(final DynamicPathwayView view) {
 		this.view = view;
 		
 		mouseListener = GLThreadListenerWrapper.wrap(new GLMouseAdapter() {
@@ -175,7 +174,6 @@ public class RankingElement extends GLElementContainer {
 		pathwayNameColumn.addPropertyChangeListener(ICollapseableColumnMixin.PROP_COLLAPSED, onCollapseColumn);
 		table.add(pathwayNameColumn);
 		
-		//TODO: just KEGG
 		Collection<String> dbtypes = new ArrayList<>(2);
 		for (EPathwayDatabaseType type : EPathwayDatabaseType.values()) {
 			dbtypes.add(type.getName());
@@ -196,9 +194,8 @@ public class RankingElement extends GLElementContainer {
 		
 		List<PathwayRow> data = new ArrayList<>();
 		for (PathwayGraph g : PathwayManager.get().getAllItems()) {
-			//TODO: just kegg??
-			String name = g.getType().getName();
-			
+			//Just kegg
+			String name = g.getType().getName();			
 			
 			if(name.equalsIgnoreCase("KEGG"))
 				data.add(new PathwayRow(g));
@@ -254,7 +251,7 @@ public class RankingElement extends GLElementContainer {
 		if (newValue == null)
 			return;
 
-		if (!view.isGraphPresented(newValue.getPathway()))
+		if (!view.isPathwayPresent(newValue.getPathway()))
 			view.addPathway(newValue.getPathway());
 
 		table.setSelectedRow(null);
@@ -289,7 +286,7 @@ public class RankingElement extends GLElementContainer {
 			IRow selected) {
 		PathwayRow pathwayRow = (PathwayRow) row;
 
-		if (view.isGraphPresented(pathwayRow.getPathway())) {
+		if (view.isPathwayPresent(pathwayRow.getPathway())) {
 			g.color(RenderStyle.COLOR_SELECTED_ROW);
 			g.incZ();
 			g.fillRect(x, y, w, h);

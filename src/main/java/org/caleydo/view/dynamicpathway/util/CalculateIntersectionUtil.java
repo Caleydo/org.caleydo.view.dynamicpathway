@@ -1,29 +1,11 @@
 package org.caleydo.view.dynamicpathway.util;
 
-import gleem.linalg.Vec2f;
-
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
 import org.caleydo.core.view.opengl.layout2.GLGraphics;
 
 public class CalculateIntersectionUtil {
-	/*
-	 * calculate intersection if the node shape is rectangular used in
-	 * {@link org.caleydo.view.dynamicpathway.ui.EdgeElement#renderImpl(GLGraphics, float, float)} for drawing
-	 * the edges between 2 nodes
-	 * 
-	 * general idea of implementation  
-	 * See <a
-	 * href="http://stackoverflow.com/questions/13053061/circle-line-intersection-points">stackoverflow.
-	 * com/circle-line-intersection-point</a>
-	 * 
-	 * @param intersectingLine
-	 *            the line from the center of the source node to the target node
-	 * @return either point at which the line intersects with one of the bounds or null, if none exists
-	 * 
-	 */
 	
 	/**
 	 * calculate the intersection point between 2 lines, if it exists
@@ -61,48 +43,32 @@ public class CalculateIntersectionUtil {
 	}
 	
 	
-	public static final Point2D.Double calcIntersectionPoint(Line2D lineToCenter, double givenRadius) {
-		Point2D.Double sourcePoint = null;
+	public static final Point2D.Double calcIntersectionPoint(Line2D lineToCenter, double circleDiameter) {
+		
+		double radius = circleDiameter/2.0f;
+		
 		
 		double xSource = lineToCenter.getX1();
 		double ySource = lineToCenter.getY1();
 		double xTarget = lineToCenter.getX2();
 		double yTarget = lineToCenter.getY2();
 		
+		double lineLength = EuclideanDistance(xSource, ySource, xTarget, yTarget);
 		
-		double radius = givenRadius;		
-		Vec2f centerToCenterVector = new Vec2f((float)(xSource-xTarget), (float)(ySource-yTarget));
-		double distanceToIntersectingPoint = centerToCenterVector.length()-radius;
-		Vec2f centerToIntersectionVector = new Vec2f(centerToCenterVector);
-		centerToIntersectionVector.normalize();
-		centerToIntersectionVector.scale((float)distanceToIntersectingPoint);	
+		double xAdd = ((xSource-xTarget) > 0) ? -radius : radius;
+		double yAdd = ((ySource-yTarget) > 0) ? -radius : radius;
 		
-		Ellipse2D circleAroundSourceCenter = new Ellipse2D.Double(xSource-radius,ySource-radius, 2*radius, 2*radius);
+		double newLineLength = EuclideanDistance(xSource+xAdd, ySource+yAdd, xTarget, yTarget);
 		
-		sourcePoint = new Point2D.Double(xTarget+centerToIntersectionVector.x(), yTarget+centerToIntersectionVector.y());	
+		double newX = xSource + (newLineLength/lineLength)* (xTarget-xSource);
+		double newY = ySource + (newLineLength/lineLength)* (yTarget-ySource);
 		
-		double i = 1.0;
-		while(circleAroundSourceCenter.contains(sourcePoint) == false) {		
-			
-			if(radius < (givenRadius/2.0))
-				break;
-			
-			radius -= i;
-			
-			centerToCenterVector = new Vec2f((float)(xSource-xTarget), (float)(ySource-yTarget));
-			distanceToIntersectingPoint = centerToCenterVector.length()-radius;
-			centerToIntersectionVector = new Vec2f(centerToCenterVector);
-			centerToIntersectionVector.normalize();
-			centerToIntersectionVector.scale((float)distanceToIntersectingPoint);	
-			
-			sourcePoint = new Point2D.Double(xTarget+centerToIntersectionVector.x(), yTarget+centerToIntersectionVector.y());	
-			
-			circleAroundSourceCenter = new Ellipse2D.Double(xSource-radius,ySource-radius, 2*radius, 2*radius);
-			
-			i += 1.0;
-		}
+		return new Point2D.Double(newX, newY);
 		
-		return sourcePoint;
-		
+	}
+	
+	private static final double EuclideanDistance(double xSource, double ySource, double xTarget, double yTarget) {
+		double distance = Math.sqrt(Math.pow(xTarget-xSource, 2) + Math.pow(yTarget-ySource, 2));
+		return distance;
 	}
 }
